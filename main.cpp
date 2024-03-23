@@ -168,7 +168,6 @@ void swapBuffers() {
 //	std::this_thread::sleep_for(std::chrono::milliseconds(1000 / FPS));
 }
 
-// Draw horizontal line moving from top to bottom.
 void drawFrame(COORD screenSize) {
 	string s = "Hello \nmom\ndad\nbrother\n" + to_string(c++);
 	int j = 1;
@@ -185,19 +184,9 @@ void drawFrame(COORD screenSize) {
 
 int main() {
 	auto screenSize = getScreenSize();
-//	ShowWindow(GetConsoleWindow(), SW_MAXIMIZE); // semi worked!
-
-//	SetConsoleDisplayMode(GetStdHandle(STD_OUTPUT_HANDLE),CONSOLE_FULLSCREEN_MODE,0); // not working
-//	system("mode con COLS=700");
-//	ShowWindow(GetConsoleWindow(),SW_MAXIMIZE);
-//	SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000);
 	SetConsoleScreenBufferSize(firstBuffer, screenSize);
 	SetConsoleScreenBufferSize(secondBuffer, screenSize);
 	frameData.resize(screenSize.X * screenSize.Y);
-
-	// Main rendering loop:
-	// 1. Draw frame to the back buffer.
-	// 2. Set back buffer as active.
 	while (true) {
 		auto screenSize2 = getScreenSize();
 		if (screenSize.X != screenSize2.X || screenSize.Y != screenSize2.Y) {
@@ -208,7 +197,6 @@ int main() {
 			frameData.clear();
 			continue;
 		}
-		system(("mode " + to_string(c % 300)).c_str());
 		drawFrame(screenSize);
 		swapBuffers();
 	}
