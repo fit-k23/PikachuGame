@@ -4,4 +4,17 @@ project(PikachuGame)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
+link_directories(lib)
+
 add_executable(PikachuGame main.cpp main.h)
+
+find_package(miniaudio REQUIRED)
+target_link_libraries(${PROJECT_NAME} miniaudio::miniaudio)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        ${GLFW_LIBRARIES}
+        ${GLEW_LIBRARIES}
+        ${OPENGL_LIBRARIES}
+        winMM.Lib)
+
+
