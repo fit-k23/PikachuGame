@@ -5,4 +5,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
-#include <conio.h>
+#include <ctime>
+#include <windows.h>
+
+//#define MINIAUDIO_IMPLEMENTATION
+//#include "miniaudio.h"
+

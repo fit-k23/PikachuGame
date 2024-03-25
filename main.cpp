@@ -2,17 +2,9 @@
 #pragma ide diagnostic ignored "cert-msc50-cpp"
 
 #include "main.h"
-#include <windows.h>
 
 using namespace std;
-//
-//void EnableAnsi() {
-//	DWORD dwMode = 0;
-//	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-//	GetConsoleMode(hOut, &dwMode);
-//	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-//	SetConsoleMode(hOut, dwMode);
-//}
+
 //
 //void cls1(HANDLE hConsole) {
 //	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -40,7 +32,7 @@ using namespace std;
 //	fill.Attributes = csbi.wAttributes;
 //
 //	// Do the scroll
-//	ScrollConsoleScreenBuffer(hConsole, &scrollRect, NULL, scrollTarget, &fill);
+//	ScrollConsoleScreenBuffer(hConsole, &scrollRect, nullptr, scrollTarget, &fill);
 //
 //	// Move the cursor to the top left corner too.
 //	csbi.dwCursorPosition.X = 0;
@@ -202,34 +194,84 @@ using namespace std;
 //	}
 //}
 
-const string songs[] = {"NecryTalkie_bloom.wav", "SelectYourFrog_Waddoop.wav", "DanTDM_spacedog.wav"};
-const int SONG_AMOUNT = 3;
+const string songs[] = {"Mili - String Theocracy.mp3"};
+const int SONG_AMOUNT = 1;
 
-void swap(int*& a, int*& b) {
+void project_init();
+
+void swap(int *&a, int *&b) {
 	a = b;
 	b = a;
 }
 
-int* shuffleSong() {
-	int* shuffle = new int[SONG_AMOUNT];
+int *shuffleSong() {
+	int *shuffle = new int[SONG_AMOUNT];
 	for (int i = 0; i < SONG_AMOUNT; i++) shuffle[i] = i;
 	for (int i = 0; i < SONG_AMOUNT; i++) swap(shuffle[i], shuffle[rand() % SONG_AMOUNT]);
 	return shuffle;
 }
 
-void deleteShuffle(const int* shuffle) {
+void deleteShuffle(const int *shuffle) {
 	delete[] shuffle;
+}
+//
+//void play(const char *path) {
+//	ma_result result;
+//	ma_engine engine;
+//
+//	result = ma_engine_init(NULL, &engine);
+//	if (result != MA_SUCCESS) {
+//		printf("Failed to initialize audio engine.");
+//		exit(1);
+//	}
+//
+//	ma_sound sound;
+//	result = ma_sound_init_from_file(&engine, path, 0, NULL, NULL, &sound);
+//	if (result != MA_SUCCESS) {
+//		printf("Failed to load sound file.");
+//		exit(1);
+//	}
+//	ma_sound_start(&sound);
+//	while (ma_sound_at_end(&sound) == 0) {
+//		ma_engine_set_volume(&engine, (rand() % 11) / 10.0);
+//		string input;
+//		getline(cin, input);
+//		if (input == "s") break;
+//	}
+//	ma_sound_stop(&sound);
+//	ma_engine_uninit(&engine);
+//}
+
+void enableAnsiSupport() {
+	DWORD dwMode = 0;
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleMode(hOut, &dwMode);
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(hOut, dwMode);
+}
+
+void project_init() {
+	enableAnsiSupport();
 }
 
 int main(){
+	// Providing a seed value
+	srand((unsigned) time(NULL));
+
+	// Get a random number
+	for (int i = 0; i < 100; i++) {
+		cout << rand() % 11 / 10.0 << "\n";
+	}
+	return 1;
+}
+
+int main1() {
+	srand((unsigned) time(nullptr));
 	int* shuffle = shuffleSong();
 	for (int i = 0; i < SONG_AMOUNT; i++) {
 		cout << "Now playing: " << songs[shuffle[i]] << "\n";
 //		std::cout.flush();
-		PlaySound(TEXT(songs[shuffle[i]].c_str()), nullptr , SND_FILENAME | SND_ASYNC | SND_LOOP);
-		string input;
-		getline(cin, input);
-		PlaySound(0,0,0);
+		play(songs[shuffle[i]].c_str());
 	}
 	deleteShuffle(shuffle);
 	return 0;
