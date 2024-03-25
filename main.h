@@ -8,6 +8,8 @@
 #include <ctime>
 #include <windows.h>
 
+#include <conio.h>
+
 //#define MINIAUDIO_IMPLEMENTATION
 //#include "miniaudio.h"
 

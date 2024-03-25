@@ -1,4 +1,6 @@
 #pragma clang diagnostic push
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "hicpp-multiway-paths-covered"
 #pragma ide diagnostic ignored "cert-msc50-cpp"
 
 #include "main.h"
@@ -161,7 +163,7 @@ using namespace std;
 //}
 //
 //void drawFrame(COORD screenSize) {
-//	string s = "Hello \nmom\ndad\nbrother\n" + to_string(c++);
+//	string s = "Hello \n mom\n dad\n brother\n" + to_string(c++);
 //	int j = 1;
 //	int offset = 0;
 //	for (int i = 0; s[i]; i++) {
@@ -194,53 +196,7 @@ using namespace std;
 //	}
 //}
 
-const string songs[] = {"Mili - String Theocracy.mp3"};
-const int SONG_AMOUNT = 1;
-
 void project_init();
-
-void swap(int *&a, int *&b) {
-	a = b;
-	b = a;
-}
-
-int *shuffleSong() {
-	int *shuffle = new int[SONG_AMOUNT];
-	for (int i = 0; i < SONG_AMOUNT; i++) shuffle[i] = i;
-	for (int i = 0; i < SONG_AMOUNT; i++) swap(shuffle[i], shuffle[rand() % SONG_AMOUNT]);
-	return shuffle;
-}
-
-void deleteShuffle(const int *shuffle) {
-	delete[] shuffle;
-}
-//
-//void play(const char *path) {
-//	ma_result result;
-//	ma_engine engine;
-//
-//	result = ma_engine_init(NULL, &engine);
-//	if (result != MA_SUCCESS) {
-//		printf("Failed to initialize audio engine.");
-//		exit(1);
-//	}
-//
-//	ma_sound sound;
-//	result = ma_sound_init_from_file(&engine, path, 0, NULL, NULL, &sound);
-//	if (result != MA_SUCCESS) {
-//		printf("Failed to load sound file.");
-//		exit(1);
-//	}
-//	ma_sound_start(&sound);
-//	while (ma_sound_at_end(&sound) == 0) {
-//		ma_engine_set_volume(&engine, (rand() % 11) / 10.0);
-//		string input;
-//		getline(cin, input);
-//		if (input == "s") break;
-//	}
-//	ma_sound_stop(&sound);
-//	ma_engine_uninit(&engine);
-//}
 
 void enableAnsiSupport() {
 	DWORD dwMode = 0;
@@ -250,29 +206,189 @@ void enableAnsiSupport() {
 	SetConsoleMode(hOut, dwMode);
 }
 
+const int COL = 5;
+const int ROW = 5;
+
+const int LINE = 7;
+const int PILAR = 3;
+
+const int ARROW_UP = 0x48;
+const int ARROW_LEFT = 0x4B;
+const int ARROW_RIGHT = 0x4D;
+const int ARROW_DOWN = 0x50;
+const int ESC_KEY = 0x1B;
+const int ENTER_KEY = 0x0D;
+
+int x = 0;
+int y = 0;
+
+struct Node {
+	char alphabet;
+};
+
+Node nodes[ROW][COL] = {};
+
+struct Selected {
+	int x1;
+	int x2;
+	int y1;
+	int y2;
+};
+
+Selected chosen{-1, -1, -1, -1};
+
+void drawContentNormal() {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 15);
+}
+
+void drawContentCursor() {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 240);
+}
+
+void drawSelect() {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 100);
+}
+
+char getRandomChar() {
+	return (char) (65 + (rand() % (90 - 65 + 1)));
+}
+
+void drawLine() {
+	cout << string(LINE, '-');
+}
+
+void drawContent(char c = ' ') {
+	if (c == ' ') cout << string(LINE, ' ');
+	else cout << string(LINE / 2, ' ') << c << string((LINE - 1) / 2, ' ');
+}
+
+void drawSpaceOut() {
+	cout << string(LINE, ' ');
+}
+
+void drawPilar() {
+	cout << "|";
+}
+
+void draw() {
+	system("cls");
+	cout << "S1: " << chosen.x1 << ":" << chosen.y1 << "\nS2: " << chosen.x2 << ":" << chosen.y2 << "\n";
+	for (int i = 0; i < ROW; i++) {
+		drawSpaceOut();
+		for (int j = 0; j < COL; j++) {
+			cout << " ";
+			drawLine();
+		}
+		cout << "\n";
+		for (int k = 0; k < PILAR; k++) {
+			drawSpaceOut();
+			for (int j = 0; j < COL; j++) {
+				drawPilar();
+				if (y == i && x == j) {
+					drawContentCursor();
+				}
+				if ((chosen.x1 == j && chosen.y1 == i) || (chosen.x2 == j && chosen.y2 == i)) {
+					drawSelect();
+				}
+				if (k == PILAR / 2) {
+					drawContent((char) (65 + i * j));
+				} else {
+					drawContent();
+				}
+				if ((y == i && x == j) || (chosen.x1 == j && chosen.y1 == i) || (chosen.x2 == j && chosen.y2 == i)) {
+					drawContentNormal();
+				}
+			}
+			drawPilar();
+			cout << "\n";
+		}
+	}
+	drawSpaceOut();
+	for (int j = 0; j < COL; j++) {
+		cout << " ";
+		drawLine();
+	}
+}
+
 void project_init() {
 	enableAnsiSupport();
+	HWND hWnd = GetConsoleWindow();
+	ShowScrollBar(hWnd, SB_BOTH, false);
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++)
+			Node nodes[i][j];
+	}
 }
 
-int main(){
-	// Providing a seed value
-	srand((unsigned) time(NULL));
-
-	// Get a random number
-	for (int i = 0; i < 100; i++) {
-		cout << rand() % 11 / 10.0 << "\n";
+int main() {
+	project_init();
+	draw();
+	unsigned char ch;
+	while (true) {
+		ch = getch();
+		switch (ch) {
+			case ARROW_UP:
+				if (y > 0) {
+					y--;
+					draw();
+				}
+				break;
+			case ARROW_LEFT:
+				if (x > 0) {
+					x--;
+					draw();
+				}
+				break;
+			case ARROW_RIGHT:
+				if (x + 1 < COL) {
+					x++;
+					draw();
+				}
+				break;
+			case ARROW_DOWN:
+				if (y + 1 < ROW) {
+					y++;
+					draw();
+				}
+				break;
+			case 'c':
+				chosen.x1 = -1;
+				chosen.y1 = -1;
+				chosen.x2 = -1;
+				chosen.y2 = -1;
+				draw();
+				break;
+			case ENTER_KEY:
+				if (chosen.x1 == -1 && (chosen.x2 != x || chosen.y2 != y)) {
+					chosen.x1 = x;
+					chosen.y1 = y;
+				} else {
+					if (x == chosen.x1 && y == chosen.y1) {
+						chosen.x1 = -1;
+						chosen.y1 = -1;
+					} else {
+						if (chosen.x2 == -1) {
+							chosen.x2 = x;
+							chosen.y2 = y;
+						} else {
+							if (x == chosen.x2 && y == chosen.y2) {
+								chosen.x2 = -1;
+								chosen.y2 = -1;
+							}
+						}
+					}
+				}
+				draw();
+				break;
+			case ESC_KEY:
+				return 0;
+//			default:
+//				int adjlna = 0;
+////				cout << "IDK! " << (int) ch << " : \"" << ch << "\"\n";
+		}
 	}
-	return 1;
-}
-
-int main1() {
-	srand((unsigned) time(nullptr));
-	int* shuffle = shuffleSong();
-	for (int i = 0; i < SONG_AMOUNT; i++) {
-		cout << "Now playing: " << songs[shuffle[i]] << "\n";
-//		std::cout.flush();
-		play(songs[shuffle[i]].c_str());
-	}
-	deleteShuffle(shuffle);
 	return 0;
 }
