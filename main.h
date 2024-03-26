@@ -10,6 +10,8 @@
 
 #include <conio.h>
 
+#include <vector>
+
 //#define MINIAUDIO_IMPLEMENTATION
 //#include "miniaudio.h"
 

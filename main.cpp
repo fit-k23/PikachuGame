@@ -127,7 +127,7 @@ using namespace std;
 //std::vector<char> frameData;
 //short cursor = 0;
 //
-//// Get the intial console buffer.
+//// Get the initial console buffer.
 //auto firstBuffer = GetStdHandle(STD_OUTPUT_HANDLE);
 //
 //// Create an additional buffer for switching.
@@ -220,14 +220,18 @@ const int ESC_KEY = 0x1B;
 const int ENTER_KEY = 0x0D;
 
 struct Box {
-	char alphabet;
+	char alphabet = ' ';
 	bool invisible = false;
+	bool exposed = false;
 };
 
 const int PADDING = 1;
 
+const int MAZE_ROW = ROW + 2 * PADDING;
+const int MAZE_COL = COL + 2 * PADDING;
+
 Box boxes[ROW][COL] = {};
-bool maze[ROW + 2 * PADDING][COL + 2 * PADDING];
+bool maze[MAZE_ROW][MAZE_COL];
 
 int x = PADDING;
 int y = PADDING;
@@ -249,6 +253,11 @@ void drawContentNormal() {
 void drawContentCursor() {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, 240);
+}
+
+void drawContentSus() {
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 200);
 }
 
 void drawSelect() {
@@ -277,24 +286,28 @@ void draw() {
 //	system("cls");
 	cout << "\033[2J\033[;H";
 	cout << "S1: " << chosen.x1 << ":" << chosen.y1 << "\nS2: " << chosen.x2 << ":" << chosen.y2 << "\n";
-	for (int i = 0; i < ROW + 2 * PADDING; i++) {
-		for (int j = 0; j < COL + 2 * PADDING; j++) {
-			cout << '=';
-			if (i != 0 && j != 0 && j != COL + 2 * PADDING - 1) drawLine();
+	for (int i = 0; i < MAZE_ROW; i++) {
+		for (int j = 0; j < MAZE_COL; j++) {
+			cout << ' ';
+			if (i != 0 && j != 0 && j != MAZE_COL - 1) drawLine();
 			else drawContent();
 		}
+		cout << ' ';
 		cout << "\n";
 
 		for (int k = 0; k < PILAR; k++) {
-			for (int j = 0; j < COL + 2 * PADDING; j++) {
-				if (i != 0 && i != ROW + 2 * PADDING - 1 && j != 0) {
+			for (int j = 0; j < MAZE_COL; j++) {
+				if (i != 0 && i != MAZE_ROW - 1 && j != 0) {
 					drawPilar();
 				} else {
-					cout << '=';
+					cout << ' ';
 				}
 				if (boxes[j - PADDING][i - PADDING].invisible) {
 					if (y == i && x == j) {
 						drawContentCursor();
+					}
+					if (!maze[j][i]) {
+						drawContentSus();
 					}
 					drawContent();
 					drawContentNormal();
@@ -307,7 +320,7 @@ void draw() {
 					drawSelect();
 				}
 				if (k == PILAR / 2) {
-					if (i != 0 && i != ROW + 2 * PADDING - 1 && j != 0 && j != COL + 2 * PADDING - 1) drawContent(boxes[j - PADDING][i - PADDING].alphabet);
+					if (i != 0 && i != MAZE_ROW - 1 && j != 0 && j != MAZE_COL - 1) drawContent(boxes[j - PADDING][i - PADDING].alphabet);
 					else drawContent();
 				} else {
 					drawContent();
@@ -316,12 +329,71 @@ void draw() {
 					drawContentNormal();
 				}
 			}
+			cout << ' ';
 			cout << "\n";
 		}
 	}
 }
 
+///////////////////////////////////////////////////////////
+// Maze zone
+
+void resetMaze() {
+	for (int i = 0; i < MAZE_ROW; i++) {
+		for (int j = 0; j < MAZE_COL; j++) {
+			if (i == 0 || i == MAZE_ROW - 1 || j == 0 || j == MAZE_COL -1) {
+				maze[j][i] = true;
+			} else {
+				maze[j][i] = boxes[j - PADDING][i - PADDING].invisible;
+			}
+		}
+	}
+}
+
+const string direction = "DLRU";
+
+// Arrays to represent change in rows and columns
+// DOWN, LEFT, RIGHT, UP
+// 0 1 2 3
+// 0 - 3 DOWN - UP -> 3 - 0 = 3
+// 1 - 2 LEFT - RIGHT -> 3 - 2 = 1
+
+const int dr[4] = {1, 0, 0, -1};
+const int dc[4] = {0, -1, 1, 0};
+
+bool isValid(int row, int col) {
+	return row >= 0 && col >= 0 && row < MAZE_ROW && col < MAZE_COL;
+}
+
+void findPath(int x1, int y1, int x2, int y2, vector<string> &ans, string &currentPath, int skip = -1) {
+	if (x1 == x2 && y1 == y2) {
+		ans.push_back(currentPath);
+		return;
+	}
+	maze[x1][y1] = false;
+
+	for (int i = 0; i < 4; i++) {
+		int nextCol = x1 + dc[i];
+		int nextRow = y1 + dr[i];
+
+		if (!maze[nextCol][nextRow] && !(nextCol = x2 && nextRow == y2)) {
+			continue;
+		}
+
+		if (isValid(nextCol, nextRow)) {
+			currentPath += direction[i];
+			findPath(nextCol, nextRow, x2, y2, ans,currentPath);
+			currentPath.pop_back();
+		}
+		maze[x1][y1] = false;
+		maze[x2][y2] = false;
+	}
+}
+
+///////////////////////////////////////////////////////////
+
 void project_init() {
+	ShowWindow(GetConsoleWindow(),SW_MAXIMIZE);
 	enableAnsiSupport();
 	HWND hWnd = GetConsoleWindow();
 	ShowScrollBar(hWnd, SB_BOTH, false);
@@ -331,21 +403,24 @@ void project_init() {
 	GetConsoleCursorInfo(out, &cursorInfo);
 	cursorInfo.bVisible = false; // set the cursor visibility
 	SetConsoleCursorInfo(out, &cursorInfo);
-	memset(maze, false, (ROW + 2*PADDING) * (COL + 2*PADDING));
-	for (int i = 0; i < ROW + 2 * PADDING; i++) {
-		for (int j = 0; j < COL + 2 * PADDING; j++) {
-			if (i == 0 || i == ROW + 2 * PADDING - 1 || j == 0 || j == COL + 2 * PADDING -1) {
-				maze[j][i] = true;
-			} else {
-				maze[j][i] = false;
-			};
-		}
-	}
+
+//	memset(maze, false, (ROW + 2*PADDING) * (COL + 2*PADDING));
 	for (auto & box : boxes) {
 		for (auto & j : box) {
 			j.alphabet = getRandomChar(65, 70);
 		}
 	}
+	resetMaze();
+}
+
+void printMaze() {
+	for (int i = 0; i < ROW + 2 * PADDING; i++) {
+		for (auto & j : maze) {
+			cout << (j[i] ? "1 " : "0 ");
+		}
+		cout << "\n";
+	}
+	cout << "\n---------------\n";
 }
 
 int main() {
@@ -391,6 +466,7 @@ int main() {
 				draw();
 				break;
 			case ENTER_KEY:
+				resetMaze();
 				if (maze[x][y]) break;
 				if (chosen.x1 == -1 && (chosen.x2 != x || chosen.y2 != y)) {
 					chosen.x1 = x;
@@ -413,10 +489,25 @@ int main() {
 				}
 				if (chosen.x1 != -1 && chosen.x2 != -1) {
 					if (boxes[chosen.x1 - PADDING][chosen.y1 - PADDING].alphabet == boxes[chosen.x2 - PADDING][chosen.y2 - PADDING].alphabet) {
-						boxes[chosen.x1 - PADDING][chosen.y1 - PADDING].invisible = true;
-						boxes[chosen.x2 - PADDING][chosen.y2 - PADDING].invisible = true;
-						maze[chosen.x1][chosen.y1] = true;
-						maze[chosen.x2][chosen.y2] = true;
+
+						printMaze();
+						vector<string> ans;
+						string s;
+						findPath(chosen.x1, chosen.y1, chosen.x2, chosen.y2, ans, s);
+						printMaze();
+						if (ans.empty()) {
+							cout << "EMPTY!";
+						}
+						for (const auto & an : ans) {
+							cout << an << " ";
+						}
+
+						if (!ans.empty()) {
+							boxes[chosen.x1 - PADDING][chosen.y1 - PADDING].invisible = true;
+							boxes[chosen.x2 - PADDING][chosen.y2 - PADDING].invisible = true;
+							maze[chosen.x1][chosen.y1] = true;
+							maze[chosen.x2][chosen.y2] = true;
+						}
 					}
 					chosen.x1 = -1;
 					chosen.y1 = -1;
@@ -424,13 +515,11 @@ int main() {
 					chosen.y2 = -1;
 				}
 				draw();
+
+				printMaze();
 				break;
 			case ESC_KEY:
 				return 0;
-//			default:
-//				int adjlna = 0;
-////				cout << "IDK! " << (int) ch << " : \"" << ch << "\"\n";
 		}
 	}
-	return 0;
 }
