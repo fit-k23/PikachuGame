@@ -206,8 +206,8 @@ void enableAnsiSupport() {
 	SetConsoleMode(hOut, dwMode);
 }
 
-const int COL = 5;
-const int ROW = 5;
+const int COL = 4;
+const int ROW = 4;
 
 const int LINE = 7;
 const int PILAR = 3;
@@ -219,14 +219,18 @@ const int ARROW_DOWN = 0x50;
 const int ESC_KEY = 0x1B;
 const int ENTER_KEY = 0x0D;
 
-int x = 0;
-int y = 0;
-
-struct Node {
+struct Box {
 	char alphabet;
+	bool invisible = false;
 };
 
-Node nodes[ROW][COL] = {};
+const int PADDING = 1;
+
+Box boxes[ROW][COL] = {};
+bool maze[ROW + 2 * PADDING][COL + 2 * PADDING];
+
+int x = PADDING;
+int y = PADDING;
 
 struct Selected {
 	int x1;
@@ -252,8 +256,8 @@ void drawSelect() {
 	SetConsoleTextAttribute(hConsole, 100);
 }
 
-char getRandomChar() {
-	return (char) (65 + (rand() % (90 - 65 + 1)));
+char getRandomChar(int range_a = 65, int range_b = 90) {
+	return (char) (range_a + (rand() % (range_b - range_a + 1)));
 }
 
 void drawLine() {
@@ -265,28 +269,37 @@ void drawContent(char c = ' ') {
 	else cout << string(LINE / 2, ' ') << c << string((LINE - 1) / 2, ' ');
 }
 
-void drawSpaceOut() {
-	cout << string(LINE, ' ');
-}
-
 void drawPilar() {
 	cout << "|";
 }
 
 void draw() {
-	system("cls");
+//	system("cls");
+	cout << "\033[2J\033[;H";
 	cout << "S1: " << chosen.x1 << ":" << chosen.y1 << "\nS2: " << chosen.x2 << ":" << chosen.y2 << "\n";
-	for (int i = 0; i < ROW; i++) {
-		drawSpaceOut();
-		for (int j = 0; j < COL; j++) {
-			cout << " ";
-			drawLine();
+	for (int i = 0; i < ROW + 2 * PADDING; i++) {
+		for (int j = 0; j < COL + 2 * PADDING; j++) {
+			cout << '=';
+			if (i != 0 && j != 0 && j != COL + 2 * PADDING - 1) drawLine();
+			else drawContent();
 		}
 		cout << "\n";
+
 		for (int k = 0; k < PILAR; k++) {
-			drawSpaceOut();
-			for (int j = 0; j < COL; j++) {
-				drawPilar();
+			for (int j = 0; j < COL + 2 * PADDING; j++) {
+				if (i != 0 && i != ROW + 2 * PADDING - 1 && j != 0) {
+					drawPilar();
+				} else {
+					cout << '=';
+				}
+				if (boxes[j - PADDING][i - PADDING].invisible) {
+					if (y == i && x == j) {
+						drawContentCursor();
+					}
+					drawContent();
+					drawContentNormal();
+					continue;
+				}
 				if (y == i && x == j) {
 					drawContentCursor();
 				}
@@ -294,7 +307,8 @@ void draw() {
 					drawSelect();
 				}
 				if (k == PILAR / 2) {
-					drawContent((char) (65 + i * j));
+					if (i != 0 && i != ROW + 2 * PADDING - 1 && j != 0 && j != COL + 2 * PADDING - 1) drawContent(boxes[j - PADDING][i - PADDING].alphabet);
+					else drawContent();
 				} else {
 					drawContent();
 				}
@@ -302,14 +316,8 @@ void draw() {
 					drawContentNormal();
 				}
 			}
-			drawPilar();
 			cout << "\n";
 		}
-	}
-	drawSpaceOut();
-	for (int j = 0; j < COL; j++) {
-		cout << " ";
-		drawLine();
 	}
 }
 
@@ -317,9 +325,26 @@ void project_init() {
 	enableAnsiSupport();
 	HWND hWnd = GetConsoleWindow();
 	ShowScrollBar(hWnd, SB_BOTH, false);
-	for (int i = 0; i < ROW; i++) {
-		for (int j = 0; j < COL; j++)
-			Node nodes[i][j];
+
+	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO cursorInfo;
+	GetConsoleCursorInfo(out, &cursorInfo);
+	cursorInfo.bVisible = false; // set the cursor visibility
+	SetConsoleCursorInfo(out, &cursorInfo);
+	memset(maze, false, (ROW + 2*PADDING) * (COL + 2*PADDING));
+	for (int i = 0; i < ROW + 2 * PADDING; i++) {
+		for (int j = 0; j < COL + 2 * PADDING; j++) {
+			if (i == 0 || i == ROW + 2 * PADDING - 1 || j == 0 || j == COL + 2 * PADDING -1) {
+				maze[j][i] = true;
+			} else {
+				maze[j][i] = false;
+			};
+		}
+	}
+	for (auto & box : boxes) {
+		for (auto & j : box) {
+			j.alphabet = getRandomChar(65, 70);
+		}
 	}
 }
 
@@ -331,25 +356,29 @@ int main() {
 		ch = getch();
 		switch (ch) {
 			case ARROW_UP:
-				if (y > 0) {
+			case 'w':
+				if (y > 1) {
 					y--;
 					draw();
 				}
 				break;
 			case ARROW_LEFT:
-				if (x > 0) {
+			case 'a':
+				if (x > 1) {
 					x--;
 					draw();
 				}
 				break;
 			case ARROW_RIGHT:
-				if (x + 1 < COL) {
+			case 'd':
+				if (x + 1 - PADDING < COL) {
 					x++;
 					draw();
 				}
 				break;
 			case ARROW_DOWN:
-				if (y + 1 < ROW) {
+			case 's':
+				if (y + 1 - PADDING < ROW) {
 					y++;
 					draw();
 				}
@@ -362,6 +391,7 @@ int main() {
 				draw();
 				break;
 			case ENTER_KEY:
+				if (maze[x][y]) break;
 				if (chosen.x1 == -1 && (chosen.x2 != x || chosen.y2 != y)) {
 					chosen.x1 = x;
 					chosen.y1 = y;
@@ -380,6 +410,18 @@ int main() {
 							}
 						}
 					}
+				}
+				if (chosen.x1 != -1 && chosen.x2 != -1) {
+					if (boxes[chosen.x1 - PADDING][chosen.y1 - PADDING].alphabet == boxes[chosen.x2 - PADDING][chosen.y2 - PADDING].alphabet) {
+						boxes[chosen.x1 - PADDING][chosen.y1 - PADDING].invisible = true;
+						boxes[chosen.x2 - PADDING][chosen.y2 - PADDING].invisible = true;
+						maze[chosen.x1][chosen.y1] = true;
+						maze[chosen.x2][chosen.y2] = true;
+					}
+					chosen.x1 = -1;
+					chosen.y1 = -1;
+					chosen.x2 = -1;
+					chosen.y2 = -1;
 				}
 				draw();
 				break;
