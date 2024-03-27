@@ -3,6 +3,7 @@
 #pragma ide diagnostic ignored "hicpp-multiway-paths-covered"
 #pragma ide diagnostic ignored "cert-msc50-cpp"
 
+#include <queue>
 #include "main.h"
 
 using namespace std;
@@ -206,8 +207,8 @@ void enableAnsiSupport() {
 	SetConsoleMode(hOut, dwMode);
 }
 
-const int COL = 4;
-const int ROW = 4;
+const int COL = 20;
+const int ROW = 10;
 
 const int LINE = 7;
 const int PILAR = 3;
@@ -222,7 +223,6 @@ const int ENTER_KEY = 0x0D;
 struct Box {
 	char alphabet = ' ';
 	bool invisible = false;
-	bool exposed = false;
 };
 
 const int PADDING = 1;
@@ -235,6 +235,8 @@ bool maze[MAZE_ROW][MAZE_COL];
 
 int x = PADDING;
 int y = PADDING;
+
+int turn = 0;
 
 struct Selected {
 	int x1;
@@ -286,6 +288,7 @@ void draw() {
 //	system("cls");
 	cout << "\033[2J\033[;H";
 	cout << "S1: " << chosen.x1 << ":" << chosen.y1 << "\nS2: " << chosen.x2 << ":" << chosen.y2 << "\n";
+	cout << "Turns: " << turn << "\n";
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
 			cout << ' ';
@@ -302,11 +305,11 @@ void draw() {
 				} else {
 					cout << ' ';
 				}
-				if (boxes[j - PADDING][i - PADDING].invisible) {
+				if (boxes[i - PADDING][j - PADDING].invisible) {
 					if (y == i && x == j) {
 						drawContentCursor();
 					}
-					if (!maze[j][i]) {
+					if (!maze[i][j]) {
 						drawContentSus();
 					}
 					drawContent();
@@ -320,7 +323,7 @@ void draw() {
 					drawSelect();
 				}
 				if (k == PILAR / 2) {
-					if (i != 0 && i != MAZE_ROW - 1 && j != 0 && j != MAZE_COL - 1) drawContent(boxes[j - PADDING][i - PADDING].alphabet);
+					if (i != 0 && i != MAZE_ROW - 1 && j != 0 && j != MAZE_COL - 1) drawContent(boxes[i - PADDING][j - PADDING].alphabet);
 					else drawContent();
 				} else {
 					drawContent();
@@ -342,9 +345,9 @@ void resetMaze() {
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
 			if (i == 0 || i == MAZE_ROW - 1 || j == 0 || j == MAZE_COL -1) {
-				maze[j][i] = true;
+				maze[i][j] = true;
 			} else {
-				maze[j][i] = boxes[j - PADDING][i - PADDING].invisible;
+				maze[i][j] = boxes[i - PADDING][j - PADDING].invisible;
 			}
 		}
 	}
@@ -364,30 +367,114 @@ const int dc[4] = {0, -1, 1, 0};
 bool isValid(int row, int col) {
 	return row >= 0 && col >= 0 && row < MAZE_ROW && col < MAZE_COL;
 }
+//
+//void findPath(int x1, int y1, int x2, int y2, vector<string> &ans, string &currentPath, int skip = -1) {
+//	if (x1 == x2 && y1 == y2) {
+//		ans.push_back(currentPath);
+//		return;
+//	}
+//	maze[y1][x1] = false;
+//
+//	for (int i = 0; i < 4; i++) {
+//		if (i == skip) continue;
+//		int nextCol = x1 + dc[i];
+//		int nextRow = y1 + dr[i];
+//
+//		if (!maze[nextRow][nextCol] && !(nextCol = x2 && nextRow == y2)) {
+//			continue;
+//		}
+//
+//		if (isValid(nextCol, nextRow)) {
+//			currentPath += direction[i];
+//			findPath(nextCol, nextRow, x2, y2, ans,currentPath, 3 - i);
+//			currentPath.pop_back();
+//		}
+//		maze[y1][x1] = false;
+//		maze[y2][x2] = false;
+//	}
+//}
 
-void findPath(int x1, int y1, int x2, int y2, vector<string> &ans, string &currentPath, int skip = -1) {
-	if (x1 == x2 && y1 == y2) {
-		ans.push_back(currentPath);
-		return;
+struct Coord{
+	int x;
+	int y;
+};
+
+struct QueueNode{
+	Coord coord;
+	int r;
+	int old_dr;
+	int turns;
+};
+
+// BFS Algorithm
+int findPath(Coord src, Coord dest) {
+	// check source and destination cell of the matrix have value 1
+	if (!maze[src.y][src.x] || !maze[dest.y][dest.x]) {
+		system("start cmd");
+		return -1;
 	}
-	maze[x1][y1] = false;
 
-	for (int i = 0; i < 4; i++) {
-		int nextCol = x1 + dc[i];
-		int nextRow = y1 + dr[i];
+	bool visited[MAZE_ROW][MAZE_COL];
+	memset(visited, false, sizeof visited);
 
-		if (!maze[nextCol][nextRow] && !(nextCol = x2 && nextRow == y2)) {
-			continue;
+	// Mark the source cell as visited
+	visited[src.y][src.x] = true;
+
+	// Create a queue for BFS
+	queue<QueueNode> q;
+
+	// Distance of source cell is 0
+	QueueNode s = {src, 0, -1,0};
+	q.push(s);  // Enqueue source cell
+
+	// Do a BFS starting from source cell
+	while (!q.empty()) {
+		QueueNode curr = q.front();
+		Coord coord = curr.coord;
+
+		// If we have reached the destination cell,
+		// we are done
+		if (curr.turns <= 2 && coord.x == dest.x && coord.y == dest.y) {
+			turn = curr.turns;
+			return curr.r;
 		}
 
-		if (isValid(nextCol, nextRow)) {
-			currentPath += direction[i];
-			findPath(nextCol, nextRow, x2, y2, ans,currentPath);
-			currentPath.pop_back();
+		// Otherwise dequeue the front
+		// cell in the queue
+		// and enqueue its adjacent cells
+		q.pop();
+
+		for (int i = 0; i < 4; i++) {
+			if (i == 3 - curr.old_dr) continue;
+			int row = coord.y + dr[i];
+			int col = coord.x + dc[i];
+
+			// if adjacent cell is valid, has path and
+			// not visited yet, enqueue it.
+			if (isValid(row, col) && maze[row][col] &&
+				!visited[row][col]) {
+				// mark cell as visited and enqueue it
+				int newTurns = curr.turns;
+				if (curr.old_dr != -1 && i != curr.old_dr) newTurns++;
+				visited[row][col] = true;
+				if (newTurns > 2) {
+					string s = "Turn: " + to_string(newTurns);
+					system(("start cmd /k echo " + s).c_str());
+					visited[row][col] = false;
+					continue;
+				}
+				QueueNode Adjcell = {
+					{col, row},
+					curr.r + 1,
+					i,
+					newTurns
+				};
+				q.push(Adjcell);
+			}
 		}
-		maze[x1][y1] = false;
-		maze[x2][y2] = false;
 	}
+	// Return -1 if destination cannot be reached
+	return -1;
 }
 
 ///////////////////////////////////////////////////////////
@@ -414,9 +501,9 @@ void project_init() {
 }
 
 void printMaze() {
-	for (int i = 0; i < ROW + 2 * PADDING; i++) {
-		for (auto & j : maze) {
-			cout << (j[i] ? "1 " : "0 ");
+	for (auto & i : maze) {
+		for (bool j : i) {
+			cout << (j ? "1 " : "0 ");
 		}
 		cout << "\n";
 	}
@@ -466,8 +553,7 @@ int main() {
 				draw();
 				break;
 			case ENTER_KEY:
-				resetMaze();
-				if (maze[x][y]) break;
+				if (maze[y][x]) break;
 				if (chosen.x1 == -1 && (chosen.x2 != x || chosen.y2 != y)) {
 					chosen.x1 = x;
 					chosen.y1 = y;
@@ -488,25 +574,16 @@ int main() {
 					}
 				}
 				if (chosen.x1 != -1 && chosen.x2 != -1) {
-					if (boxes[chosen.x1 - PADDING][chosen.y1 - PADDING].alphabet == boxes[chosen.x2 - PADDING][chosen.y2 - PADDING].alphabet) {
-
-						printMaze();
-						vector<string> ans;
-						string s;
-						findPath(chosen.x1, chosen.y1, chosen.x2, chosen.y2, ans, s);
-						printMaze();
-						if (ans.empty()) {
-							cout << "EMPTY!";
-						}
-						for (const auto & an : ans) {
-							cout << an << " ";
-						}
-
-						if (!ans.empty()) {
-							boxes[chosen.x1 - PADDING][chosen.y1 - PADDING].invisible = true;
-							boxes[chosen.x2 - PADDING][chosen.y2 - PADDING].invisible = true;
-							maze[chosen.x1][chosen.y1] = true;
-							maze[chosen.x2][chosen.y2] = true;
+					if (boxes[chosen.y1 - PADDING][chosen.x1 - PADDING].alphabet == boxes[chosen.y2 - PADDING][chosen.x2 - PADDING].alphabet) {
+						bool temp = (chosen.x1 == chosen.x2 && abs(chosen.y1 - chosen.y2) == 1) || (chosen.y1 == chosen.y2 && abs(chosen.x1 - chosen.x2) == 1);
+						maze[chosen.y1][chosen.x1] = true;
+						maze[chosen.y2][chosen.x2] = true;
+						if (temp || findPath(Coord{chosen.x1, chosen.y1}, Coord{chosen.x2, chosen.y2}) != -1) {// || findPath(Coord{chosen.x2, chosen.y2}, Coord{chosen.x1, chosen.y1}) != -1) {
+							boxes[chosen.y1 - PADDING][chosen.x1 - PADDING].invisible = true;
+							boxes[chosen.y2 - PADDING][chosen.x2 - PADDING].invisible = true;
+						} else {
+							maze[chosen.y1][chosen.x1] = false;
+							maze[chosen.y2][chosen.x2] = false;
 						}
 					}
 					chosen.x1 = -1;
@@ -515,7 +592,6 @@ int main() {
 					chosen.y2 = -1;
 				}
 				draw();
-
 				printMaze();
 				break;
 			case ESC_KEY:
