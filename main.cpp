@@ -513,6 +513,7 @@ void printMaze() {
 int main() {
 	project_init();
 	draw();
+
 	unsigned char ch;
 	while (true) {
 		ch = getch();
