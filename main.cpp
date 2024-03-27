@@ -446,17 +446,41 @@ int findPath(Coord src, Coord dest) {
 
 ///////////////////////////////////////////////////////////
 
-void project_init() {
-	ShowWindow(GetConsoleWindow(),SW_MAXIMIZE);
-	enableAnsiSupport();
+void DisableResizeWindow() {
 	HWND hWnd = GetConsoleWindow();
-	ShowScrollBar(hWnd, SB_BOTH, false);
+	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_SIZEBOX);
+}
+
+void DisableMinimizeButton() {
+	HWND hWnd = GetConsoleWindow();
+	HMENU hMenu = GetSystemMenu(hWnd, false);
+
+	DeleteMenu(hMenu, SC_MINIMIZE, MF_BYCOMMAND);
+}
+
+void project_init() {
+	system("mode con COLS=700");
+	ShowWindow(GetConsoleWindow(),SW_MAXIMIZE);
+//	SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000); Full screen
+	enableAnsiSupport();
+	SetConsoleTitleW(L"Pikachu Game");
+	HWND hWnd = GetConsoleWindow();
+//	ShowScrollBar(hWnd, SB_BOTH, false);
 
 	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_CURSOR_INFO cursorInfo;
 	GetConsoleCursorInfo(out, &cursorInfo);
 	cursorInfo.bVisible = false; // set the cursor visibility
 	SetConsoleCursorInfo(out, &cursorInfo);
+
+	DisableResizeWindow(); //auto resize
+	DisableMinimizeButton();
+//	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
+
+	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
+	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+
+//	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
 
 //	memset(maze, false, (ROW + 2*PADDING) * (COL + 2*PADDING));
 	for (auto & box : boxes) {
@@ -480,36 +504,39 @@ void printMaze() {
 int main() {
 	project_init();
 	draw();
-
 	unsigned char ch;
 	while (true) {
 		ch = getch();
 		switch (ch) {
 			case ARROW_UP:
 			case 'w':
-				if (y > 1) {
+				if (y > 0) {
 					y--;
+					if (y == 0) y = ROW + PADDING - 1;
 					draw();
 				}
 				break;
 			case ARROW_LEFT:
 			case 'a':
-				if (x > 1) {
+				if (x > 0) {
 					x--;
+					if (x == 0) x = COL + PADDING - 1;
 					draw();
 				}
 				break;
 			case ARROW_RIGHT:
 			case 'd':
-				if (x + 1 - PADDING < COL) {
+				if (x < COL + PADDING) {
 					x++;
+					if (x == COL + PADDING) x = PADDING;
 					draw();
 				}
 				break;
 			case ARROW_DOWN:
 			case 's':
-				if (y + 1 - PADDING < ROW) {
+				if (y < ROW + PADDING) {
 					y++;
+					if (y == ROW + PADDING) y = PADDING;
 					draw();
 				}
 				break;
