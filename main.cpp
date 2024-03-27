@@ -207,8 +207,8 @@ void enableAnsiSupport() {
 	SetConsoleMode(hOut, dwMode);
 }
 
-const int COL = 8;
-const int ROW = 8;
+const int COL = 20;
+const int ROW = 10;
 
 const int LINE = 7;
 const int PILAR = 3;
@@ -406,74 +406,41 @@ struct QueueNode{
 	int turns;
 };
 
-// BFS Algorithm
+// Modified BFS Algorithm
 int findPath(Coord src, Coord dest) {
-	// check source and destination cell of the matrix have value 1
+	int c = 0;
 	if (!maze[src.y][src.x] || !maze[dest.y][dest.x]) {
-		system("start cmd");
 		return -1;
 	}
-
-	bool visited[MAZE_ROW][MAZE_COL];
-	memset(visited, false, sizeof visited);
-
-	// Mark the source cell as visited
-	visited[src.y][src.x] = true;
-
-	// Create a queue for BFS
+	int turnMap[MAZE_ROW][MAZE_COL];
+	memset(turnMap, 0, sizeof turnMap);
+	turnMap[src.y][src.x] = 0;
 	queue<QueueNode> q;
+	q.push( {src, 0, -1,0});
 
-	// Distance of source cell is 0
-	QueueNode s = {src, 0, -1,0};
-	q.push(s);  // Enqueue source cell
-
-	// Do a BFS starting from source cell
 	while (!q.empty()) {
-		QueueNode curr = q.front();
-		Coord coord = curr.coord;
-
-		// If we have reached the destination cell,
-		// we are done
-		if (curr.turns <= 2 && coord.x == dest.x && coord.y == dest.y) {
-			turn = curr.turns;
-			return curr.r;
+		auto cur = q.front();
+		Coord coord = cur.coord;
+		if (coord.x == dest.x && coord.y == dest.y) {
+			//system(("start cmd /k echo " + to_string(c)).c_str());
+			return cur.r;
 		}
-
-		// Otherwise dequeue the front
-		// cell in the queue
-		// and enqueue its adjacent cells
 		q.pop();
-
 		for (int i = 0; i < 4; i++) {
-			if (i == 3 - curr.old_dr) continue;
+			if (i == 3 - cur.old_dr) continue;
 			int row = coord.y + dr[i];
 			int col = coord.x + dc[i];
 
-			// if adjacent cell is valid, has path and
-			// not visited yet, enqueue it.
-			if (isValid(row, col) && maze[row][col] &&
-				!visited[row][col]) {
-				// mark cell as visited and enqueue it
-				int newTurns = curr.turns;
-				if (curr.old_dr != -1 && i != curr.old_dr) newTurns++;
-				visited[row][col] = true;
-//				if (newTurns > 2) {
-//					string s = "Turn: " + to_string(newTurns);
-//					system(("start cmd /k echo " + s).c_str());
-//					visited[row][col] = false;
-//					continue;
-//				}
-				QueueNode Adjcell = {
-					{col, row},
-					curr.r + 1,
-					i,
-					newTurns
-				};
-				q.push(Adjcell);
+			if (isValid(row, col) && maze[row][col]) {
+				int tPoint = cur.turns;
+				if (cur.old_dr != -1 && i != cur.old_dr) tPoint++;
+				if (tPoint > 2) continue;
+				turnMap[row][col] = tPoint;
+				q.push({{col, row}, cur.r + 1, i, tPoint});
+				c++;
 			}
 		}
 	}
-	// Return -1 if destination cannot be reached
 	return -1;
 }
 
@@ -593,7 +560,6 @@ int main() {
 					chosen.y2 = -1;
 				}
 				draw();
-				printMaze();
 				break;
 			case ESC_KEY:
 				return 0;
