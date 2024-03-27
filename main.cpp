@@ -207,8 +207,8 @@ void enableAnsiSupport() {
 	SetConsoleMode(hOut, dwMode);
 }
 
-const int COL = 20;
-const int ROW = 10;
+const int COL = 8;
+const int ROW = 8;
 
 const int LINE = 7;
 const int PILAR = 3;
@@ -457,12 +457,12 @@ int findPath(Coord src, Coord dest) {
 				int newTurns = curr.turns;
 				if (curr.old_dr != -1 && i != curr.old_dr) newTurns++;
 				visited[row][col] = true;
-				if (newTurns > 2) {
-					string s = "Turn: " + to_string(newTurns);
-					system(("start cmd /k echo " + s).c_str());
-					visited[row][col] = false;
-					continue;
-				}
+//				if (newTurns > 2) {
+//					string s = "Turn: " + to_string(newTurns);
+//					system(("start cmd /k echo " + s).c_str());
+//					visited[row][col] = false;
+//					continue;
+//				}
 				QueueNode Adjcell = {
 					{col, row},
 					curr.r + 1,
