@@ -12,6 +12,9 @@
 
 #include <vector>
 
+#include <fstream>
+#include <sstream>
+
 //#define MINIAUDIO_IMPLEMENTATION
 //#include "miniaudio.h"
 

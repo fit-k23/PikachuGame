@@ -8,10 +8,3 @@ link_directories(lib)
 
 add_executable(PikachuGame main.cpp main.h)#miniaudio.h)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-        ${GLFW_LIBRARIES}
-        ${GLEW_LIBRARIES}
-        ${OPENGL_LIBRARIES}
-        winMM.Lib)
-
-
