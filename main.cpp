@@ -261,50 +261,48 @@ void drawLine(ostringstream &sstr) {
 	sstr << string(LINE, '-');
 }
 
-//void drawNormalBoxContent(ostringstream &sstr, char c = ' ') {
-//	if (c == ' ') sstr << string(LINE, ' ');
-//	else sstr << string(LINE / 2, ' ') << c << string((LINE - 1) / 2, ' ');
-//}
-
-void drawNormalBoxContent(char* sstr, char c = ' ') {
-	if (c == ' ') strcat(sstr, string(LINE, ' ').c_str());
-	else snprintf(s) << string(LINE / 2, ' ') << c << string((LINE - 1) / 2, ' ');
+void drawNormalBoxContent(ostringstream &sstr, char c = ' ') {
+	if (c == ' ') sstr << string(LINE, ' ');
+	else sstr << string(LINE / 2, ' ') << c << string((LINE - 1) / 2, ' ');
 }
 
 void drawPilar(ostringstream &sstr) {
 	sstr << "|";
 }
 
+void MoveCursorTo(COORD coord) {
+	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(hStdout, coord);
+}
+
 void draw() {
 //	system("cls");
 	ostringstream sstr;
 	char a[1000 * 1000] = "";
-	sstr << CLEAR_ANSI;
-//	sstr << "S1: " << chosen.x1 << ":" << chosen.y1 << "\nS2: " << chosen.x2 << ":" << chosen.y2 << "\n";
+	MoveCursorTo({0,0});
+//	sstr << CLEAR_ANSI;
+	sstr << "S1: " << chosen.x1 << ":" << chosen.y1 << "\nS2: " << chosen.x2 << ":" << chosen.y2 << "\n";
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
-			strcat(a, " ");
-//			sstr << ' ';
+			sstr << ' ';
 			if (i != 0 && j != 0 && j != MAZE_COL - 1)  drawLine(sstr);//&& !boxes[i - PADDING][j - PADDING].invisible && !boxes[i - PADDING + 1][j - PADDING].invisible) drawLine(sstr);
 			else drawNormalBoxContent(sstr);
 		}
-		strcat(a, " \n");
-//		sstr << " ";
-//		sstr << "\n";
+		sstr << " \n";
 
 		for (int k = 0; k < PILAR; k++) {
 			for (int j = 0; j < MAZE_COL; j++) {
 				if (i != 0 && i != MAZE_ROW - 1 && j != 0) {// && !boxes[i - PADDING][j - PADDING].invisible) {
-					strcat(a, "|");
-//					drawPilar(sstr);
+//					strcat(a, "|");
+					drawPilar(sstr);
 				} else {
-					strcat(a, " ");
-//					sstr << ' ';
+//					strcat(a, " ");
+					sstr << ' ';
 				}
 				if (boxes[i - PADDING][j - PADDING].invisible) {
 					if (y == i && x == j) {
-						strcat(a, CURSOR_COLOR_ANSI);
-//						sstr << CURSOR_COLOR_ANSI;
+//						strcat(a, CURSOR_COLOR_ANSI);
+						sstr << CURSOR_COLOR_ANSI;
 					}
 					drawNormalBoxContent(sstr);
 					sstr << NORMAL_ANSI;
@@ -326,11 +324,10 @@ void draw() {
 					sstr << NORMAL_ANSI;
 				}
 			}
-			sstr << ' ';
-			sstr << "\n";
+			sstr << " \n";
 		}
 	}
-	printf("%s", sstr.str().c_str());
+	cout << sstr.str();
 }
 
 ///////////////////////////////////////////////////////////
