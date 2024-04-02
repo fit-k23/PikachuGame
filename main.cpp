@@ -544,6 +544,7 @@ void DisableMinimizeButton() {
 }
 
 void project_init() {
+	SetConsoleOutputCP(65001);
 //	system("mode con COLS=700");
 	SetConsoleTitleW(L"Pikachu Game");
 	ShowWindow(GetConsoleWindow(),SW_MAXIMIZE);
