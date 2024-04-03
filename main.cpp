@@ -3,202 +3,9 @@
 #pragma ide diagnostic ignored "hicpp-multiway-paths-covered"
 #pragma ide diagnostic ignored "cert-msc50-cpp"
 
-#include <queue>
 #include "main.h"
 
 using namespace std;
-
-//
-//void cls1(HANDLE hConsole) {
-//	CONSOLE_SCREEN_BUFFER_INFO csbi;
-//	SMALL_RECT scrollRect;
-//	COORD scrollTarget;
-//	CHAR_INFO fill;
-//
-//	// Get the number of character cells in the current buffer.
-//	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-//		return;
-//	}
-//
-//	// Scroll the rectangle of the entire buffer.
-//	scrollRect.Left = 0;
-//	scrollRect.Top = 0;
-//	scrollRect.Right = csbi.dwSize.X;
-//	scrollRect.Bottom = csbi.dwSize.Y;
-//
-//	// Scroll it upwards off the top of the buffer with a magnitude of the entire height.
-//	scrollTarget.X = 0;
-//	scrollTarget.Y = (SHORT)(0 - csbi.dwSize.Y);
-//
-//	// Fill with empty spaces with the buffer's default text attribute.
-//	fill.Char.UnicodeChar = TEXT(' ');
-//	fill.Attributes = csbi.wAttributes;
-//
-//	// Do the scroll
-//	ScrollConsoleScreenBuffer(hConsole, &scrollRect, nullptr, scrollTarget, &fill);
-//
-//	// Move the cursor to the top left corner too.
-//	csbi.dwCursorPosition.X = 0;
-//	csbi.dwCursorPosition.Y = 0;
-//
-//	SetConsoleCursorPosition(hConsole, csbi.dwCursorPosition);
-//}
-//
-//
-//void cls2(HANDLE hConsole) {
-//	COORD coordScreen = {0, 0};    // home for the cursor
-//	DWORD cCharsWritten;
-//	CONSOLE_SCREEN_BUFFER_INFO csbi;
-//	DWORD dwConSize;
-//
-//	// Get the number of character cells in the current buffer.
-//
-//	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-//		return;
-//	}
-//
-//	dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
-//
-//	// Fill the entire screen with blanks.
-//
-//	if (!FillConsoleOutputCharacter(hConsole,        // Handle to console screen buffer
-//									(TCHAR) ' ',     // Character to write to the buffer
-//									dwConSize,       // Number of cells to write
-//									coordScreen,     // Coordinates of first cell
-//									&cCharsWritten))// Receive number of characters written
-//	{
-//		return;
-//	}
-//
-//	// Get the current text attribute.
-//
-//	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-//		return;
-//	}
-//
-//	// Set the buffer's attributes accordingly.
-//
-//	if (!FillConsoleOutputAttribute(hConsole,         // Handle to console screen buffer
-//									csbi.wAttributes, // Character attributes to use
-//									dwConSize,        // Number of cells to set attribute
-//									coordScreen,      // Coordinates of first cell
-//									&cCharsWritten)) // Receive number of characters written
-//	{
-//		return;
-//	}
-//
-//	// Put the cursor at its home coordinates.
-//
-//	SetConsoleCursorPosition(hConsole, coordScreen);
-//}
-//
-//
-//
-//int main1() {
-//	EnableAnsi();
-//	int i = 0;
-//
-//	HANDLE hStdout;
-//	hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-//	while (true) {
-//		printf("\x1b[2J");
-//		cout << "Hello!\n" << i;
-//		Sleep(1000 / 30);
-//		printf("\x1b[H");
-////		system("cls");
-////		cls1(hStdout);
-////		cout << "\033[2J\033[;H";
-//
-//		i++;
-//		if (i == 10000) system("pause");
-//	}
-//
-////	clrscr();
-//	return 0;
-//}
-//
-//
-//#include <chrono>
-//#include <thread>
-//#include <vector>
-//
-//
-//const unsigned FPS = 1000;
-//int c = 0;
-////char* frameData = new char[SIZE];
-//std::vector<char> frameData;
-//short cursor = 0;
-//
-//// Get the initial console buffer.
-//auto firstBuffer = GetStdHandle(STD_OUTPUT_HANDLE);
-//
-//// Create an additional buffer for switching.
-//auto secondBuffer = CreateConsoleScreenBuffer(
-//		GENERIC_READ | GENERIC_WRITE,
-//		FILE_SHARE_WRITE | FILE_SHARE_READ,
-//		nullptr,
-//		CONSOLE_TEXTMODE_BUFFER,
-//		nullptr);
-//
-//// Assign switchable back buffer.
-//HANDLE backBuffer = secondBuffer;
-//bool bufferSwitch = true;
-//
-//// Returns current window size in rows and columns.
-//COORD getScreenSize() {
-//	CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
-//	GetConsoleScreenBufferInfo(firstBuffer, &bufferInfo);
-//	const auto newScreenWidth = bufferInfo.srWindow.Right - bufferInfo.srWindow.Left + 1;
-//	const auto newscreenHeight = bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top + 1;
-//
-//	return COORD{ static_cast<short>(newScreenWidth), static_cast<short>(newscreenHeight) };
-//}
-//
-//// Switches back buffer as active.
-//void swapBuffers() {
-//	WriteConsole(backBuffer, &frameData.front(), static_cast<short>(frameData.size()), nullptr, nullptr);
-//	SetConsoleActiveScreenBuffer(backBuffer);
-//	backBuffer = bufferSwitch ? firstBuffer : secondBuffer;
-//	bufferSwitch = !bufferSwitch;
-//	Sleep(1000 / FPS);
-////	std::this_thread::sleep_for(std::chrono::milliseconds(1000 / FPS));
-//}
-//
-//void drawFrame(COORD screenSize) {
-//	string s = "Hello \n mom\n dad\n brother\n" + to_string(c++);
-//	int j = 1;
-//	int offset = 0;
-//	for (int i = 0; s[i]; i++) {
-//		if (s[i] == '\n') {
-//			j++;
-//			offset = i + 1;
-//			continue;
-//		}
-//		frameData[j * screenSize.X + i - offset] = s[i];
-//	}
-//}
-//
-//int main() {
-//	auto screenSize = getScreenSize();
-//	SetConsoleScreenBufferSize(firstBuffer, screenSize);
-//	SetConsoleScreenBufferSize(secondBuffer, screenSize);
-//	frameData.resize(screenSize.X * screenSize.Y);
-//	while (true) {
-//		auto screenSize2 = getScreenSize();
-//		if (screenSize.X != screenSize2.X || screenSize.Y != screenSize2.Y) {
-//			SetConsoleScreenBufferSize(secondBuffer, screenSize2);
-//			screenSize.X = screenSize2.X;
-//			screenSize.Y = screenSize2.Y;
-//			frameData.resize(screenSize.X * screenSize.Y);
-//			frameData.clear();
-//			continue;
-//		}
-//		drawFrame(screenSize);
-//		swapBuffers();
-//	}
-//}
-
-void project_init();
 
 void enableAnsiSupport() {
 	DWORD dwMode = 0;
@@ -231,8 +38,8 @@ const int PADDING = 1;
 const int MAZE_ROW = ROW + 2 * PADDING;
 const int MAZE_COL = COL + 2 * PADDING;
 
-Box boxes[ROW][COL] = {};
-bool maze[MAZE_ROW][MAZE_COL];
+Box** boxes;
+bool** maze;
 
 int x = PADDING;
 int y = PADDING;
@@ -316,7 +123,7 @@ void draw() {
 				} else {
 					sstr << ' ';
 				}
-				if (boxes[i - PADDING][j - PADDING].invisible) {
+				if (i >= 1 && j >= 1 && i <= MAZE_ROW - 2 && j <= MAZE_COL - 2 && boxes[i - PADDING][j - PADDING].invisible) {
 					if (y == i && x == j) {
 						sstr << CURSOR_COLOR_ANSI;
 					}
@@ -404,41 +211,11 @@ void print2DArray(int a[MAZE_ROW][MAZE_COL], Coord src = {-1, -1}, Coord dist = 
 	cout << "\n";
 }
 
-int getBannedDirection(Coord &src, Coord &dest) {
-	int predicted_y_direction = (src.y - dest.y) / abs(src.y - dest.y);
-	int predicted_x_direction = (src.x - dest.x) / abs(src.x - dest.x);
-	cout << predicted_x_direction << " " << predicted_y_direction << "\n";
-	if (!maze[src.y][src.x - predicted_x_direction]) {
-		if (!maze[src.y - predicted_y_direction][src.x]) {
-			return -1;
-		}
-		return predicted_x_direction > 0 ? 2 : 1;
-	}
-	if (!maze[src.y - predicted_y_direction][src.x]) {
-		if (!maze[src.y][src.x - predicted_x_direction]) {
-			return -1;
-		}
-		return predicted_y_direction > 0 ? 0 : 3;
-	}
-	return -1;
-}
-
-int getBannedYDirection(Coord &src, Coord &dest) {
-	if (src.y == dest.y) return -1;
-	if (src.x == dest.x) return -1;
-	int predicted_y_direction = (src.y - dest.y) / abs(src.y - dest.y);
-	return maze[src.y + predicted_y_direction][src.x] ? -1 : predicted_y_direction > 0 ? 0 : 3;
-}
-
-int getBannedXDirection(Coord &src, Coord &dest) {
-	if (src.y == dest.y) return -1;
-	if (src.x == dest.x) return -1;
-	int predicted_x_direction = (src.x - dest.x) / abs(src.x - dest.x);
-	return maze[src.y][src.x + predicted_x_direction] ? -1 : predicted_x_direction > 0 ? 2 : 1;
-}
-
 // Modified BFS Algorithm
 int findPath(Coord src, Coord dest, string &path) {
+	if ((src.x == dest.x && abs(src.y - dest.y) == 1) || (src.y == dest.y && abs(src.x - dest.x) == 1)) {
+		return 0;
+	}
 	int c = 0;
 
 	bool checkDest = false;
@@ -459,10 +236,6 @@ int findPath(Coord src, Coord dest, string &path) {
 	memset(turnMap, 0, sizeof turnMap);
 	turnMap[src.y][src.x] = 0;
 
-	int bd = getBannedDirection(src, dest);
-	int bd_x = getBannedXDirection(src, dest);
-	int bd_y = getBannedYDirection(src, dest);
-	cout << bd_x << "\n" << bd_y << "\n---\n";
 	queue<QueueNode> q;
 	q.push({src, -1, 0});
 	path = " ";
@@ -547,23 +320,17 @@ void project_init() {
 
 //	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
 
-//	memset(maze, false, (ROW + 2*PADDING) * (COL + 2*PADDING));
-	for (auto & box : boxes) {
-		for (auto & j : box) {
-			j.alphabet = getRandomChar(65, 70);
-		}
-	}
-	resetMaze();
-}
+	boxes = new Box*[ROW];
+	for (int i = 0; i < ROW; i++) boxes[i] = new Box[COL];
 
-void printMaze() {
-	for (auto & i : maze) {
-		for (bool j : i) {
-			cout << (j ? "1 " : "0 ");
-		}
-		cout << "\n";
-	}
-	cout << "\n---------------\n";
+	maze = new bool*[MAZE_ROW];
+	for (int i = 0; i < MAZE_ROW; i++) maze[i] = new bool[MAZE_COL];
+
+	for (int i = 0; i < ROW; i++)
+		for (int j = 0; j < COL; j++)
+			boxes[i][j].alphabet = getRandomChar(65, 70);
+
+	resetMaze();
 }
 
 void project_cleanup() {
@@ -645,11 +412,10 @@ int main() {
 				draw();
 				if (chosen.x1 != -1 && chosen.x2 != -1) {
 					if (boxes[chosen.y1 - PADDING][chosen.x1 - PADDING].alphabet == boxes[chosen.y2 - PADDING][chosen.x2 - PADDING].alphabet) {
-						bool temp = (chosen.x1 == chosen.x2 && abs(chosen.y1 - chosen.y2) == 1) || (chosen.y1 == chosen.y2 && abs(chosen.x1 - chosen.x2) == 1);
 						maze[chosen.y1][chosen.x1] = true;
 						maze[chosen.y2][chosen.x2] = true;
 						string tempString;
-						if (temp || findPath(Coord{chosen.x1, chosen.y1}, Coord{chosen.x2, chosen.y2}, tempString) != -1) {
+						if (findPath(Coord{chosen.x1, chosen.y1}, Coord{chosen.x2, chosen.y2}, tempString) != -1) {
 							//cout << tempString << "\n--------------\n";
 							Sleep(50);
 							boxes[chosen.y1 - PADDING][chosen.x1 - PADDING].invisible = true;

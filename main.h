@@ -7,13 +7,13 @@
 #include <string>
 #include <ctime>
 #include <windows.h>
-
 #include <conio.h>
-
 #include <vector>
-
 #include <fstream>
 #include <sstream>
+#include <queue>
+
+void project_init();
 
 //#define MINIAUDIO_IMPLEMENTATION
 //#include "miniaudio.h"
