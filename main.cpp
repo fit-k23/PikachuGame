@@ -250,12 +250,9 @@ char getRandomChar(int range_a = 65, int range_b = 90) {
 	return (char) (range_a + (rand() % (range_b - range_a + 1)));
 }
 
-const char* CLEAR_ANSI = "\033[2J\033[;H";
-//const char* NORMAL_ANSI = "\033[39\033[49";
-const char* NORMAL_ANSI = "\033[48;2;0;0;0m\033[38;2;255;255;255m";
+const char* NORMAL_ANSI = "\033[38;2;255;255;255m\033[49m";
 const char* SELECT_COLOR_ANSI = "\033[48;2;123;23;131m";
 const char* CURSOR_COLOR_ANSI = "\033[48;2;255;255;255m\x1B[38;2;0;0;0m";
-
 
 void drawLine(ostringstream &sstr) {
 	sstr << string(LINE, '-');
@@ -276,32 +273,51 @@ void MoveCursorTo(COORD coord) {
 }
 
 void draw() {
-//	system("cls");
 	ostringstream sstr;
-	char a[1000 * 1000] = "";
 	MoveCursorTo({0,0});
-//	sstr << CLEAR_ANSI;
 	sstr << "S1: " << chosen.x1 << ":" << chosen.y1 << "\nS2: " << chosen.x2 << ":" << chosen.y2 << "\n";
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
 			sstr << ' ';
-			if (i != 0 && j != 0 && j != MAZE_COL - 1)  drawLine(sstr);//&& !boxes[i - PADDING][j - PADDING].invisible && !boxes[i - PADDING + 1][j - PADDING].invisible) drawLine(sstr);
-			else drawNormalBoxContent(sstr);
+
+//			if ((i == PADDING) && j != 0 && boxes[i - PADDING][j - PADDING].invisible) {
+//				drawNormalBoxContent(sstr);
+//				continue;
+//			}
+//			if (i != 0 && j != 0 && j != MAZE_COL - 1) {
+//				if (boxes[i - PADDING - 1][j - PADDING].invisible && boxes[i - PADDING][j - PADDING].invisible) {
+//					drawNormalBoxContent(sstr);
+//				} else {
+//					drawLine(sstr);
+//				}
+//			} else {
+//				drawNormalBoxContent(sstr);
+//			}
+			if (i != 0 && i != MAZE_ROW - 1) {
+//				if (i == MAZE_ROW - 2 && boxes[i - PADDING - 1][j - PADDING].invisible) drawNormalBoxContent(sstr);
+				if (i == PADDING && boxes[i - PADDING][j - PADDING].invisible) drawNormalBoxContent(sstr);
+				else if (i >= 2 && boxes[i - PADDING][j - PADDING].invisible && boxes[i - PADDING - 1][j - PADDING].invisible) drawNormalBoxContent(sstr);
+				else if (j != 0 && j != MAZE_COL - 1) drawLine(sstr);
+				else drawNormalBoxContent(sstr);
+			} else {
+				if (j != 0 && j != MAZE_COL - 1 && i == MAZE_ROW - 1 && !boxes[i - PADDING - 1][j - PADDING].invisible) drawLine(sstr);
+				else drawNormalBoxContent(sstr);
+			}
 		}
 		sstr << " \n";
 
 		for (int k = 0; k < PILAR; k++) {
 			for (int j = 0; j < MAZE_COL; j++) {
-				if (i != 0 && i != MAZE_ROW - 1 && j != 0) {// && !boxes[i - PADDING][j - PADDING].invisible) {
-//					strcat(a, "|");
-					drawPilar(sstr);
+				if (i != 0 && i != MAZE_ROW - 1 && j != 0) {
+					if (j == MAZE_COL - 1 && boxes[i - PADDING][j - PADDING - 1].invisible) sstr << ' ';
+					else if (j == 1 && boxes[i - PADDING][j - PADDING].invisible) sstr << ' ';
+					else if (j >= 2 && boxes[i - PADDING][j - PADDING].invisible && boxes[i - PADDING][j - PADDING - 1].invisible) sstr << ' ';
+					else drawPilar(sstr);
 				} else {
-//					strcat(a, " ");
 					sstr << ' ';
 				}
 				if (boxes[i - PADDING][j - PADDING].invisible) {
 					if (y == i && x == j) {
-//						strcat(a, CURSOR_COLOR_ANSI);
 						sstr << CURSOR_COLOR_ANSI;
 					}
 					drawNormalBoxContent(sstr);
@@ -328,6 +344,10 @@ void draw() {
 		}
 	}
 	cout << sstr.str();
+}
+
+void clearBox(int row, int col) {
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -452,6 +472,7 @@ int findPath(Coord src, Coord dest, string &path) {
 		Coord coord = cur.coord;
 		if (coord.x == dest.x && coord.y == dest.y) {
 			print2DArray(turnMap, src, dest);
+			cout << path << '\n';
 			return 1;
 		}
 		q.pop();
@@ -461,7 +482,6 @@ int findPath(Coord src, Coord dest, string &path) {
 			if (i == 3 - cur.old_dr) {
 //			if (i == 3 - cur.old_dr || i == bd_x) {
 //			if (i == 3 - cur.old_dr || i == bd_x || i == bd_y) {
-				//cout << "HERE0!\n";
 				continue;
 			}
 			int row = coord.y + dr[i];
@@ -471,62 +491,21 @@ int findPath(Coord src, Coord dest, string &path) {
 				int tPoint = cur.turns;
 				if (cur.old_dr != -1 && i != cur.old_dr) tPoint++;
 				if (tPoint > 2) {
-//					if (col == dest.x && row == dest.y) {
-//						print2DArray(turnMap, src, dest);
-//						//cout << "HERE1!\n";
-//						continue;
-//					}
-					//cout << "HERE3!\n";
 					continue;
 				}
 				if (tPoint == 2 && (row != dest.y && col != dest.x)) {
-					//cout << "HERE4!\n";
 					continue;
 				}
 				turnMap[row][col] = tPoint;
-//				print2DArray(turnMap, src, dest);
 				path += DIRECTION[i];
 				q.push({{col, row}, i, tPoint});
 				c++;
 			}
 		}
 	}
-	//cout << "HERE2!\n";
 	print2DArray(turnMap, src, dest);
+	cout << path << "\n";
 	return -1;
-}
-
-//void findPath(int x1, int y1, int x2, int y2, vector<string> &ans, string &currentPath, int skip = -1) {
-//	if (x1 == x2 && y1 == y2) {
-//		ans.push_back(currentPath);
-//		return;
-//	}
-//	maze[y1][x1] = false;
-//
-//	for (int i = 0; i < 4; i++) {
-//		if (i == skip) continue;
-//		int nextCol = x1 + dc[i];
-//		int nextRow = y1 + dr[i];
-//
-//		if (!maze[nextRow][nextCol] && !(nextCol = x2 && nextRow == y2)) {
-//			continue;
-//		}
-//
-//		if (isValid(nextCol, nextRow)) {
-//			currentPath += direction[i];
-//			findPath(nextCol, nextRow, x2, y2, ans,currentPath, 3 - i);
-//			currentPath.pop_back();
-//		}
-//		maze[y1][x1] = false;
-//		maze[y2][x2] = false;
-//	}
-//}
-
-bool findPathAlter(Coord src, Coord dest) {
-	if (!maze[src.y][src.x] || !maze[dest.y][dest.x]) {
-		return false;
-	}
-	return false;
 }
 
 ///////////////////////////////////////////////////////////
@@ -690,6 +669,7 @@ int main() {
 				break;
 			case ESC_KEY:
 				FLAG_RUNNING = false;
+				break;
 		}
 	}
 	project_cleanup();
