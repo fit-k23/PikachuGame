@@ -6,5 +6,6 @@ set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 link_directories(lib)
 
-add_executable(PikachuGame main.cpp main.h)#miniaudio.h)
+add_executable(PikachuGame main.cpp main.h
+        utils.h)#miniaudio.h)
 

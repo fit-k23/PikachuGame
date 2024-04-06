@@ -72,13 +72,13 @@ bool Coord::isEqual(Coord c) const {
 
 Coord cursor = {PADDING, PADDING};
 
-struct Selected {
+struct Selector {
 	Coord c1;
 	Coord c2;
 	bool valid = false;
 };
 
-Selected chosen{{-1, -1}, {-1, -1}, false};
+Selector selector{{-1, -1}, {-1, -1}, false};
 
 char getRandomChar(int range_a = 65, int range_b = 90) {
 	return (char) (range_a + (rand() % (range_b - range_a + 1)));
@@ -87,12 +87,6 @@ char getRandomChar(int range_a = 65, int range_b = 90) {
 const char* NORMAL_ANSI = "\033[38;2;255;255;255m\033[49m";
 const char* SELECT_COLOR_ANSI = "\033[48;2;123;23;131m";
 const char* CURSOR_COLOR_ANSI = "\033[48;2;255;255;255m\x1B[38;2;0;0;0m";
-
-string str_repeat(string s, int n) {
-	string s1 = s;
-	for (int i=1; i<n;i++) s += s1;
-	return s;
-}
 
 void drawLine(ostringstream &sstr) {
 //	sstr << string(LINE, '-');
@@ -166,15 +160,6 @@ void drawThinRectangle(COORD coord, int width, int height) {
 	MoveCursorTo({0, 50});
 }
 
-string getFileContent(const string &fileName) {
-	ifstream file(fileName);
-	if (!file.is_open()) return "";
-	ostringstream sstr;
-	sstr << file.rdbuf();
-	file.close();
-	return sstr.str();
-}
-
 void drawAtPos(COORD coord, const string& s) {
 	istringstream sstr(s);
 	string temp;
@@ -187,10 +172,10 @@ void drawAtPos(COORD coord, const string& s) {
 }
 
 void draw() {
-	drawAtPos({18,9}, getFileContent("poké-side-of-the-block.txt"));
+	//drawAtPos({18,9}, getFileContent("poké-side-of-the-block.txt"));
 	ostringstream sstr;
 	MoveCursorTo({0,0});
-//	sstr << "S1: " << chosen.c1.x << ":" << chosen.c1.y << "\nS2: " << chosen.c2.x << ":" << chosen.c2.y << "\n";
+//	sstr << "S1: " << selector.c1.x << ":" << selector.c1.y << "\nS2: " << selector.c2.x << ":" << selector.c2.y << "\n";
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
 			sstr << ' ';
@@ -230,7 +215,7 @@ void draw() {
 				if (cursor.isEqual({j, i})) {
 					sstr << CURSOR_COLOR_ANSI;
 				}
-				if ((chosen.c1.x == j && chosen.c1.y == i) || (chosen.c2.x == j && chosen.c2.y == i)) {
+				if ((selector.c1.x == j && selector.c1.y == i) || (selector.c2.x == j && selector.c2.y == i)) {
 					sstr << SELECT_COLOR_ANSI;
 				}
 				if (k == PILAR / 2) {
@@ -239,7 +224,7 @@ void draw() {
 				} else {
 					drawNormalBoxContent(sstr);
 				}
-				if (cursor.isEqual({j, i}) || chosen.c1.isEqual({j, i}) || chosen.c2.isEqual({j, i})) {
+				if (cursor.isEqual({j, i}) || selector.c1.isEqual({j, i}) || selector.c2.isEqual({j, i})) {
 					sstr << NORMAL_ANSI;
 				}
 			}
@@ -264,16 +249,16 @@ void draw() {
 	cout << ("│ world  │");
 	MoveCursorTo({160, i++});
 	cout << ("╘════════╛");
-	drawDoubleLayerRectangle({160, 10}, 80, 20);
-	drawThinRectangle({160, 50}, 20, 5);
+	//drawDoubleLayerRectangle({160, 10}, 80, 20);
+	//drawThinRectangle({160, 50}, 20, 5);
 }
 
 
 void drawOld() {
-	drawAtPos({18,9}, getFileContent("poké-side-of-the-block.txt"));
+	//drawAtPos({18,9}, getFileContent("poké-side-of-the-block.txt"));
 	ostringstream sstr;
 	MoveCursorTo({0,0});
-//	sstr << "S1: " << chosen.c1.x << ":" << chosen.c1.y << "\nS2: " << chosen.c2.x << ":" << chosen.c2.y << "\n";
+//	sstr << "S1: " << selector.c1.x << ":" << selector.c1.y << "\nS2: " << selector.c2.x << ":" << selector.c2.y << "\n";
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
 			sstr << ' ';
@@ -313,7 +298,7 @@ void drawOld() {
 				if (cursor.isEqual({j, i})) {
 					sstr << CURSOR_COLOR_ANSI;
 				}
-				if ((chosen.c1.x == j && chosen.c1.y == i) || (chosen.c2.x == j && chosen.c2.y == i)) {
+				if ((selector.c1.x == j && selector.c1.y == i) || (selector.c2.x == j && selector.c2.y == i)) {
 					sstr << SELECT_COLOR_ANSI;
 				}
 				if (k == PILAR / 2) {
@@ -322,7 +307,7 @@ void drawOld() {
 				} else {
 					drawNormalBoxContent(sstr);
 				}
-				if (cursor.isEqual({j, i}) || chosen.c1.isEqual({j, i}) || chosen.c2.isEqual({j, i})) {
+				if (cursor.isEqual({j, i}) || selector.c1.isEqual({j, i}) || selector.c2.isEqual({j, i})) {
 					sstr << NORMAL_ANSI;
 				}
 			}
@@ -367,8 +352,6 @@ void resetMaze() {
 }
 ///////////////////////// NEW BFS
 
-const char DIRECTION[] = "DLRU";
-
 // Arrays to represent change in rows and columns
 // DOWN, LEFT, RIGHT, UP
 // 0 1 2 3
@@ -379,15 +362,20 @@ const int dr[4] = {1, 0, 0, -1};
 const int dc[4] = {0, -1, 1, 0};
 
 const int MOVE_DOWN = 0;
-const int MOVE_LEFT = 1;
-const int MOVE_RIGHT = 2;
-const int MOVE_UP = 3;
+//const int MOVE_LEFT = 1;
+//const int MOVE_RIGHT = 2;
+//const int MOVE_UP = 3;
 const int MOVE_SIZE = 4;
 
 struct Path{
-	Coord corners[2];
-	int old_dr;
-	int turns = -1;
+	Coord corners[4];
+	int direction;
+	int turns = 0;
+};
+
+struct PathWay{
+	Path path;
+	int direction{};
 };
 
 bool isValid(int row, int col) {
@@ -396,221 +384,84 @@ bool isValid(int row, int col) {
 
 Path findPath(Coord src, Coord dest) {
 	if ((src.x == dest.x && abs(src.y - dest.y) == 1) || (src.y == dest.y && abs(src.x - dest.x) == 1)) {
-		return Path{{}, -1, 0};
+		return Path{{dest}, -1, 0};
 	}
 	if (!maze[src.y][src.x] || !maze[dest.y][dest.x]) {
-		return Path{{}, -1, 0};
+		return Path{{}, -1, -1};
 	}
 	queue<Path> q;
 	q.push({{src}, -1, 0});
 	while (!q.empty()) {
 		auto cur = q.front();
 		Coord coord = cur.corners[cur.turns];
-		for (int i = MOVE_DOWN; i <= MOVE_SIZE; i++) {
-			if (i == cur.old_dr) {
-				continue;
-			}
-			int row = coord.y + dr[i];
-			int col = coord.x + dc[i];
-
-			if (isValid(row, col) && maze[row][col]) {
-				int tPoint = cur.turns;
-				if (cur.old_dr != -1 && i != cur.old_dr) tPoint++;
-				if (tPoint > 2) {
-					continue;
-				}
-				if (tPoint == 2 && (row != dest.y && col != dest.x)) {
-					continue;
-				}
-				cur.corners[tPoint - 1] = {col, row};
-				cur.turns = tPoint;
-				cur.old_dr = i;
-				if (col == dest.x && row == dest.y) {
-					return cur;
-				}
-				q.push(cur);
-			}
-		}
-	}
-	return Path{{}, -1};
-}
-
-/////////////////////////
-
-struct QueueNode{
-	Coord coord;
-	int old_dr;
-	int turns;
-};
-
-
-void print2DArray(int a[MAZE_ROW][MAZE_COL], Coord src = {-1, -1}, Coord dist = {-1,-1}) {
-	for (int i = 0; i < MAZE_ROW; i++) {
-		for (int j = 0; j < MAZE_COL; j++) {
-			if (i == dist.y && j == dist.x) cout << "\x1B[48;2;123;23;131m";
-			if (i == src.y && j == src.x) cout << "\x1B[48;2;223;23;23m";
-			cout << a[i][j] << NORMAL_ANSI << " ";
-		}
-		cout << "\n";
-	}
-	cout << "\n";
-}
-
-void printDumpWay(Coord trace[MAZE_ROW][MAZE_COL], int turnMap[MAZE_ROW][MAZE_COL], Coord src, Coord dest) {
-	if (!src.isEqual(dest)) {
-		printDumpWay(trace, turnMap, src, trace[dest.y][dest.x]);
-	}
-//	MoveCursorTo({static_cast<SHORT>(LINE * dest.x + LINE + LINE/2), static_cast<SHORT>(dest.y * PILAR + PILAR + PILAR / 2)});
-	MoveCursorTo({static_cast<SHORT>((1 + LINE) * dest.x + LINE / 2), static_cast<SHORT>((1 + PILAR) * dest.y + PILAR/2)});
-	cout << "X";
-}
-
-int getYDirectionFromCoord(Coord a, Coord b) {
-	return a.y == b.y ? -1 : 3 * (abs(a.y - b.y) < 0);
-}
-
-int getXDirectionFromCoord(Coord a, Coord b) {
-	return a.x = b.x ? -1 : 1 + (abs(a.x - b.x) < 0);
-}
-
-// Modified BFS Algorithm
-int findPath(Coord src, Coord dest, string &path) {
-	if ((src.x == dest.x && abs(src.y - dest.y) == 1) || (src.y == dest.y && abs(src.x - dest.x) == 1)) {
-		return 0;
-	}
-	bool checkDest = false;
-	for (int i = 0; i < 4; i++) {
-		int row = dest.y + dr[i];
-		int col = dest.x + dc[i];
-		if (isValid(row, col) && maze[row][col]) {
-			checkDest = true;
-		}
-	}
-	if (!checkDest) return -1;
-
-	if (!maze[src.y][src.x] || !maze[dest.y][dest.x]) {
-		return -1;
-	}
-
-	int turnMap[MAZE_ROW][MAZE_COL] = {0};
-	for (auto & i : turnMap)
-		for (int & j : i)
-			j = 3;
-	turnMap[src.y][src.x] = 0;
-
-	queue<QueueNode> q;
-	q.push({src, -1, 0});
-
-	while (!q.empty()) {
-		auto cur = q.front();
-		Coord coord = cur.coord;
-		if (coord.x == dest.x && coord.y == dest.y) {
-			MoveCursorTo({0, 50});
-			print2DArray(turnMap, src, dest);
-			Coord drawer = dest;
-			MoveCursorTo({0, 50 + MAZE_ROW + 1});
-			cout << string(50, ' ');
-			MoveCursorTo({0, 50 + MAZE_ROW + 1});
-			int old_d = -1;
-//			while (!drawer.isEqual(src)) {
-//				for (int i = 0; i < 4; i++) {
-//					int row = drawer.y + dr[i];
-//					int col = drawer.x + dc[i];
-//					if (i == old_d || turnMap[row][col] > turnMap[drawer.y][drawer.x]) continue;
-//					drawer = {col, row};
-//					old_d = 3 - i;
-//					cout << col << ":" << row << " ";
-//					break;
-//				}
-//				cout << "FAILED!";
-//				break;
-//			}
-			return cur.turns;
-		}
 		q.pop();
-		for (int i = 0; i < 4; i++) {
-			if (i == 3 - cur.old_dr) {
+		for (int move = 0; move < 4; move++) {
+			if (move == 3 - cur.direction) {
 				continue;
 			}
-//			if (cur.turns == 1) {
-//				if (coord.y == dest.y) {
-//					int bX = getXDirectionFromCoord(coord, dest);
-//					if (bX != -1 && i != bX) continue;
-//				}
-//				if (coord.y == dest.x) {
-//					int bY = getYDirectionFromCoord(coord, dest);
-//					if (bY != -1 && i != bY) continue;
-//				}
-//			}
-			int row = coord.y + dr[i];
-			int col = coord.x + dc[i];
-			MoveCursorTo({0, 50});
-			print2DArray(turnMap, src, dest);
+			int row = coord.y + dr[move];
+			int col = coord.x + dc[move];
 
 			if (isValid(row, col) && maze[row][col]) {
-				int tPoint = cur.turns;
-				if (cur.old_dr != -1 && i != cur.old_dr) tPoint++;
-				if (tPoint > 2) {
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 1)});
+//				cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 2)});
+//				cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 3)});
+//				cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
+//
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 1)});
+//				cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 2)});
+//				cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 3)});
+//				cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
+////				Sleep(10);
+//
+////				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 1)});
+////				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+////				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 2)});
+////				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+////				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 3)});
+////				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+//
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 1)});
+//				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 2)});
+//				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 3)});
+//				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+
+				int turn = cur.turns;
+				if (cur.direction != -1 && move != cur.direction) {
+					turn++;
+				}
+				if (turn > 2) {
 					continue;
 				}
-				if (tPoint == 2 && (row != dest.y && col != dest.x)) {
+				if (turn == 2 && col != dest.x && row != dest.y) {
 					continue;
 				}
-//				if (tPoint == 2) {
-//					if (row == dest.y) {
-//						int bX = getXDirectionFromCoord(coord, dest);
-//						if (bX != -1 && i != bX) continue;
-//					}
-//					if (col == dest.x) {
-//						int bY = getYDirectionFromCoord(coord, dest);
-//						if (bY != -1 && i != bY) continue;
-//					}
-//				}
+				MoveCursorTo({80, 40});
+				cout << "Turns: " << turn << "    " + to_string(rand()) + "     ";
+				Path newPath{{}, move, turn};
 
-				turnMap[row][col] = tPoint;
-//				Sleep(1000);
-				q.push({{col, row}, i, tPoint});
+				for (int i = 0; i <= cur.turns; i++) {
+					newPath.corners[i] = cur.corners[i];
+				}
+
+				newPath.corners[turn] = {col, row};
+
+				if (col == dest.x && row == dest.y) {
+					return newPath;
+				}
+				q.push(newPath);
+				//Sleep(1000);
 			}
 		}
 	}
-	MoveCursorTo({0, 50});
-	print2DArray(turnMap, src, dest);
-	cout << path << "\n";
-	return -1;
+	return Path{{}, -1, -1};
 }
-
-// Modified rat in a maze
-int findArcPath(Coord src, Coord dest, vector<string> &ans, string &path, int turn, int skip = -1) {
-	if (src.isEqual(dest)) {
-		ans.push_back(path);
-		return 1;
-	}
-
-	for (int i = 0; i < 4; i++) {
-		if (i == skip) {
-			continue;
-		}
-		int row = src.y + dr[i];
-		int col = src.x + dc[i];
-
-		if (isValid(row, col) && maze[row][col]) {
-			int tPoint = turn;
-			if (skip != -1 && i != 3 - skip) tPoint++;
-			if (tPoint > 2) {
-				continue;
-			}
-			if (tPoint == 2 && (row != dest.y && col != dest.x)) {
-				continue;
-			}
-			path += DIRECTION[i];
-			findArcPath({col, row}, dest, ans, path, tPoint, 3 - i);
-			path.pop_back();
-		}
-	}
-	return -1;
-}
-
-///////////////////////////////////////////////////////////
 
 void DisableResizeWindow() {
 	HWND hWnd = GetConsoleWindow();
@@ -674,14 +525,75 @@ void project_init() {
 }
 
 void project_cleanup() {
-//	delete[] CLEAR_ANSI;
-//	delete[] NORMAL_ANSI;
-//	delete[] CURSOR_COLOR_ANSI;
-//	delete[] SELECT_COLOR_ANSI;
 	system("pause");
 }
 
 bool FLAG_RUNNING = true;
+
+Selector help() {
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++) {
+			if (boxes[i][j].invisible) {
+				continue;
+			}
+			for (int m = 0; m < ROW; m++) {
+				for (int n = 0; n < COL; n++) {
+					if (boxes[m][n].invisible) {
+						continue;
+					}
+					if ((i == m && j == n) || boxes[i][j].alphabet != boxes[m][n].alphabet) continue;
+					Path p = findPath({j, i}, {n, m});
+
+					if (p.turns != -1) {
+						if (boxes[i][j].alphabet == 'f') system(("start cmd.exe /k echo " + to_string(p.turns)).c_str());
+						return Selector{{j + PADDING, i + PADDING}, {n + PADDING, m + PADDING}};
+					}
+				}
+			}
+		}
+	}
+	return {{-1,-1},{-1,-1}};
+}
+
+void match() {
+	if (boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].alphabet == boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].alphabet) {
+		maze[selector.c1.y][selector.c1.x] = true;
+		maze[selector.c2.y][selector.c2.x] = true;
+		Path p = findPath(selector.c1, selector.c2);
+		if (p.turns != -1) {
+			Coord start = selector.c1;
+			int t = 0;
+			while (!start.isEqual(p.corners[t])) {
+				int dx = p.corners[t].x == start.x ? 0 : (p.corners[t].x - start.x) / abs(p.corners[t].x - start.x);
+				int dy = p.corners[t].y == start.y ? 0 : (p.corners[t].y - start.y) / abs(p.corners[t].y - start.y);
+				start.x += dx;
+				start.y += dy;
+				if (start.isEqual(p.corners[t]) && t < p.turns) {
+					t++;
+				}
+				MoveCursorTo({static_cast<SHORT>((1 + LINE) * start.x + 1), static_cast<SHORT>((1 + PILAR) * start.y)});
+				MoveCursorTo({static_cast<SHORT>((1 + LINE) * start.x + 1), static_cast<SHORT>((1 + PILAR) * start.y + 1)});
+				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+				MoveCursorTo({static_cast<SHORT>((1 + LINE) * start.x + 1), static_cast<SHORT>((1 + PILAR) * start.y + 2)});
+				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+				MoveCursorTo({static_cast<SHORT>((1 + LINE) * start.x + 1), static_cast<SHORT>((1 + PILAR) * start.y + 3)});
+				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+//								Sleep(50);
+			}
+
+			Sleep(150);
+			boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].invisible = true;
+			boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].invisible = true;
+		} else {
+			Sleep(100);
+			maze[selector.c1.y][selector.c1.x] = false;
+			maze[selector.c2.y][selector.c2.x] = false;
+		}
+	}
+	selector.c1 = {-1, -1};
+	selector.c2 = {-1, -1};
+	draw();
+}
 
 int main() {
 	project_init();
@@ -740,83 +652,31 @@ int main() {
 				}
 				break;
 			case 'c':
-				chosen.c1 = {-1, -1};
-				chosen.c2 = {-1, -1};
+				selector.c1 = {-1, -1};
+				selector.c2 = {-1, -1};
+				draw();
+				break;
+			case 'h':
+				selector = help();
+				draw();
+				Sleep(10);
+				match();
 				draw();
 				break;
 			case ENTER_KEY:
 				if (maze[cursor.y][cursor.x]) break;
-				if (chosen.c1.x == -1 && !cursor.isEqual(chosen.c2)) {
-					chosen.c1 = cursor;
-				} else if (cursor.isEqual(chosen.c1)) {
-					chosen.c1 = {-1,-1};
-				} else if (chosen.c2.x == -1) {
-					chosen.c2 = cursor;
-				} else if (cursor.isEqual(chosen.c2)) {
-					chosen.c2 = {-1, -1};
+				if (selector.c1.x == -1 && !cursor.isEqual(selector.c2)) {
+					selector.c1 = cursor;
+				} else if (cursor.isEqual(selector.c1)) {
+					selector.c1 = {-1,-1};
+				} else if (selector.c2.x == -1) {
+					selector.c2 = cursor;
+				} else if (cursor.isEqual(selector.c2)) {
+					selector.c2 = {-1, -1};
 				}
 				draw();
-				if (chosen.c1.x != -1 && chosen.c2.x != -1) {
-					if (boxes[chosen.c1.y - PADDING][chosen.c1.x - PADDING].alphabet == boxes[chosen.c2.y - PADDING][chosen.c2.x - PADDING].alphabet) {
-						maze[chosen.c1.y][chosen.c1.x] = true;
-						maze[chosen.c2.y][chosen.c2.x] = true;
-						string tempString;
-						if (findPath(chosen.c1, chosen.c2, tempString) != -1) {
-							string path;
-							vector<string> ans;
-							findArcPath(chosen.c1, chosen.c2, ans, path, 0);
-							MoveCursorTo({180, 80});
-							Coord drawer = chosen.c1;
-							int max = 0;
-							for (int i = 1; i < size(ans); i++) {
-								if (ans[i].length() < ans[max].length()) {
-									max = i;
-								}
-							}
-							for (int sS = 0; ans[max][sS]; sS++) {
-								switch(ans[max][sS]) {
-									case 'D':
-										drawer.x += dc[0];
-										drawer.y += dr[0];
-										break;
-									case 'L':
-										drawer.x += dc[1];
-										drawer.y += dr[1];
-										break;
-									case 'R':
-										drawer.x += dc[2];
-										drawer.y += dr[2];
-										break;
-									case 'U':
-										drawer.x += dc[3];
-										drawer.y += dr[3];
-										break;
-								}
-//								MoveCursorTo({static_cast<SHORT>((1 + LINE) * drawer.x + LINE / 2), static_cast<SHORT>((1 + PILAR) * drawer.y + PILAR/2)});
-								MoveCursorTo({static_cast<SHORT>((1 + LINE) * drawer.x + 1), static_cast<SHORT>((1 + PILAR) * drawer.y)});
-//								SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
-//								cout << string(LINE, ' ');
-//								cout << "\033[48;2;245;25;25m" << string(LINE, ' ') << "\033[049m";
-								MoveCursorTo({static_cast<SHORT>((1 + LINE) * drawer.x + 1), static_cast<SHORT>((1 + PILAR) * drawer.y + 1)});
-								cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
-								MoveCursorTo({static_cast<SHORT>((1 + LINE) * drawer.x + 1), static_cast<SHORT>((1 + PILAR) * drawer.y + 2)});
-								cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
-								MoveCursorTo({static_cast<SHORT>((1 + LINE) * drawer.x + 1), static_cast<SHORT>((1 + PILAR) * drawer.y + 3)});
-								cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
-								Sleep(100 / ans[max].length());
-							}
-							Sleep(150);
-							boxes[chosen.c1.y - PADDING][chosen.c1.x - PADDING].invisible = true;
-							boxes[chosen.c2.y - PADDING][chosen.c2.x - PADDING].invisible = true;
-						} else {
-							Sleep(100);
-							maze[chosen.c1.y][chosen.c1.x] = false;
-							maze[chosen.c2.y][chosen.c2.x] = false;
-						}
-					}
-					chosen.c1 = {-1, -1};
-					chosen.c2 = {-1, -1};
-					draw();
+				if (selector.c1.x != -1 && selector.c2.x != -1) {
+					match();
 				}
 				break;
 			case ESC_KEY:
