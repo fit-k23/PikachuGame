@@ -365,6 +365,7 @@ void resetMaze() {
 		}
 	}
 }
+///////////////////////// NEW BFS
 
 const char DIRECTION[] = "DLRU";
 
@@ -377,9 +378,64 @@ const char DIRECTION[] = "DLRU";
 const int dr[4] = {1, 0, 0, -1};
 const int dc[4] = {0, -1, 1, 0};
 
+const int MOVE_DOWN = 0;
+const int MOVE_LEFT = 1;
+const int MOVE_RIGHT = 2;
+const int MOVE_UP = 3;
+const int MOVE_SIZE = 4;
+
+struct Path{
+	Coord corners[2];
+	int old_dr;
+	int turns = -1;
+};
+
 bool isValid(int row, int col) {
 	return row >= 0 && col >= 0 && row < MAZE_ROW && col < MAZE_COL;
 }
+
+Path findPath(Coord src, Coord dest) {
+	if ((src.x == dest.x && abs(src.y - dest.y) == 1) || (src.y == dest.y && abs(src.x - dest.x) == 1)) {
+		return Path{{}, -1, 0};
+	}
+	if (!maze[src.y][src.x] || !maze[dest.y][dest.x]) {
+		return Path{{}, -1, 0};
+	}
+	queue<Path> q;
+	q.push({{src}, -1, 0});
+	while (!q.empty()) {
+		auto cur = q.front();
+		Coord coord = cur.corners[cur.turns];
+		for (int i = MOVE_DOWN; i <= MOVE_SIZE; i++) {
+			if (i == cur.old_dr) {
+				continue;
+			}
+			int row = coord.y + dr[i];
+			int col = coord.x + dc[i];
+
+			if (isValid(row, col) && maze[row][col]) {
+				int tPoint = cur.turns;
+				if (cur.old_dr != -1 && i != cur.old_dr) tPoint++;
+				if (tPoint > 2) {
+					continue;
+				}
+				if (tPoint == 2 && (row != dest.y && col != dest.x)) {
+					continue;
+				}
+				cur.corners[tPoint - 1] = {col, row};
+				cur.turns = tPoint;
+				cur.old_dr = i;
+				if (col == dest.x && row == dest.y) {
+					return cur;
+				}
+				q.push(cur);
+			}
+		}
+	}
+	return Path{{}, -1};
+}
+
+/////////////////////////
 
 struct QueueNode{
 	Coord coord;
@@ -476,16 +532,16 @@ int findPath(Coord src, Coord dest, string &path) {
 			if (i == 3 - cur.old_dr) {
 				continue;
 			}
-			if (cur.turns == 1) {
-				if (coord.y == dest.y) {
-					int bX = getXDirectionFromCoord(coord, dest);
-					if (bX != -1 && i != bX) continue;
-				}
-				if (coord.y == dest.x) {
-					int bY = getYDirectionFromCoord(coord, dest);
-					if (bY != -1 && i != bY) continue;
-				}
-			}
+//			if (cur.turns == 1) {
+//				if (coord.y == dest.y) {
+//					int bX = getXDirectionFromCoord(coord, dest);
+//					if (bX != -1 && i != bX) continue;
+//				}
+//				if (coord.y == dest.x) {
+//					int bY = getYDirectionFromCoord(coord, dest);
+//					if (bY != -1 && i != bY) continue;
+//				}
+//			}
 			int row = coord.y + dr[i];
 			int col = coord.x + dc[i];
 			MoveCursorTo({0, 50});
@@ -500,16 +556,16 @@ int findPath(Coord src, Coord dest, string &path) {
 				if (tPoint == 2 && (row != dest.y && col != dest.x)) {
 					continue;
 				}
-				if (tPoint == 2) {
-					if (row == dest.y) {
-						int bX = getXDirectionFromCoord(coord, dest);
-						if (bX != -1 && i != bX) continue;
-					}
-					if (col == dest.x) {
-						int bY = getYDirectionFromCoord(coord, dest);
-						if (bY != -1 && i != bY) continue;
-					}
-				}
+//				if (tPoint == 2) {
+//					if (row == dest.y) {
+//						int bX = getXDirectionFromCoord(coord, dest);
+//						if (bX != -1 && i != bX) continue;
+//					}
+//					if (col == dest.x) {
+//						int bY = getYDirectionFromCoord(coord, dest);
+//						if (bY != -1 && i != bY) continue;
+//					}
+//				}
 
 				turnMap[row][col] = tPoint;
 //				Sleep(1000);
