@@ -34,7 +34,7 @@ void enableAnsiSupport() {
 	SetConsoleMode(hOut, dwMode);
 }
 
-const int COL = 12;
+const int COL = 10;
 const int ROW = 8;
 
 const int LINE = 7;
@@ -79,10 +79,6 @@ struct Selector {
 };
 
 Selector selector{{-1, -1}, {-1, -1}, false};
-
-char getRandomChar(int range_a = 65, int range_b = 90) {
-	return (char) (range_a + (rand() % (range_b - range_a + 1)));
-}
 
 const char* NORMAL_ANSI = "\033[38;2;255;255;255m\033[49m";
 const char* SELECT_COLOR_ANSI = "\033[48;2;123;23;131m";
@@ -170,6 +166,8 @@ void drawAtPos(COORD coord, const string& s) {
 		coord.Y++;
 	}
 }
+
+
 
 void draw() {
 	//drawAtPos({18,9}, getFileContent("poké-side-of-the-block.txt"));
@@ -350,22 +348,15 @@ void resetMaze() {
 		}
 	}
 }
-///////////////////////// NEW BFS
 
 // Arrays to represent change in rows and columns
 // DOWN, LEFT, RIGHT, UP
 // 0 1 2 3
-// 0 - 3 DOWN - UP -> 3 - 0 = 3
-// 1 - 2 LEFT - RIGHT -> 3 - 2 = 1
+// 0 - 3 DOWN - UP -> Counter: 3 - 0 = 3
+// 1 - 2 LEFT - RIGHT -> Counter: 3 - 2 = 1
 
 const int dr[4] = {1, 0, 0, -1};
 const int dc[4] = {0, -1, 1, 0};
-
-const int MOVE_DOWN = 0;
-//const int MOVE_LEFT = 1;
-//const int MOVE_RIGHT = 2;
-//const int MOVE_UP = 3;
-const int MOVE_SIZE = 4;
 
 struct Path{
 	Coord corners[4];
@@ -373,14 +364,13 @@ struct Path{
 	int turns = 0;
 };
 
-struct PathWay{
-	Path path;
-	int direction{};
-};
-
 bool isValid(int row, int col) {
 	return row >= 0 && col >= 0 && row < MAZE_ROW && col < MAZE_COL;
 }
+
+// Modified Breadth-First-Search (BFS) Algorithm
+// A common graph traversal algorithm
+// Based on the docs provided by GeeksForGeeks: https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/
 
 Path findPath(Coord src, Coord dest) {
 	if ((src.x == dest.x && abs(src.y - dest.y) == 1) || (src.y == dest.y && abs(src.x - dest.x) == 1)) {
@@ -401,36 +391,38 @@ Path findPath(Coord src, Coord dest) {
 			}
 			int row = coord.y + dr[move];
 			int col = coord.x + dc[move];
+			if (src.isEqual({col, row})) continue;
 
 			if (isValid(row, col) && maze[row][col]) {
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 1)});
+//					cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 2)});
+//					cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 3)});
+//					cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
+//
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 1)});
+//					cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 2)});
+//					cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 3)});
+//					cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
+
+//					Sleep(100);
+//
 //				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 1)});
-//				cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
+//				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
 //				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 2)});
-//				cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
+//				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
 //				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 3)});
-//				cout << "\033[48;2;100;245;245m" << string(LINE, ' ') << "\033[049m";
-//
-//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 1)});
-//				cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
-//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 2)});
-//				cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
-//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 3)});
-//				cout << "\033[48;2;0;245;25m" << string(LINE, ' ') << "\033[049m";
-////				Sleep(10);
-//
-////				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 1)});
-////				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
-////				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 2)});
-////				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
-////				MoveCursorTo({static_cast<SHORT>((1 + LINE) * coord.x + 1), static_cast<SHORT>((1 + PILAR) * coord.y + 3)});
-////				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
-//
-//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 1)});
 //				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
-//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 2)});
-//				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
-//				MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 3)});
-//				cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+//
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 1)});
+//					cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 2)});
+//					cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
+//					MoveCursorTo({static_cast<SHORT>((1 + LINE) * col + 1), static_cast<SHORT>((1 + PILAR) * row + 3)});
+//					cout << "\033[049m" << string(LINE, ' ') << "\033[049m";
 
 				int turn = cur.turns;
 				if (cur.direction != -1 && move != cur.direction) {
@@ -463,12 +455,13 @@ Path findPath(Coord src, Coord dest) {
 	return Path{{}, -1, -1};
 }
 
-void DisableResizeWindow() {
+
+void disableResizeWindow() {
 	HWND hWnd = GetConsoleWindow();
 	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_SIZEBOX);
 }
 
-void DisableMinimizeButton() {
+void disableMinimizeButton() {
 	HWND hWnd = GetConsoleWindow();
 	HMENU hMenu = GetSystemMenu(hWnd, false);
 
@@ -541,13 +534,24 @@ Selector help() {
 					if (boxes[m][n].invisible) {
 						continue;
 					}
-					if ((i == m && j == n) || boxes[i][j].alphabet != boxes[m][n].alphabet) continue;
-					Path p = findPath({j, i}, {n, m});
-
-					if (p.turns != -1) {
-						if (boxes[i][j].alphabet == 'f') system(("start cmd.exe /k echo " + to_string(p.turns)).c_str());
-						return Selector{{j + PADDING, i + PADDING}, {n + PADDING, m + PADDING}};
+					if ((i == m && j == n) || boxes[i][j].alphabet != boxes[m][n].alphabet) {
+						continue;
 					}
+					maze[i + PADDING][j + PADDING] = true;
+					maze[m + PADDING][n + PADDING] = true;
+					Path p = findPath({j + PADDING,i + PADDING}, {n + PADDING,m + PADDING});
+					if (p.turns != -1) {
+//						MoveCursorTo({static_cast<SHORT>((1 + LINE) * p.corners[0].x + 1), static_cast<SHORT>((1 + PILAR) * p.corners[0].y + 1)});
+//						cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+//						MoveCursorTo({static_cast<SHORT>((1 + LINE) * p.corners[1].x + 1), static_cast<SHORT>((1 + PILAR) * p.corners[1].y + 2)});
+//						cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+//						MoveCursorTo({static_cast<SHORT>((1 + LINE) * p.corners[2].x + 1), static_cast<SHORT>((1 + PILAR) * p.corners[2].y + 3)});
+//						cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+//						Sleep(1000);
+						return Selector{{j + PADDING,i + PADDING}, {n + PADDING,m + PADDING}};
+					}
+					maze[i + PADDING][j + PADDING] = false;
+					maze[m + PADDING][n + PADDING] = false;
 				}
 			}
 		}
@@ -660,6 +664,9 @@ int main() {
 				selector = help();
 				draw();
 				Sleep(10);
+				if (selector.c1.isEqual({-1,-1})) {
+					break;
+				}
 				match();
 				draw();
 				break;
