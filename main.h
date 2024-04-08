@@ -16,6 +16,7 @@
 using namespace std;
 
 #include "utils.h"
+#include "console.h"
 
 void project_init();
 

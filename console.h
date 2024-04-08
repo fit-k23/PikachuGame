@@ -21,20 +21,16 @@ void syncScrSize() {
 	SCREEN_HEIGHT = scrSize.Y;
 }
 
+void disableConsoleResize() {
+	HWND hWnd = GetConsoleWindow();
+	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_SIZEBOX);
+}
 
 void disableConsoleMinimizeButton() {
 	HWND hWnd = GetConsoleWindow();
 	HMENU hMenu = GetSystemMenu(hWnd, false);
 
 	DeleteMenu(hMenu, SC_MINIMIZE, MF_BYCOMMAND);
-}
-
-void hideConsoleCursor(bool visible = false){
-	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_CURSOR_INFO cursorInfo;
-	GetConsoleCursorInfo(handle, &cursorInfo);
-	cursorInfo.bVisible = visible; // set the cursor visibility
-	SetConsoleCursorInfo(handle, &cursorInfo);
 }
 
 // Clear screen without the need of using "cls" command or ansi escape code (which will surely expand the screen buffer
@@ -44,7 +40,7 @@ void hideConsoleCursor(bool visible = false){
 // Other: Tali Oat - https://stackoverflow.com/questions/34842526/update-console-without-flickering-c
 // https://learn.microsoft.com/en-us/windows/console/console-screen-buffers?redirectedfrom=MSDN#_win32_character_attributes
 
-void clearScreen() {
+void clrScr() {
 	// Get the Win32 handle representing standard output.
 	// This generally only has to be done once, so we make it static.
 	static const auto hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -76,3 +72,39 @@ void clearScreen() {
 	SetConsoleCursorPosition(hOut, topLeft);
 }
 
+void consoleInit() {
+	//Force console to use UTF-8, so it won't break ansi code due to most ansi code is written using utf-8
+	//Ref: The source is I made it up, jk: https://stackoverflow.com/a/41645159/24078702
+	//Docs: https://learn.microsoft.com/en-us/windows/console/setconsoleoutputcp
+	SetConsoleOutputCP(CP_UTF8); //65001
+
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	// Enable Ansi support, giving the power to change the color world! RGB1!!!!
+	DWORD dwMode = 0;
+	GetConsoleMode(hOut, &dwMode);
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(hOut, dwMode);
+
+	HWND hWnd = GetConsoleWindow();
+
+	ShowWindow(hWnd,SW_MAXIMIZE);
+//	system("mode con COLS=700");
+//	SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000); Full screen
+
+//	disableConsoleResize(); //auto resize
+//	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
+	disableConsoleMinimizeButton();
+
+	// Hide the cursor. The blinking one, not the mouse;
+	CONSOLE_CURSOR_INFO cursorInfo;
+	GetConsoleCursorInfo(hOut, &cursorInfo);
+	cursorInfo.bVisible = false; // set the cursor visibility
+	SetConsoleCursorInfo(hOut, &cursorInfo);
+
+	ShowScrollBar(hWnd, SB_BOTH, false);
+	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
+	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+	syncScrSize();
+//	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
+
+}
