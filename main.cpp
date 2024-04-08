@@ -8,32 +8,6 @@
 
 using namespace std;
 
-int SCREEN_WIDTH = 0;
-int SCREEN_HEIGHT = 0;
-
-COORD getScreenSize() {
-	CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &bufferInfo);
-	const auto newScreenWidth = bufferInfo.srWindow.Right - bufferInfo.srWindow.Left + 1;
-	const auto newscreenHeight = bufferInfo.srWindow.Bottom - bufferInfo.srWindow.Top + 1;
-
-	return COORD{static_cast<short>(newScreenWidth), static_cast<short>(newscreenHeight)};
-}
-
-void syncScrSize() {
-	COORD scrSize = getScreenSize();
-	SCREEN_WIDTH = scrSize.X;
-	SCREEN_HEIGHT = scrSize.Y;
-}
-
-void enableAnsiSupport() {
-	DWORD dwMode = 0;
-	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	GetConsoleMode(hOut, &dwMode);
-	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-	SetConsoleMode(hOut, dwMode);
-}
-
 const int COL = 10;
 const int ROW = 8;
 
@@ -334,21 +308,6 @@ void drawOld() {
 	drawThinRectangle({160, 50}, 20, 5);
 }
 
-///////////////////////////////////////////////////////////
-// Maze zone
-
-void resetMaze() {
-	for (int i = 0; i < MAZE_ROW; i++) {
-		for (int j = 0; j < MAZE_COL; j++) {
-			if (i == 0 || i == MAZE_ROW - 1 || j == 0 || j == MAZE_COL -1) {
-				maze[i][j] = true;
-			} else {
-				maze[i][j] = boxes[i - PADDING][j - PADDING].invisible;
-			}
-		}
-	}
-}
-
 // Arrays to represent change in rows and columns
 // DOWN, LEFT, RIGHT, UP
 // 0 1 2 3
@@ -434,8 +393,6 @@ Path findPath(Coord src, Coord dest) {
 				if (turn == 2 && col != dest.x && row != dest.y) {
 					continue;
 				}
-				MoveCursorTo({80, 40});
-				cout << "Turns: " << turn << "    " + to_string(rand()) + "     ";
 				Path newPath{{}, move, turn};
 
 				for (int i = 0; i <= cur.turns; i++) {
@@ -455,46 +412,9 @@ Path findPath(Coord src, Coord dest) {
 	return Path{{}, -1, -1};
 }
 
-
-void disableResizeWindow() {
-	HWND hWnd = GetConsoleWindow();
-	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_SIZEBOX);
-}
-
-void disableMinimizeButton() {
-	HWND hWnd = GetConsoleWindow();
-	HMENU hMenu = GetSystemMenu(hWnd, false);
-
-	DeleteMenu(hMenu, SC_MINIMIZE, MF_BYCOMMAND);
-}
-
 void project_init() {
-	SetConsoleOutputCP(65001);
-//	system("mode con COLS=700");
-	SetConsoleTitleW(L"Pikachu Game");
-	ShowWindow(GetConsoleWindow(),SW_MAXIMIZE);
-//	SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000); Full screen
-	enableAnsiSupport();
-	HWND hWnd = GetConsoleWindow();
-//	ShowScrollBar(hWnd, SB_BOTH, false);
-
-	HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_CURSOR_INFO cursorInfo;
-	GetConsoleCursorInfo(out, &cursorInfo);
-	cursorInfo.bVisible = false; // set the cursor visibility
-	SetConsoleCursorInfo(out, &cursorInfo);
-
-//	DisableResizeWindow(); //auto resize
-	DisableMinimizeButton();
-//	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
-
-	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
-	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
-
-
-	syncScrSize();
-
-//	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
+	SetConsoleTitleW(L"Pikachu - Matching Game");
+	consoleInit();
 
 	boxes = new Box*[ROW];
 	for (int i = 0; i < ROW; i++) boxes[i] = new Box[COL];
@@ -504,17 +424,9 @@ void project_init() {
 
 	for (int i = 0; i < ROW; i++) {
 		for (int j = 0; j < COL; j++) {
-			boxes[i][j].alphabet = getRandomChar(65, 70);
+			boxes[i][j].alphabet = getRandomCharInRange(65, 70);
 		}
 	}
-
-//	int c = 0;
-//	while (c < ROW * COL) {
-//		boxes[c / ROW][c % COL]
-//		c += 2;
-//	}
-
-	resetMaze();
 }
 
 void project_cleanup() {
