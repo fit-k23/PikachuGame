@@ -1,4 +1,5 @@
 #include <conio.h>
+#include <cstdlib>
 
 const int ESC_KEY = 0x1B;
 const int ENTER_KEY = 13;

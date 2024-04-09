@@ -13,6 +13,8 @@
 #include <sstream>
 #include <queue>
 
+#include <cstdlib>
+
 using namespace std;
 
 #include "utils.h"

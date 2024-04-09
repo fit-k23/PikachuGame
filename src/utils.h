@@ -1,4 +1,3 @@
-#include <cstdlib>
 // Repeat a string multi times, Eg: str_repeat("a",3) -> "aaa"
 // Name suggested by PHP >:)! PHP RULE!11!
 string str_repeat(string s, int n) {
