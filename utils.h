@@ -24,3 +24,25 @@ int getRandomIntInRange(int range_a, int range_b) {
 char getRandomCharInRange(int range_a = 65, int range_b = 90) {
 	return (char) getRandomIntInRange(range_a, range_b);
 }
+
+struct PikaRGB{
+	int r;
+	int g;
+	int b;
+};
+
+string getBGAnsiCode(int r, int g, int b) {
+	return "\033[48;2;" + to_string(r) + ";" + to_string(g) + ";" + to_string(b) + "m";
+}
+
+string getBGAnsiCode(PikaRGB rgb) {
+	return getBGAnsiCode(rgb.r, rgb.g, rgb.b);
+}
+
+string getFGAnsiCode(int r, int g, int b) {
+	return "\033[38;2;" + to_string(r) + ";" + to_string(g) + ";" + to_string(b) + "m";
+}
+
+string getFGAnsiCode(PikaRGB rgb) {
+	return getFGAnsiCode(rgb.r, rgb.g, rgb.b);
+}

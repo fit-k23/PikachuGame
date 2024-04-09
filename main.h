@@ -17,6 +17,7 @@ using namespace std;
 
 #include "utils.h"
 #include "console.h"
+#include "controller.h"
 
 void project_init();
 

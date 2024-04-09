@@ -9,5 +9,7 @@ link_directories(lib)
 add_executable(PikachuGame main.cpp main.h
         utils.h
         search.h
-        console.h)#miniaudio.h)
+        console.h
+        controller.h
+)#miniaudio.h)
 
