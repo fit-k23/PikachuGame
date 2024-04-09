@@ -275,7 +275,7 @@ void drawBox(int i, int j) {
 void draw() {
 //	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2);
 //	drawBoxyLineRectangle({BOARD_START_X + LINE + 1, BOARD_START_Y + PILAR + 1}, (LINE - 0.5) *  MAZE_COL + 1, (PILAR) * MAZE_ROW * 2 + 2);
-	drawAtPos({BOARD_START_X + 1,BOARD_START_Y + 1}, getFileContent("poké-side-of-the-block.txt"));
+	drawAtPos({BOARD_START_X + 1,BOARD_START_Y + 1}, getFileContent("asset/pikachu_large.txt"));
 	//drawAtPosAvoidEmptySpace({120,9}, getFileContent("poké-side-of-the-block.txt"));
 	ostringstream sstr;
 

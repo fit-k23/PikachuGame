@@ -4,12 +4,15 @@ project(PikachuGame)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-static")
 
-link_directories(lib)
+set(asset "${CMAKE_SOURCE_DIR}/asset")
+set(build_asset "${CMAKE_CURRENT_BINARY_DIR}/asset")
 
-add_executable(PikachuGame main.cpp main.h
-        utils.h
-        search.h
-        console.h
-        controller.h
-)#miniaudio.h)
+add_executable(${PROJECT_NAME} src/main.cpp src/main.h src/utils.h src/search.h src/console.h src/controller.h)
 
+add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD COMMAND ${CMAKE_COMMAND}
+    -E create_symlink ${asset} ${build_asset}
+    DEPENDS ${build_asset}
+    COMMENT "symbolic link ${asset} => ${build_asset}"
+)
