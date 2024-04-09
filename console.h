@@ -73,7 +73,7 @@ void clrScr() {
 }
 
 void consoleInit() {
-	//Force console to use UTF-8, so it won't break ansi code due to most ansi code is written using utf-8
+	//Force console to use UTF-8, so it won't break ansi code due to most ansi code is written using utf-8o
 	//Ref: The source is I made it up, jk: https://stackoverflow.com/a/41645159/24078702
 	//Docs: https://learn.microsoft.com/en-us/windows/console/setconsoleoutputcp
 	SetConsoleOutputCP(CP_UTF8); //65001

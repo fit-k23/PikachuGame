@@ -45,6 +45,7 @@ bool Coord::isEqual(Coord c) const {
 Coord Coord::add(int dx = 0, int dy = 0) {
 	x += dx;
 	y += dy;
+	return {x, y};
 }
 
 Coord Coord::add(Coord c) {
@@ -56,20 +57,19 @@ Coord cursor = {PADDING, PADDING};
 struct Selector {
 	Coord c1;
 	Coord c2;
-	bool valid = false;
 };
 
-Selector selector{{-1, -1}, {-1, -1}, false};
+Selector selector{{-1, -1}, {-1, -1}};
+
+const char* ANSI_RESET_BACKGROUND = "\033[49m";
+const char* ANSI_RESET_FOREGROUND = "\033[39m";
+const char* ANSI_RESET = "\033[0m";
 
 const char* NORMAL_ANSI = "\033[38;2;255;255;255m\033[49m";
 const char* SELECT_COLOR_ANSI = "\033[48;2;123;23;131m";
 const char* CURSOR_COLOR_ANSI = "\033[48;2;255;255;255m\x1B[38;2;0;0;0m";
 
-const char* ANSI_RESET_BACKGROUND = "\033[49m";
-const char* ANSI_RESET_FOREGROUND = "\033[39m";
-
 void drawLine(ostringstream &sstr) {
-//	sstr << string(LINE, '-');
 	sstr << str_repeat("─", LINE);
 }
 
@@ -79,7 +79,6 @@ void drawNormalBoxContent(ostringstream &sstr, char c = ' ') {
 }
 
 void drawPilar(ostringstream &sstr) {
-//	sstr << "|";
 	sstr << "│";
 }
 
@@ -102,7 +101,7 @@ struct BoxPart{
 	const char* bot_right;
 };
 
-void drawRectangle(BoxPart parts, Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}) {
+void drawRectangle(const BoxPart& parts, Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}) {
 	MoveCursorTo(coord);
 	string s = parts.top_left;
 	string space;
@@ -113,53 +112,50 @@ void drawRectangle(BoxPart parts, Coord coord, int width, int height, PikaRGB bg
 	for (int i = 0; i < width; i++) {
 		s += parts.top_mid;
 	}
-	cout << s << parts.top_right;
+	cout << ANSI_RESET_BACKGROUND << s << parts.top_right;
 
 	for (int i = 0; i < height / 2; i++) {
 		MoveCursorTo({coord.x, coord.y + i + 1});
-		cout << parts.mid_left << bgColorCode + string(width, ' ') + ANSI_RESET_BACKGROUND + parts.mid_right;
+		cout << ANSI_RESET_BACKGROUND << parts.mid_left << bgColorCode + string(width, ' ') + ANSI_RESET_BACKGROUND + parts.mid_right;
 	}
 	s = parts.bot_left;
 	for (int i = 0; i < width; i++)
 		s += parts.bot_mid;
 	MoveCursorTo({coord.x, coord.y + height / 2 + 1});
 	s += parts.bot_right;
-	cout << s;
+	cout << ANSI_RESET_BACKGROUND << s;
 	MoveCursorTo({0,0}); //Resting coord
 }
 
-void drawThickRectangle() {
-
+void drawRoundCornerRectangle(Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}, BoxPart part = {"╭","─","╮","│","│","╰","─","╯"}) {
+	part.top_left = "╭";
+	part.top_right = "╮";
+	part.bot_left = "╰";
+	part.bot_right = "╯";
+	drawRectangle(part, coord, width, height, bgColor);
 }
 
-void drawDoubleLayerRectangle(Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}) {
+//void drawChoppedCornerRectangle(Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}, BoxPart part = {"╭","─","╮","│","│","╰","─","╯"}) {
+//	part.top_left = "╱";
+//	part.top_right = "╲";
+//	part.bot_left = "╲";
+//	part.bot_right = "╱";
+//	drawRectangle(part, coord, width, height, bgColor);
+//} Look bad
+
+void drawBoxyLineRectangle(Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}) {
+	drawRectangle({"▄","▄","▄","█","█","▀","▀","▀"}, coord, width, height, bgColor);
+}
+
+void drawHeavyLineRectangle(Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}) {
+	drawRectangle({"┏","━","┓","┃","┃","┗","━","┛"}, coord, width, height, bgColor);
+}
+
+void drawDoubleLineRectangle(Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}) {
 	drawRectangle({"╔","═", "╗", "║", "║", "╚","═","╝"}, coord, width, height, bgColor);
-//	MoveCursorTo(coord);
-//	string s = "╔";
-//	string space;
-//	string bgColorCode;
-//	if (bgColor.r != -1) {
-//		bgColorCode = getBGAnsiCode(bgColor);
-//	}
-//	for (int i = 0; i < width; i++) {
-//		s += "═";
-//	}
-//	cout << s << "╗";
-//
-//	for (int i = 0; i < height / 2; i++) {
-//		MoveCursorTo({coord.x, coord.y + i + 1});
-//		cout << "║" << bgColorCode + string(width, ' ') + ANSI_RESET_BACKGROUND + "║";
-//	}
-//	s = "╚";
-//	for (int i = 0; i < width; i++)
-//		s += "═";
-//	MoveCursorTo({coord.x, coord.y + height / 2 + 1});
-//	s += "╝";
-//	cout << s;
-//	MoveCursorTo({0,0}); //Resting coord
 }
 
-void drawDoubleLayerHollowRectangle(Coord coord, int width, int height) {
+void drawDoubleLineHollowRectangle(Coord coord, int width, int height) {
 	MoveCursorTo(coord);
 	string s = "╔";
 	string space;
@@ -183,27 +179,8 @@ void drawDoubleLayerHollowRectangle(Coord coord, int width, int height) {
 	MoveCursorTo({0,0}); //Resting coord
 }
 
-void drawThinRectangle(Coord coord, int width, int height) {
-	MoveCursorTo(coord);
-	string s = "┌";
-	string space;
-	string temp;
-	for (int i = 0; i < width; i++) {
-		s += "─";
-	}
-	cout << s << "┐";
-
-	for (int i = 0; i < height / 2; i++) {
-		MoveCursorTo({coord.x, coord.y + i + 1});
-		cout << "│" + string(width, ' ') + "│";
-	}
-	s = "└";
-	for (int i = 0; i < width; i++)
-		s += "─";
-	MoveCursorTo({coord.x, coord.y + height / 2 + 1});
-	s += "┘";
-	cout << s;
-	MoveCursorTo({0, 50});
+void drawThinLineRectangle(Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}) {
+	drawRectangle({"┌", "─", "┐", "│", "│", "└", "─", "┘"}, coord, width, height, bgColor);
 }
 
 void drawAtPos(Coord coord, const string& s) {
@@ -212,9 +189,10 @@ void drawAtPos(Coord coord, const string& s) {
 	while (!sstr.eof()) {
 		getline(sstr, temp, '\n');
 		MoveCursorTo(coord);
-		printf("%s", temp.c_str());
+		cout << ANSI_RESET_BACKGROUND << temp;
 		coord.y++;
 	}
+	MoveCursorTo({0, 0});
 }
 
 void drawAtPosAvoidEmptySpace(Coord coord, const string& s) {
@@ -229,126 +207,88 @@ void drawAtPosAvoidEmptySpace(Coord coord, const string& s) {
 		}
 
 		MoveCursorTo({coord.x + dx, coord.y});
-		printf("%s", temp.c_str());
+		cout << temp << ANSI_RESET_BACKGROUND << ANSI_RESET_FOREGROUND;
 		coord.y++;
 	}
 }
 
-void drawAtPosAvoidEmptySpace2(Coord coord, const string& s) {
-	istringstream sstr(s);
-	string temp;
-	while (!sstr.eof()) {
-		int dx = 0;
-		getline(sstr, temp, '\n');
-		int p1 = 0;
-		int p2 = 0;
-		while (p1 != string::npos) {
-			p1 = temp.find(' ', p1 + 1);
+//void drawAtPosAvoidEmptySpace2(Coord coord, const string& s) {
+//	istringstream sstr(s);
+//	string temp;
+//	while (!sstr.eof()) {
+//		int dx = 0;
+//		getline(sstr, temp, '\n');
+//		int p1 = 0;
+//		int p2 = 0;
+//		while (p1 != string::npos) {
+//			p1 = temp.find(' ', p1 + 1);
+//
+//
+//		}
+//		while (getline(sstr, temp, ' ')) {
+//		}
+//		getline(sstr, temp, '\n');
+//		getline(sstr, temp, '\n');
+//		while (temp[0] == ' ') {
+//			dx++;
+//			temp.erase(0, 1);
+//		}
+//
+//		MoveCursorTo({coord.x + dx, coord.y});
+//		cout << temp << ANSI_RESET_BACKGROUND << ANSI_RESET_FOREGROUND;
+//		coord.y++;
+//	}
+//}
 
-
-		}
-		while (getline(sstr, temp, ' ')) {
-		}
-		getline(sstr, temp, '\n');
-		getline(sstr, temp, '\n');
-		while (temp[0] == ' ') {
-			dx++;
-			temp.erase(0, 1);
-		}
-
-		MoveCursorTo({coord.x + dx, coord.y});
-		printf("%s", temp.c_str());
-		coord.y++;
+void drawCursor() {
+	MoveCursorTo({BOARD_START_X + (1 + LINE) * cursor.x + 1, BOARD_START_Y + (1 + PILAR) * cursor.y + 1});
+	cout << CURSOR_COLOR_ANSI << "       " << ANSI_RESET_BACKGROUND;
+	MoveCursorTo({BOARD_START_X + (1 + LINE) * cursor.x + 1, BOARD_START_Y + (1 + PILAR) * cursor.y + 2});
+	if (maze[cursor.y][cursor.x]) {
+		cout << CURSOR_COLOR_ANSI << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
+	} else {
+		cout << CURSOR_COLOR_ANSI << string(LINE / 2, ' ') << "\033[1m" << boxes[cursor.y - PADDING][cursor.x - PADDING].alphabet << string((LINE - 1) / 2, ' ') << ANSI_RESET_BACKGROUND;
 	}
+	MoveCursorTo({BOARD_START_X + (1 + LINE) * cursor.x + 1, BOARD_START_Y + (1 + PILAR) * cursor.y + 3});
+	cout << CURSOR_COLOR_ANSI << "       " << ANSI_RESET_BACKGROUND;
+}
+
+void drawBackgroundBox(Coord coord) {
+//	MoveCursorTo({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 1});
+//	cout << ANSI_RESET_BACKGROUND << "       " << ANSI_RESET_BACKGROUND;
+//	MoveCursorTo({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 2});
+//	cout << "  XXX   ";
+//	MoveCursorTo({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 3});
+//	cout << ANSI_RESET_BACKGROUND << "       " << ANSI_RESET_BACKGROUND;
+}
+
+void drawBox(int i, int j) {
+	if (maze[i][j]) return;
+	MoveCursorTo({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 1});
+	cout << NORMAL_ANSI << "       " << ANSI_RESET_BACKGROUND;
+	MoveCursorTo({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 2});
+	cout << NORMAL_ANSI << string(LINE / 2, ' ') << "\033[1m" << boxes[i - PADDING][j - PADDING].alphabet << "\033[0m" << string((LINE - 1) / 2, ' ') << ANSI_RESET_BACKGROUND;
+	MoveCursorTo({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 3});
+	cout << NORMAL_ANSI << "       " << ANSI_RESET_BACKGROUND;
 }
 
 void draw() {
-	drawDoubleLayerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2);
-//	drawAtPos({18,9}, getFileContent("poké-side-of-the-block.txt"));
-//	drawAtPosAvoidEmptySpace({120,9}, getFileContent("poké-side-of-the-block.txt"));
-}
-
-
-void drawOld() {
-	//drawAtPos({18,9}, getFileContent("poké-side-of-the-block.txt"));
+//	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2);
+//	drawBoxyLineRectangle({BOARD_START_X + LINE + 1, BOARD_START_Y + PILAR + 1}, (LINE - 0.5) *  MAZE_COL + 1, (PILAR) * MAZE_ROW * 2 + 2);
+	drawAtPos({BOARD_START_X + 1,BOARD_START_Y + 1}, getFileContent("poké-side-of-the-block.txt"));
+	//drawAtPosAvoidEmptySpace({120,9}, getFileContent("poké-side-of-the-block.txt"));
 	ostringstream sstr;
-	MoveCursorTo({0,0});
-//	sstr << "S1: " << selector.c1.x << ":" << selector.c1.y << "\nS2: " << selector.c2.x << ":" << selector.c2.y << "\n";
+
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
-			sstr << ' ';
-
-			if (i != 0 && i != MAZE_ROW - 1) {
-//				if (i == MAZE_ROW - 2 && boxes[i - PADDING - 1][j - PADDING].invisible) drawNormalBoxContent(sstr);
-				if (i == PADDING && boxes[i - PADDING][j - PADDING].invisible) drawNormalBoxContent(sstr);
-				else if (i >= 2 && boxes[i - PADDING][j - PADDING].invisible && boxes[i - PADDING - 1][j - PADDING].invisible) drawNormalBoxContent(sstr);
-				else if (j != 0 && j != MAZE_COL - 1) drawLine(sstr);
-				else drawNormalBoxContent(sstr);
+			string bgColor = NORMAL_ANSI;
+			if (!maze[i][j]) {
+				drawBox(i, j);
 			} else {
-				if (j != 0 && j != MAZE_COL - 1 && i == MAZE_ROW - 1 && !boxes[i - PADDING - 1][j - PADDING].invisible) drawLine(sstr);
-				else drawNormalBoxContent(sstr);
+				drawBackgroundBox({j, i});
 			}
-		}
-		sstr << " \n";
-
-		for (int k = 0; k < PILAR; k++) {
-			for (int j = 0; j < MAZE_COL; j++) {
-				if (i != 0 && i != MAZE_ROW - 1 && j != 0) {
-					if (j == MAZE_COL - 1 && boxes[i - PADDING][j - PADDING - 1].invisible) sstr << ' ';
-					else if (j == 1 && boxes[i - PADDING][j - PADDING].invisible) sstr << ' ';
-					else if (j >= 2 && boxes[i - PADDING][j - PADDING].invisible && boxes[i - PADDING][j - PADDING - 1].invisible) sstr << ' ';
-					else drawPilar(sstr);
-				} else {
-					sstr << ' ';
-				}
-				if (i >= 1 && j >= 1 && i <= MAZE_ROW - 2 && j <= MAZE_COL - 2 && boxes[i - PADDING][j - PADDING].invisible) {
-					if (cursor.isEqual({j, i})) {
-						sstr << CURSOR_COLOR_ANSI;
-					}
-					drawNormalBoxContent(sstr);
-					sstr << NORMAL_ANSI;
-					continue;
-				}
-//				if (y == i && x == j) {
-				if (cursor.isEqual({j, i})) {
-					sstr << CURSOR_COLOR_ANSI;
-				}
-				if ((selector.c1.x == j && selector.c1.y == i) || (selector.c2.x == j && selector.c2.y == i)) {
-					sstr << SELECT_COLOR_ANSI;
-				}
-				if (k == PILAR / 2) {
-					if (i != 0 && i != MAZE_ROW - 1 && j != 0 && j != MAZE_COL - 1) drawNormalBoxContent(sstr, boxes[i - PADDING][j - PADDING].alphabet);
-					else drawNormalBoxContent(sstr);
-				} else {
-					drawNormalBoxContent(sstr);
-				}
-				if (cursor.isEqual({j, i}) || selector.c1.isEqual({j, i}) || selector.c2.isEqual({j, i})) {
-					sstr << NORMAL_ANSI;
-				}
-			}
-			sstr << " \n";
 		}
 	}
-	cout << sstr.str();
-	SHORT i = 30;
-	MoveCursorTo({160, i++});
-	cout << "┌───────────────────────────────────┐";
-	MoveCursorTo({160, i++});
-	cout << "│ > Use arrow keys for navigating!  │";
-	MoveCursorTo({160, i++});
-	cout << "│ > Toggle ENTER to select/deselect!│";
-	MoveCursorTo({160, i++});
-	cout << "└───────────────────────────────────┘";
-	MoveCursorTo({160, i++});
-	cout << ("╒════════╕");
-	MoveCursorTo({160, i++});
-	cout << ("│ Hello  │");
-	MoveCursorTo({160, i++});
-	cout << ("│ world  │");
-	MoveCursorTo({160, i++});
-	cout << ("╘════════╛");
-	drawDoubleLayerRectangle({160, 10}, 80, 20);
-	drawThinRectangle({160, 50}, 20, 5);
 }
 
 // Arrays to represent change in rows and columns
@@ -505,11 +445,11 @@ void match() {
 			coords.push_back(start);
 			int t = 0;
 			MoveCursorTo({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1});
-			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 			MoveCursorTo({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2});
-			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 			MoveCursorTo({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3});
-			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 			Sleep(1);
 			while (!start.isEqual(p.corners[t])) {
 				int dx = p.corners[t].x == start.x ? 0 : (p.corners[t].x - start.x) / abs(p.corners[t].x - start.x);
@@ -521,47 +461,97 @@ void match() {
 				}
 				coords.push_back(start);
 				MoveCursorTo({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1});
-				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 				MoveCursorTo({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2});
-				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 				MoveCursorTo({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3});
-				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << "\033[049m";
+				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 				Sleep(10);
 			}
 			Sleep(100);
 			draw();
 			for (auto & cods : coords) {
-				if (rand() % 13 == 0 && !coords[0].isEqual(cods) && !coords.back().isEqual(cods)) {
-					if (rand() % 5 == 0) {
+				switch (rand() % 37) {
+					case 0:
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << ANSI_RESET_BACKGROUND;
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :D   " << "\033[049m";
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :D   " << ANSI_RESET_BACKGROUND;
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-					} else if (rand() % 5 == 0){
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << ANSI_RESET_BACKGROUND;
+						break;
+					case 1:
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :>   " << "\033[049m";
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-					} else {
+						break;
+					case 2:
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :O   " << "\033[049m";
 						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-					};
-					continue;
+						break;
+					case 3:
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♥   " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						break;
+					case 4:
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ★   " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						break;
+					case 5:
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ☆   " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						break;
+					case 6:
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♫   " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						break;
+					case 7:
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ⛛   " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						break;
+					case 8:
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♜   " << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
+						break;
+					default:
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
+						MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
 				}
-				MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-				cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
-				MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-				cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
-				MoveCursorTo({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-				cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
 			}
 
 			Sleep(250);
@@ -581,10 +571,6 @@ void match() {
 int main() {
 	project_init();
 
-	const char* s1 = "Meow";
-	const char* s2 = string(s1).append(" Goofiest").c_str();
-	//cout << s2 << "\n";
-
 	SHORT i = 1000;
 	while (i-- > 0) {
 		MoveCursorTo({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT});
@@ -597,12 +583,15 @@ int main() {
 		cout << "\033[39m\033[49m";
 	}
 
+	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2);
 	draw();
+	drawCursor();
 	int input;
 	while (FLAG_RUNNING) {
 		input = getch();
 		if (input == PRE_KEY_1 || input == PRE_KEY_2) {
 			input = getch();
+			draw();
 			switch(input) {
 				case CTR_ARROW_UP:
 					for (int m = cursor.y - 1; m > 0; m--) {
@@ -610,7 +599,7 @@ int main() {
 						cursor.y = m;
 						break;
 					}
-					draw();
+					drawCursor();
 					break;
 				case CTR_ARROW_DOWN:
 					for (int m = cursor.y + 1; m < MAZE_ROW - PADDING; m++) {
@@ -618,7 +607,7 @@ int main() {
 						cursor.y = m;
 						break;
 					}
-					draw();
+					drawCursor();
 					break;
 				case CTR_ARROW_LEFT:
 					for (int m = cursor.x - 1; m > 0; m--) {
@@ -626,7 +615,7 @@ int main() {
 						cursor.x = m;
 						break;
 					}
-					draw();
+					drawCursor();
 					break;
 				case CTR_ARROW_RIGHT:
 					for (int m = cursor.x + 1; m < MAZE_COL - PADDING; m++) {
@@ -634,34 +623,34 @@ int main() {
 						cursor.x = m;
 						break;
 					}
-					draw();
+					drawCursor();
 					break;
 				case ARROW_UP:
 					if (cursor.y > 0) {
 						cursor.y--;
 						if (cursor.y == 0) cursor.y = ROW + PADDING - 1;
-						draw();
+						drawCursor();
 					}
 					break;
 				case ARROW_DOWN:
 					if (cursor.y < ROW + PADDING) {
 						cursor.y++;
 						if (cursor.y == ROW + PADDING) cursor.y = PADDING;
-						draw();
+						drawCursor();
 					}
 					break;
 				case ARROW_LEFT:
 					if (cursor.x > 0) {
 						cursor.x--;
 						if (cursor.x == 0) cursor.x = COL + PADDING - 1;
-						draw();
+						drawCursor();
 					}
 					break;
 				case ARROW_RIGHT:
 					if (cursor.x < COL + PADDING) {
 						cursor.x++;
 						if (cursor.x == COL + PADDING) cursor.x = PADDING;
-						draw();
+						drawCursor();
 					}
 					break;
 			}
