@@ -1,6 +1,10 @@
 #include <windows.h>
 #include <iostream>
 
+#ifndef PIKACHUGAME_CONSOLE_H
+#define PIKACHUGAME_CONSOLE_H
+#endif
+
 int SCREEN_WIDTH = 0;
 int SCREEN_HEIGHT = 0;
 
@@ -34,7 +38,7 @@ void disableConsoleMinimizeButton() {
 }
 
 // Clear screen without the need of using "cls" command or ansi escape code (which will surely expand the screen buffer
-// causing the console to flicker.
+// causing the console to flicker)
 // Modified from the accepted answer: https://stackoverflow.com/questions/34842526/update-console-without-flickering-c
 // Microsoft API: https://learn.microsoft.com/en-us/windows/console/clearing-the-screen
 // Other: Tali Oat - https://stackoverflow.com/questions/34842526/update-console-without-flickering-c
@@ -106,5 +110,15 @@ void consoleInit() {
 	syncScrSize();
 	ShowScrollBar(hWnd, SB_BOTH, false);
 //	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
+}
 
+#ifndef PIKA_HAS_COORD_HEADER
+#include "coord.h"
+#define PIKA_HAS_COORD_HEADER
+#endif
+
+void moveCursorToCoord(Coord coord) {
+	if (coord.x > SCREEN_WIDTH || coord.y > SCREEN_HEIGHT) return;
+	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(hStdout, {static_cast<SHORT>(coord.x), static_cast<SHORT>(coord.y)});
 }

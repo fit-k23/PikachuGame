@@ -1,3 +1,9 @@
+#ifndef PIKACHUGAME_UTILS_H
+#define PIKACHUGAME_UTILS_H
+#endif
+
+#include <filesystem>
+
 // Repeat a string multi times, Eg: str_repeat("a",3) -> "aaa"
 // Name suggested by PHP >:)! PHP RULE!11!
 string str_repeat(string s, int n) {
@@ -44,4 +50,8 @@ string getFGAnsiCode(int r, int g, int b) {
 
 string getFGAnsiCode(PikaRGB rgb) {
 	return getFGAnsiCode(rgb.r, rgb.g, rgb.b);
+}
+
+bool dirExist(const char* dirPath) {
+	return filesystem::is_directory(dirPath);
 }

@@ -1,6 +1,14 @@
 #include <conio.h>
 #include <cstdlib>
 
+#ifndef PIKACHUGAME_CONTROLLER_H
+#define PIKACHUGAME_CONTROLLER_H
+#endif
+
+#ifndef PIKACHUGAME_CONSTANT_H
+#include "constant.h"
+#endif
+
 const int ESC_KEY = 0x1B;
 const int ENTER_KEY = 13;
 const int DELETE_KEY = 83;
@@ -19,9 +27,6 @@ const int CTR_ENTER_KEY = 10;
 
 const int PRE_KEY_1 = 0;
 const int PRE_KEY_2 = 224;
-
-const int CHAR_USER_NAME_SIZE = 21;
-const int CHAR_USER_PASS_SIZE = 21;
 
 void loginKeyboardController(char* userName, char* userPass, bool* inputPass, bool* entered) {
 	int input = 0;
