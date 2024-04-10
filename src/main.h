@@ -45,6 +45,14 @@ using namespace std;
 #include "bfs.h"
 #endif
 
+#ifndef PIKACHUGAME_BFS_H
+#include "bfs.h"
+#endif
+
+#ifndef PIKACHUGAME_AUDIO_H
+#include "audio.h"
+#endif
+
 void project_init();
 
 //#define MINIAUDIO_IMPLEMENTATION

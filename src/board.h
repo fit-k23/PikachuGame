@@ -50,6 +50,41 @@ void uninitBoard() {
 	}
 }
 
+#ifndef PIKACHUGAME_UTILS_H
+#include "utils.h"
+#endif
+
+#include <algorithm>
+#include <random>
+
+void generateShuffledBoard() {
+	int cnt[7] = {};
+	int total = ROW * COL;
+	int len = total;
+	while (total > 0) for (int i = 0; i < 7; i++) {
+		if (total <= 0) break;
+		int num = 2 * getRandomCharInRange(0, 3);
+		if (total >= num) {
+			cnt[i] += num;
+			total -= num;
+		}
+	}
+
+	int count = 0;
+	while (count < len) {
+		for (int i = 0; i < 7; ++i) {
+			if (cnt[i] > 0) {
+				if (count == len) {
+					break;
+				}
+				boxes[count / COL][count % COL].alphabet = (char)(i + 'A');
+				cnt[i]--;
+				count++;
+			}
+		}
+	}
+}
+
 void setBoardSize(int row, int col) {
 	uninitBoard();
 	ROW = row;
@@ -57,16 +92,5 @@ void setBoardSize(int row, int col) {
 	MAZE_ROW = ROW + 2 * PADDING;
 	MAZE_COL = COL + 2 * PADDING;
 	initBoard();
-}
-
-#ifndef PIKACHUGAME_UTILS_H
-#include "utils.h"
-#endif
-
-void pushRandomCharsToBoard() { //Todo: make the part actually work!
-	for (int i = 0; i < ROW; i++) {
-		for (int j = 0; j < COL; j++) {
-			boxes[i][j].alphabet = getRandomCharInRange(65, 70);
-		}
-	}
+	generateShuffledBoard();
 }

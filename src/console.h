@@ -122,3 +122,50 @@ void moveCursorToCoord(Coord coord) {
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleCursorPosition(hStdout, {static_cast<SHORT>(coord.x), static_cast<SHORT>(coord.y)});
 }
+
+COLORREF getDefaultColor() {
+	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
+	HANDLE consoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
+	return sbInfoEx.ColorTable[0];
+}
+
+void fillConsoleBackground(COLORREF color) {
+	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
+	sbInfoEx.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+	HANDLE consoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
+	sbInfoEx.ColorTable[0] = color;
+	SetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
+}
+
+void flashConsoleBackgroundColor(int cntFlashes, int flashInterval_ms, COLORREF color, COLORREF color2) {
+	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
+	sbInfoEx.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+
+	HANDLE consoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
+
+	COLORREF storedBG = sbInfoEx.ColorTable[0];
+
+	for (int i = 0; i < 2 * cntFlashes; ++i) {
+		if (i % 2 == 0) {
+			sbInfoEx.ColorTable[0] = color;
+		} else {
+			sbInfoEx.ColorTable[0] = color2;
+		}
+		SetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
+		Sleep(flashInterval_ms);
+	}
+}
+
+
+void setConsoleColors(WORD attribs) {
+	HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	CONSOLE_SCREEN_BUFFER_INFOEX cbi;
+	cbi.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+	GetConsoleScreenBufferInfoEx(hOutput, &cbi);
+	cbi.wAttributes = attribs;
+	SetConsoleScreenBufferInfoEx(hOutput, &cbi);
+}

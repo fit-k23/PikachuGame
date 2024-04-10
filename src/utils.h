@@ -22,8 +22,14 @@ string getFileContent(const string &fileName) {
 	return sstr.str();
 }
 
+#include <random>
+
 int getRandomIntInRange(int range_a, int range_b) {
-	return range_a + rand() % (range_b - range_a + 1);
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	std::uniform_real_distribution<double> dist(range_a, range_b + 1);
+	return (int) round(dist(mt));
+	//return range_a + rand() % (range_b - range_a + 1);
 }
 
 char getRandomCharInRange(int range_a = 65, int range_b = 90) {

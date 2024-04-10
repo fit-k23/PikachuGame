@@ -46,7 +46,12 @@ void drawBackgroundBox(Coord coord) {
 //	cout << ANSI_RESET_BACKGROUND << "       " << ANSI_RESET_BACKGROUND;
 }
 
+
+#include <cassert>
+
 void drawBox(int i, int j) {
+	assert(i - PADDING >= 0 && i - PADDING < ROW);
+	assert(j - PADDING >= 0 && j - PADDING < COL);
 	if (maze[i][j]) return;
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 1});
 	cout << NORMAL_ANSI << "       " << ANSI_RESET_BACKGROUND;
@@ -75,6 +80,9 @@ void draw() {
 	}
 }
 
+auto musicEngine = AudioEngine();
+auto soundEngine = AudioEngine();
+
 void project_init() {
 	if (!dirExist(ASSET_RELATIVE_PATH)) {
 		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of asset files!\n" << ANSI_RESET;
@@ -88,18 +96,38 @@ void project_init() {
 		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of sound files!\n" << ANSI_RESET;
 		return;
 	}
+	musicEngine.init();
+	soundEngine.init();
+
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Littleroot Town.mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Soaring The Sky (Night).mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "AZALI - theme of a shop that sells things you dont want.mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Bitzel - Silly tune.mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "is it good enough to be called elevator music.mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "The 4 Corners - Phantom Funk.mp3");
+	musicEngine.loop = true;
+	musicEngine.volume = 1.0;
+
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "button_confirm.mp3");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "button_tap.mp3");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "correct.wav");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "cursor.wav");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "select.wav");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "wrong.wav");
+	soundEngine.volume = 1.0;
+
 	SetConsoleTitleW(L"Pikachu - Matching Game 💀 （╯°□°）╯︵◓");
 	consoleInit();
 
 	setBoardSize(8, 10);
+//	setBoardSize(4, 5);
 
-	for (int i = 0; i < ROW; i++) {
-		for (int j = 0; j < COL; j++) {
-			boxes[i][j].alphabet = getRandomCharInRange(65, 70);
-		}
-	}
 	BOARD_START_X = (SCREEN_WIDTH / 3 * 2) / MAZE_COL;
 	BOARD_START_Y = PILAR + 1;
+
+//	std::thread musicThread(playLoop, &musicEngine);
+//	musicThread.detach();
+
 }
 
 void project_cleanup() {
@@ -172,7 +200,7 @@ void match() {
 				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 				Sleep(10);
 			}
-			Sleep(100);
+			Sleep(20);
 			draw();
 			for (auto & cods : coords) {
 				switch (rand() % 37) {
@@ -258,13 +286,15 @@ void match() {
 				}
 			}
 
-			Sleep(250);
+			Sleep(100);
 			boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].invisible = true;
 			boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].invisible = true;
+			ma_sound_start(&soundEngine.sounds[2]);
 		} else {
-			Sleep(100);
+			Sleep(50);
 			maze[selector.c1.y][selector.c1.x] = false;
 			maze[selector.c2.y][selector.c2.x] = false;
+			ma_sound_start(&soundEngine.sounds[5]);
 		}
 	}
 	selector.c1 = {-1, -1};
@@ -287,7 +317,7 @@ int main() {
 		cout << "\033[39m\033[49m";
 	}
 
-	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2);
+	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2, {255, 255,0});
 	draw();
 	drawCursor();
 	int input;
@@ -296,6 +326,7 @@ int main() {
 		if (input == PRE_KEY_1 || input == PRE_KEY_2) {
 			input = getch();
 			draw();
+			ma_sound_start(&soundEngine.sounds[3]);
 			switch(input) {
 				case CTR_ARROW_UP:
 					for (int m = cursor.y - 1; m > 0; m--) {
@@ -362,6 +393,7 @@ int main() {
 			switch (input) {
 				case CTR_ENTER_KEY:
 				case ENTER_KEY:
+					ma_sound_start(&soundEngine.sounds[4]);
 					if (maze[cursor.y][cursor.x]) break;
 					if (selector.c1.x == -1 && !cursor.isEqual(selector.c2)) {
 						selector.c1 = cursor;
@@ -385,7 +417,7 @@ int main() {
 				case 'h':
 					selector = help();
 					draw();
-					Sleep(10);
+					Sleep(1);
 					if (selector.c1.isEqual({-1,-1})) {
 						break;
 					}
