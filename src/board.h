@@ -1,9 +1,15 @@
 #ifndef PIKACHUGAME_BOARD_H
 #define PIKACHUGAME_BOARD_H
+#include <algorithm>
+#include <random>
 #endif
 
 #ifndef PIKACHUGAME_COORD_H
 #include "coord.h"
+#endif
+
+#ifndef PIKACHUGAME_UTILS_H
+#include "utils.h"
 #endif
 
 int ROW;
@@ -15,12 +21,15 @@ int MAZE_COL;
 struct Box {
 	char alphabet = ' ';
 	bool invisible = false;
+	int color = 0;
 };
 
 Coord cursor = {PADDING, PADDING};
 
 Box** boxes;
 bool** maze;
+
+static int remainPair;
 
 void initBoard() {
 	boxes = new Box*[ROW];
@@ -54,9 +63,6 @@ void uninitBoard() {
 #include "utils.h"
 #endif
 
-#include <algorithm>
-#include <random>
-
 void generateShuffledBoard() {
 	int cnt[7] = {};
 	int total = ROW * COL;
@@ -73,6 +79,10 @@ void generateShuffledBoard() {
 	int count = 0;
 	while (count < len) {
 		for (int i = 0; i < 7; ++i) {
+			if (getRandomIntInRange(0, 2) == 2) {
+				i = getRandomIntInRange(0, 6);
+				continue;
+			}
 			if (cnt[i] > 0) {
 				if (count == len) {
 					break;
@@ -85,6 +95,14 @@ void generateShuffledBoard() {
 	}
 }
 
+void generateColorBoard() {
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++) {
+			boxes[i][j].color = getRandomIntInRange(0, 11);
+		}
+	}
+}
+
 void setBoardSize(int row, int col) {
 	uninitBoard();
 	ROW = row;
@@ -93,4 +111,6 @@ void setBoardSize(int row, int col) {
 	MAZE_COL = COL + 2 * PADDING;
 	initBoard();
 	generateShuffledBoard();
+	generateColorBoard();
+	remainPair = ROW * COL / 2;
 }

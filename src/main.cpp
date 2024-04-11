@@ -11,67 +11,125 @@ using namespace std;
 int BOARD_START_X;
 int BOARD_START_Y;
 
-void drawLine(ostringstream &sstr) {
-	sstr << str_repeat("─", LINE);
-}
+int SCORE_BOARD_X;
+int SCORE_BOARD_Y;
 
-void drawNormalBoxContent(ostringstream &sstr, char c = ' ') {
-	if (c == ' ') sstr << string(LINE, ' ');
-	else sstr << string(LINE / 2, ' ') << c << string((LINE - 1) / 2, ' ');
-}
+AnsiArt bgAnsi;
 
-void drawPilar(ostringstream &sstr) {
-	sstr << "│";
-}
+//#35374B
+//#344955
+//#50727B
+//#78A083
+//https://colorhunt.co/palette/35374b34495550727b78a083
+//
+//#B3C8CF
+//#BED7DC
+//#F1EEDC
+//#E5DDC5
+//https://colorhunt.co/palette/b3c8cfbed7dcf1eedce5ddc5
+//
+//#070F2B
+//#1B1A55
+//#535C91
+//#9290C3
+//https://colorhunt.co/palette/070f2b1b1a55535c919290c3
+
+PikaRGB color[12] = {
+	{53, 55, 75}, //#35374B
+	{52, 73, 85}, //#344955
+	{80, 114, 123}, //#50727B
+	{120, 160, 131}, //#78A083
+	{179, 200, 207}, //#B3C8CF
+	{190, 215, 220}, //#BED7DC
+	{241, 238, 220}, //#F1EEDC
+	{229, 221, 197}, //#E5DDC5
+	{7, 15, 43}, //#070F2B
+	{27, 26, 85}, //#1B1A55
+	{83, 92, 145}, //#535C91
+	{146, 144, 195} //#9290C3
+};
+
+string bgAn[12] = {
+	getBGAnsiCode(color[0]),
+	getBGAnsiCode(color[1]),
+	getBGAnsiCode(color[2]),
+	getBGAnsiCode(color[3]),
+	getBGAnsiCode(color[4]),
+	getBGAnsiCode(color[5]),
+	getBGAnsiCode(color[6]),
+	getBGAnsiCode(color[7]),
+	getBGAnsiCode(color[8]),
+	getBGAnsiCode(color[9]),
+	getBGAnsiCode(color[10]),
+	getBGAnsiCode(color[11])
+};
+
+string fgAn[12] = {
+	getFGAnsiCode(getSuitAbleFGColor(color[0])),
+	getFGAnsiCode(getSuitAbleFGColor(color[1])),
+	getFGAnsiCode(getSuitAbleFGColor(color[2])),
+	getFGAnsiCode(getSuitAbleFGColor(color[3])),
+	getFGAnsiCode(getSuitAbleFGColor(color[4])),
+	getFGAnsiCode(getSuitAbleFGColor(color[5])),
+	getFGAnsiCode(getSuitAbleFGColor(color[6])),
+	getFGAnsiCode(getSuitAbleFGColor(color[7])),
+	getFGAnsiCode(getSuitAbleFGColor(color[8])),
+	getFGAnsiCode(getSuitAbleFGColor(color[9])),
+	getFGAnsiCode(getSuitAbleFGColor(color[10])),
+	getFGAnsiCode(getSuitAbleFGColor(color[11]))
+};
 
 void drawCursor() {
+	string bg;
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * cursor.x + 1, BOARD_START_Y + (1 + PILAR) * cursor.y + 1});
-	cout << CURSOR_COLOR_ANSI << "       " << ANSI_RESET_BACKGROUND;
-	moveCursorToCoord({BOARD_START_X + (1 + LINE) * cursor.x + 1, BOARD_START_Y + (1 + PILAR) * cursor.y + 2});
-	if (maze[cursor.y][cursor.x]) {
-		cout << CURSOR_COLOR_ANSI << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-	} else {
-		cout << CURSOR_COLOR_ANSI << string(LINE / 2, ' ') << "\033[1m" << boxes[cursor.y - PADDING][cursor.x - PADDING].alphabet << string((LINE - 1) / 2, ' ') << ANSI_RESET_BACKGROUND;
-	}
+	cout << bg << "┏";
+	moveCursorToCoord({BOARD_START_X + (1 + LINE) * cursor.x + 1 + 6, BOARD_START_Y + (1 + PILAR) * cursor.y + 1});
+	cout << bg << "┓";
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * cursor.x + 1, BOARD_START_Y + (1 + PILAR) * cursor.y + 3});
-	cout << CURSOR_COLOR_ANSI << "       " << ANSI_RESET_BACKGROUND;
+	cout << bg << "┗";
+	moveCursorToCoord({BOARD_START_X + (1 + LINE) * cursor.x + 1 + 6, BOARD_START_Y + (1 + PILAR) * cursor.y + 3});
+	cout << bg << "┛";
+}
+
+void drawSelect(Coord coord) {
+	int r = boxes[coord.y - PADDING][coord.x - PADDING].color;
+	string bg = bgAn[r];
+	string fg = fgAn[r];
+	moveCursorToCoord({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 1});
+	cout << bg << fg << "╭" << ANSI_RESET;
+	moveCursorToCoord({BOARD_START_X + (1 + LINE) * coord.x + 1 + 6, BOARD_START_Y + (1 + PILAR) * coord.y + 1});
+	cout << bg << fg << "╮" << ANSI_RESET;
+	moveCursorToCoord({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 3});
+	cout << bg << fg << "╰" << ANSI_RESET;
+	moveCursorToCoord({BOARD_START_X + (1 + LINE) * coord.x + 1 + 6, BOARD_START_Y + (1 + PILAR) * coord.y + 3});
+	cout << bg << fg << "╯" << ANSI_RESET;
 }
 
 void drawBackgroundBox(Coord coord) {
-//	moveCursorToCoord({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 1});
-//	cout << ANSI_RESET_BACKGROUND << "       " << ANSI_RESET_BACKGROUND;
-//	moveCursorToCoord({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 2});
-//	cout << "  XXX   ";
-//	moveCursorToCoord({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 3});
-//	cout << ANSI_RESET_BACKGROUND << "       " << ANSI_RESET_BACKGROUND;
+	drawAtPos({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 1}, bgAnsi.frames[1 + (coord.y) * MAZE_COL + coord.x]);
 }
 
-
-#include <cassert>
-
 void drawBox(int i, int j) {
-	assert(i - PADDING >= 0 && i - PADDING < ROW);
-	assert(j - PADDING >= 0 && j - PADDING < COL);
 	if (maze[i][j]) return;
+	int r = boxes[i - PADDING][j - PADDING].color;
+	string bg = bgAn[r];
+	string fg = fgAn[r];
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 1});
-	cout << NORMAL_ANSI << "       " << ANSI_RESET_BACKGROUND;
+	cout << bg << "       " << ANSI_RESET_BACKGROUND;
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 2});
-	cout << NORMAL_ANSI << string(LINE / 2, ' ') << "\033[1m" << boxes[i - PADDING][j - PADDING].alphabet << "\033[0m" << string((LINE - 1) / 2, ' ') << ANSI_RESET_BACKGROUND;
+//	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1 + LINE / 2, BOARD_START_Y + (1 + PILAR) * i + 2});
+//	cout << boxes[i - PADDING][j - PADDING].alphabet;
+	cout << bg << string(LINE / 2, ' ') << fg << boxes[i - PADDING][j - PADDING].alphabet << string((LINE - 1) / 2, ' ') << ANSI_RESET_BACKGROUND;
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 3});
-	cout << NORMAL_ANSI << "       " << ANSI_RESET_BACKGROUND;
+	cout << bg << "       " << ANSI_RESET_BACKGROUND;
 }
 
 void draw() {
-//	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2);
-//	drawBoxyLineRectangle({BOARD_START_X + LINE + 1, BOARD_START_Y + PILAR + 1}, (LINE - 0.5) *  MAZE_COL + 1, (PILAR) * MAZE_ROW * 2 + 2);
-	drawAtPos({BOARD_START_X + 1,BOARD_START_Y + 1}, getFileContent("asset/pikachu_large.txt"));
-	//drawAtPosAvoidEmptySpace({120,9}, getFileContent("poké-side-of-the-block.txt"));
-	ostringstream sstr;
-
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
-			string bgColor = NORMAL_ANSI;
-			if (!maze[i][j]) {
+			if (selector.c1.isEqual({j,i}) || selector.c2.isEqual({j,i})) {
+				drawSelect({j, i});
+			} else if (!maze[i][j]) {
 				drawBox(i, j);
 			} else {
 				drawBackgroundBox({j, i});
@@ -80,62 +138,96 @@ void draw() {
 	}
 }
 
-auto musicEngine = AudioEngine();
-auto soundEngine = AudioEngine();
+//void drawOld() {
+//	//drawAtPos({18,9}, getFileContent("poké-side-of-the-block.txt"));
+//	ostringstream sstr;
+////	sstr << "S1: " << selector.c1.x << ":" << selector.c1.y << "\nS2: " << selector.c2.x << ":" << selector.c2.y << "\n";
+//	for (int i = 0; i < MAZE_ROW; i++) {
+//		for (int j = 0; j < MAZE_COL; j++) {
+//			sstr << ' ';
+//
+//			if (i != 0 && i != MAZE_ROW - 1) {
+////				if (i == MAZE_ROW - 2 && boxes[i - PADDING - 1][j - PADDING].invisible) drawNormalBoxContent(sstr);
+//				if (i == PADDING && boxes[i - PADDING][j - PADDING].invisible) drawNormalBoxContent(sstr);
+//				else if (i >= 2 && boxes[i - PADDING][j - PADDING].invisible && boxes[i - PADDING - 1][j - PADDING].invisible) drawNormalBoxContent(sstr);
+//				else if (j != 0 && j != MAZE_COL - 1) drawLine(sstr);
+//				else drawNormalBoxContent(sstr);
+//			} else {
+//				if (j != 0 && j != MAZE_COL - 1 && i == MAZE_ROW - 1 && !boxes[i - PADDING - 1][j - PADDING].invisible) drawLine(sstr);
+//				else drawNormalBoxContent(sstr);
+//			}
+//		}
+//		sstr << " \n";
+//
+//		for (int k = 0; k < PILAR; k++) {
+//			for (int j = 0; j < MAZE_COL; j++) {
+//				if (i != 0 && i != MAZE_ROW - 1 && j != 0) {
+//					if (j == MAZE_COL - 1 && boxes[i - PADDING][j - PADDING - 1].invisible) sstr << ' ';
+//					else if (j == 1 && boxes[i - PADDING][j - PADDING].invisible) sstr << ' ';
+//					else if (j >= 2 && boxes[i - PADDING][j - PADDING].invisible && boxes[i - PADDING][j - PADDING - 1].invisible) sstr << ' ';
+//					else drawPilar(sstr);
+//				} else {
+//					sstr << ' ';
+//				}
+//				if (i >= 1 && j >= 1 && i <= MAZE_ROW - 2 && j <= MAZE_COL - 2 && boxes[i - PADDING][j - PADDING].invisible) {
+//					if (cursor.isEqual({j, i})) {
+//						sstr << CURSOR_COLOR_ANSI;
+//					}
+//					drawNormalBoxContent(sstr);
+//					sstr << NORMAL_ANSI;
+//					continue;
+//				}
+////				if (y == i && x == j) {
+//				if (cursor.isEqual({j, i})) {
+//					sstr << CURSOR_COLOR_ANSI;
+//				}
+//				if ((selector.c1.x == j && selector.c1.y == i) || (selector.c2.x == j && selector.c2.y == i)) {
+//					sstr << SELECT_COLOR_ANSI;
+//				}
+//				if (k == PILAR / 2) {
+//					if (i != 0 && i != MAZE_ROW - 1 && j != 0 && j != MAZE_COL - 1) drawNormalBoxContent(sstr, boxes[i - PADDING][j - PADDING].alphabet);
+//					else drawNormalBoxContent(sstr);
+//				} else {
+//					drawNormalBoxContent(sstr);
+//				}
+//				if (cursor.isEqual({j, i}) || selector.c1.isEqual({j, i}) || selector.c2.isEqual({j, i})) {
+//					sstr << NORMAL_ANSI;
+//				}
+//			}
+//			sstr << " \n";
+//		}
+//	}
+//	cout << sstr.str();
+//}
 
-void project_init() {
-	if (!dirExist(ASSET_RELATIVE_PATH)) {
-		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of asset files!\n" << ANSI_RESET;
-		return;
+Coord findMatch(Coord src) {
+	if (boxes[src.y][src.x].invisible) {
+		return {-1, -1};
 	}
-	if (!dirExist(MUSIC_RELATIVE_PATH)) {
-		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of music files!\n" << ANSI_RESET;
-		return;
+	for (int m = 0; m < ROW; m++) {
+		for (int n = 0; n < COL; n++) {
+			if (boxes[m][n].invisible) {
+				continue;
+			}
+			if (src.isEqual({n, m}) || boxes[src.y][src.x].alphabet != boxes[m][n].alphabet) {
+				continue;
+			}
+			maze[src.y + PADDING][src.x + PADDING] = true;
+			maze[m + PADDING][n + PADDING] = true;
+			Path p = findPath({src.y + PADDING, src.x + PADDING}, {n + PADDING,m + PADDING});
+			if (p.turns != -1) {
+				if (p.turns > 2) {
+					system("start cmd.exe /k echo Hey1");
+				}
+				return {n + PADDING,m + PADDING};
+			} else {
+				maze[src.y + PADDING][src.x + PADDING] = false;
+				maze[m + PADDING][n + PADDING] = false;
+			}
+		}
 	}
-	if (!dirExist(SOUND_RELATIVE_PATH)) {
-		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of sound files!\n" << ANSI_RESET;
-		return;
-	}
-	musicEngine.init();
-	soundEngine.init();
-
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Littleroot Town.mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Soaring The Sky (Night).mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "AZALI - theme of a shop that sells things you dont want.mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Bitzel - Silly tune.mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "is it good enough to be called elevator music.mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "The 4 Corners - Phantom Funk.mp3");
-	musicEngine.loop = true;
-	musicEngine.volume = 1.0;
-
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "button_confirm.mp3");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "button_tap.mp3");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "correct.wav");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "cursor.wav");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "select.wav");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "wrong.wav");
-	soundEngine.volume = 1.0;
-
-	SetConsoleTitleW(L"Pikachu - Matching Game 💀 （╯°□°）╯︵◓");
-	consoleInit();
-
-	setBoardSize(8, 10);
-//	setBoardSize(4, 5);
-
-	BOARD_START_X = (SCREEN_WIDTH / 3 * 2) / MAZE_COL;
-	BOARD_START_Y = PILAR + 1;
-
-//	std::thread musicThread(playLoop, &musicEngine);
-//	musicThread.detach();
-
+	return {-1, -1};
 }
-
-void project_cleanup() {
-	uninitBoard();
-	system("pause");
-}
-
-bool FLAG_RUNNING = true;
 
 Selector help() {
 	for (int i = 0; i < ROW; i++) {
@@ -165,6 +257,28 @@ Selector help() {
 	}
 	return {{-1,-1},{-1,-1}};
 }
+
+//Help is broken
+Selector help2() {
+	int i, j;
+	for (i = 0; i < ROW; i++) {
+		for (j = 0; j < COL; j++) {
+			if (boxes[i][j].invisible) {
+				continue;
+			}
+			Coord result = findMatch({j, i});
+			if (result.x != -1) {
+				return {{j + PADDING, i + PADDING}, result};
+			}
+		}
+	}
+	return {{-1,-1},{-1,-1}};
+}
+
+auto musicEngine = AudioEngine();
+auto soundEngine = AudioEngine();
+
+int score = 0;
 
 void match() {
 	if (boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].alphabet == boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].alphabet) {
@@ -290,6 +404,8 @@ void match() {
 			boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].invisible = true;
 			boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].invisible = true;
 			ma_sound_start(&soundEngine.sounds[2]);
+			score += (p.turns + 1) * coords.size();
+			remainPair--;
 		} else {
 			Sleep(50);
 			maze[selector.c1.y][selector.c1.x] = false;
@@ -297,36 +413,99 @@ void match() {
 			ma_sound_start(&soundEngine.sounds[5]);
 		}
 	}
-	selector.c1 = {-1, -1};
-	selector.c2 = {-1, -1};
+	selector.reset();
 	draw();
+	drawCursor();
 }
+
+bool FLAG_RUNNING = true;
+
+void project_init() {
+	if (!dirExist(ASSET_RELATIVE_PATH)) {
+		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of asset files!\n" << ANSI_RESET;
+		return;
+	}
+	if (!dirExist(MUSIC_RELATIVE_PATH)) {
+		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of music files!\n" << ANSI_RESET;
+		return;
+	}
+	if (!dirExist(SOUND_RELATIVE_PATH)) {
+		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of sound files!\n" << ANSI_RESET;
+		return;
+	}
+	musicEngine.init();
+	soundEngine.init();
+
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Littleroot Town.mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Soaring The Sky (Night).mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "AZALI - theme of a shop that sells things you dont want.mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Bitzel - Silly tune.mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "is it good enough to be called elevator music.mp3");
+	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "The 4 Corners - Phantom Funk.mp3");
+	musicEngine.loop = true;
+	musicEngine.volume = 1.0;
+
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "button_confirm.mp3");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "button_tap.mp3");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "correct.wav");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "cursor.wav");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "select.wav");
+	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "wrong.wav");
+	soundEngine.volume = 1.0;
+
+	SetConsoleTitleW(L"Pikachu - Matching Game 💀 （╯°□°）╯︵◓");
+	consoleInit();
+
+	setBoardSize(8, 10);
+//	setBoardSize(4, 5);
+
+	BOARD_START_X = (SCREEN_WIDTH / 3 * 2) / MAZE_COL;
+	BOARD_START_Y = PILAR + 1;
+	SCORE_BOARD_X = (SCREEN_WIDTH / 2) + 20;
+	SCORE_BOARD_Y = 20;//(BOARD_START_Y + (PILAR + 1) * MAZE_ROW * 2) - 30 / 2;
+	SCORE_BOARD_Y = (BOARD_START_Y + (PILAR + 1) * MAZE_ROW) - 30/ 2;
+
+//	std::thread musicThread(playLoop, &musicEngine);
+//	musicThread.detach();
+}
+
+void project_cleanup() {
+	uninitBoard();
+	system("pause");
+}
+
+void drawScoreBoard(){
+	drawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 2}, "Score: " + to_string(score));
+};
 
 int main() {
 	project_init();
+	readAnsiFile(string(ASSET_RELATIVE_PATH) + "pikachu_large.txt", bgAnsi);
 
 	SHORT i = 1000;
 	while (i-- > 0) {
-		moveCursorToCoord({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT});
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), rand() % 16);
-		if (rand() % 2 == 0) cout << ".";
-		else cout << "*";
-//		cout << getRandomChar(35, 95);
-//		printf("\033[38;2;%d;%d;%dm%c\033[39m\033[49m", rand() % 256, rand() % 256, rand() % 256,
-//			   getRandomChar(25, 95));
-		cout << "\033[39m\033[49m";
+		drawTextAtPos({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT}, rand() % 2 == 0 ? "." : "*");
+		cout << ANSI_RESET;
 	}
 
-	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2, {255, 255,0});
+	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2);
+	drawThinLineRectangle({SCORE_BOARD_X, SCORE_BOARD_Y}, 60, 30);
 	draw();
 	drawCursor();
 	int input;
 	while (FLAG_RUNNING) {
+		if (remainPair == 0) {
+			drawBoxyLineRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2, {255, 255,0});
+			drawAtPos({BOARD_START_X + 1,BOARD_START_Y + 1}, bgAnsi.frames[0]);
+			break;
+		}
+		drawScoreBoard();
 		input = getch();
 		if (input == PRE_KEY_1 || input == PRE_KEY_2) {
 			input = getch();
-			draw();
 			ma_sound_start(&soundEngine.sounds[3]);
+			draw();
 			switch(input) {
 				case CTR_ARROW_UP:
 					for (int m = cursor.y - 1; m > 0; m--) {
@@ -394,7 +573,12 @@ int main() {
 				case CTR_ENTER_KEY:
 				case ENTER_KEY:
 					ma_sound_start(&soundEngine.sounds[4]);
-					if (maze[cursor.y][cursor.x]) break;
+					if (maze[cursor.y][cursor.x]) {
+						selector.reset();
+						draw();
+						drawCursor();
+						continue;
+					}
 					if (selector.c1.x == -1 && !cursor.isEqual(selector.c2)) {
 						selector.c1 = cursor;
 					} else if (cursor.isEqual(selector.c1)) {
@@ -410,23 +594,26 @@ int main() {
 					}
 					break;
 				case 'c':
-					selector.c1 = {-1, -1};
-					selector.c2 = {-1, -1};
+					selector.reset();
 					draw();
 					break;
-				case 'h':
-					selector = help();
-					draw();
-					Sleep(1);
-					if (selector.c1.isEqual({-1,-1})) {
-						break;
+				case 'h': {
+					auto suggest = help();
+					if (suggest.c1.x != -1) {
+						drawSelect(suggest.c1);
+						drawSelect(suggest.c2);
+						Sleep(1000);
+						selector = suggest;
+						draw();
+						match();
+						drawCursor();
 					}
-					match();
-					draw();
 					break;
-				case ESC_KEY:
+				}
+				case ESC_KEY: {
 					FLAG_RUNNING = false;
 					break;
+				}
 			}
 		}
 	}

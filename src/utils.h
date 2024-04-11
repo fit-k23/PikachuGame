@@ -42,6 +42,20 @@ struct PikaRGB{
 	int b;
 };
 
+PikaRGB getSuitAbleFGColor(PikaRGB in) {
+	PikaRGB out = {};
+	if (in.r < 255 / 2) {
+		out.r = 255;
+	} else out.r = 0;
+	if (in.g < 255 / 2) {
+		out.g = 255;
+	} else out.r = 0;
+	if (in.b < 255 / 2) {
+		out.b = 255;
+	} else out.r = 0;
+	return out;
+}
+
 string getBGAnsiCode(int r, int g, int b) {
 	return "\033[48;2;" + to_string(r) + ";" + to_string(g) + ";" + to_string(b) + "m";
 }

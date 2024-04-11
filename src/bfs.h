@@ -16,7 +16,13 @@
 struct Selector {
 	Coord c1;
 	Coord c2;
+	void reset();
 };
+
+void Selector::reset() {
+	c1 = {-1, -1};
+	c2 = {-1, -1};
+}
 
 Selector selector{{-1, -1}, {-1, -1}};
 
@@ -47,7 +53,7 @@ Path findPath(Coord src, Coord dest) {
 	if ((src.x == dest.x && abs(src.y - dest.y) == 1) || (src.y == dest.y && abs(src.x - dest.x) == 1)) {
 		return Path{{dest}, -1, 0};
 	}
-	if (!maze[src.y][src.x] || !maze[dest.y][dest.x]) {
+	if (!maze[src.y][src.x] || !maze[dest.y][dest.x]) {// || isBlocked(dest) || isBlocked(src)) {
 		return Path{{}, -1, -1};
 	}
 	std::queue<Path> q;

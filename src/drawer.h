@@ -77,6 +77,10 @@ void drawHeavyLineRectangle(Coord coord, int width, int height, PikaRGB color = 
 	drawRectangle({"┏","━","┓","┃","┃","┗","━","┛"}, coord, width, height, color, bgColor);
 }
 
+void drawHeavyLineRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}) {
+	drawRoundCornerRectangle(coord, width, height, color, bgColor, {"┏","━","┓","┃","┃","┗","━","┛"});
+}
+
 void drawDoubleLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}) {
 	drawRectangle({"╔","═", "╗", "║", "║", "╚","═","╝"}, coord, width, height, color, bgColor);
 }
@@ -124,6 +128,22 @@ void drawAtPos(Coord coord, const string& s) {
 		coord.y++;
 	}
 	moveCursorToCoord({0, 0});
+}
+
+void drawTextAtPos(Coord coord, const string& s) {
+//	string foreground;
+//	if (fg.r != -1) {
+//		foreground = getFGAnsiCode(fg);
+//	}
+//	if (fg.r == -2) {
+//		foreground = ANSI_RESET_FOREGROUND;
+//	}
+//	string background;
+//	if (bg.r != -1) {
+//		background = getBGAnsiCode(bg);
+//	}
+	moveCursorToCoord(coord);
+	cout << s;
 }
 
 void drawAtPosTransparent(Coord coord, const string& s) {
@@ -182,4 +202,40 @@ void drawAnsiArt(AnsiArt& art, Coord coord, bool transparent = false) {
 //	if (art.sleepTime != 0) {
 //		Sleep(art.sleepTime);
 //	}
+}
+
+//Source: friendly neighbourhood!
+void readAnsiFile(const string& filePath, AnsiArt &art) {
+	ifstream ifs(filePath.c_str());
+	if (ifs.is_open()) {
+		int width = 0, height = 0;
+		ifs >> width;
+		ifs >> height;
+//		cout << width << " " << height << "\n";
+		ifs.ignore();
+		int nFrame = width*height/(8*4);
+		string frame;
+		while (nFrame --> 0 && !ifs.eof()) {
+			string line;
+			getline(ifs, line);
+			while (line != "@ANSI" && !line.empty() && !ifs.eof()) {
+				line += '\n';
+				frame += line;
+				getline(ifs, line);
+			}
+
+			if (!ifs.eof()) {
+				art.addFrame(frame);
+			}
+			frame = "";
+		}
+
+//		cout << art.getFramesAmount() << "\n";
+		ifs.close();
+	}
+
+//	cout << art.frames[0] << "\n";
+	// while (!art.isDone) {
+	//     cout << art.nextFrame() << "\n";
+	// }
 }

@@ -89,14 +89,22 @@ void consoleInit() {
 	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 	SetConsoleMode(hOut, dwMode);
 
+	// Resize the console font size to 16
+	// Ref: https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex
+	CONSOLE_FONT_INFOEX cfi;
+	cfi.cbSize = sizeof cfi;
+	GetCurrentConsoleFontEx(hOut, false,  &cfi);
+	cfi.dwFontSize = {0, 16};
+	SetCurrentConsoleFontEx(hOut, false, &cfi);
+
 	HWND hWnd = GetConsoleWindow();
 
 	ShowWindow(hWnd,SW_MAXIMIZE);
-//	system("mode con COLS=700");
-//	SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000); Full screen
+	//system("mode con COLS=700");
+	//SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000); Full screen
 
-//	disableConsoleResize(); //auto resize
-//	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
+	//disableConsoleResize(); //auto resize
+	//DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
 	disableConsoleMinimizeButton();
 
 	// Hide the cursor. The blinking one, not the mouse;
