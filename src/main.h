@@ -18,11 +18,15 @@
 using namespace std;
 
 #ifndef PIKACHUGAME_UTILS_H
+
 #include "utils.h"
+
 #endif
 
 #ifndef PIKACHUGAME_CONSOLE_H
+
 #include "console.h"
+
 #endif
 
 #ifndef PIKACHUGAME_CONSTANT_H
@@ -30,7 +34,9 @@ using namespace std;
 #endif
 
 #ifndef PIKACHUGAME_CONTROLLER_H
+
 #include "controller.h"
+
 #endif
 
 #ifndef PIKACHUGAME_COORD_H
@@ -38,11 +44,15 @@ using namespace std;
 #endif
 
 #ifndef PIKACHUGAME_DRAWER_H
+
 #include "drawer.h"
+
 #endif
 
 #ifndef PIKACHUGAME_BFS_H
+
 #include "bfs.h"
+
 #endif
 
 #ifndef PIKACHUGAME_BFS_H
@@ -50,7 +60,9 @@ using namespace std;
 #endif
 
 #ifndef PIKACHUGAME_AUDIO_H
+
 #include "audio.h"
+
 #endif
 
 void project_init();

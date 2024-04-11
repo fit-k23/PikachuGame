@@ -9,20 +9,21 @@
 const int LINE = 7;
 const int PILAR = 3;
 
-struct BoxPart{
-	const char* top_left;
-	const char* top_mid;
-	const char* top_right;
+struct BoxPart {
+	const char *top_left;
+	const char *top_mid;
+	const char *top_right;
 
-	const char* mid_left;
-	const char* mid_right;
+	const char *mid_left;
+	const char *mid_right;
 
-	const char* bot_left;
-	const char* bot_mid;
-	const char* bot_right;
+	const char *bot_left;
+	const char *bot_mid;
+	const char *bot_right;
 };
 
-void drawRectangle(const BoxPart& parts, Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}) {
+void drawRectangle(const BoxPart &parts, Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
+				   PikaRGB bgColor = {-1, -1, -1}) {
 	moveCursorToCoord(coord);
 	string bgColorCode;
 	string fgColorCode;
@@ -42,7 +43,8 @@ void drawRectangle(const BoxPart& parts, Coord coord, int width, int height, Pik
 
 	for (int i = 0; i < height / 2; i++) {
 		moveCursorToCoord({coord.x, coord.y + i + 1});
-		cout << ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_left << bgColorCode + string(width, ' ') + ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_right;
+		cout << ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_left
+			 << bgColorCode + string(width, ' ') + ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_right;
 	}
 	s = fgColorCode + parts.bot_left;
 	for (int i = 0; i < width; i++)
@@ -50,10 +52,11 @@ void drawRectangle(const BoxPart& parts, Coord coord, int width, int height, Pik
 	s += parts.bot_right;
 	moveCursorToCoord({coord.x, coord.y + height / 2 + 1});
 	cout << ANSI_RESET_BACKGROUND << s;
-	moveCursorToCoord({0,0}); //Resting coord
+	moveCursorToCoord({0, 0}); //Resting coord
 }
 
-void drawRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}, BoxPart part = {"╭","─","╮","│","│","╰","─","╯"}) {
+void drawRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
+							  PikaRGB bgColor = {-1, -1, -1}, BoxPart part = {"╭", "─", "╮", "│", "│", "╰", "─", "╯"}) {
 	part.top_left = "╭";
 	part.top_right = "╮";
 	part.bot_left = "╰";
@@ -69,23 +72,27 @@ void drawRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color 
 //	drawRectangle(part, coord, width, height, bgColor);
 //} Look bad
 
-void drawBoxyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}) {
-	drawRectangle({"▄","▄","▄","█","█","▀","▀","▀"}, coord, width, height, color, bgColor);
+void drawBoxyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
+						   PikaRGB bgColor = {-1, -1, -1}) {
+	drawRectangle({"▄", "▄", "▄", "█", "█", "▀", "▀", "▀"}, coord, width, height, color, bgColor);
 }
 
-void drawHeavyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}) {
-	drawRectangle({"┏","━","┓","┃","┃","┗","━","┛"}, coord, width, height, color, bgColor);
+void drawHeavyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
+							PikaRGB bgColor = {-1, -1, -1}) {
+	drawRectangle({"┏", "━", "┓", "┃", "┃", "┗", "━", "┛"}, coord, width, height, color, bgColor);
 }
 
-void drawHeavyLineRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}) {
-	drawRoundCornerRectangle(coord, width, height, color, bgColor, {"┏","━","┓","┃","┃","┗","━","┛"});
+void drawHeavyLineRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
+									   PikaRGB bgColor = {-1, -1, -1}) {
+	drawRoundCornerRectangle(coord, width, height, color, bgColor, {"┏", "━", "┓", "┃", "┃", "┗", "━", "┛"});
 }
 
-void drawDoubleLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}) {
-	drawRectangle({"╔","═", "╗", "║", "║", "╚","═","╝"}, coord, width, height, color, bgColor);
+void drawDoubleLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
+							 PikaRGB bgColor = {-1, -1, -1}) {
+	drawRectangle({"╔", "═", "╗", "║", "║", "╚", "═", "╝"}, coord, width, height, color, bgColor);
 }
 
-void drawDoubleLineHollowRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}) {
+void drawDoubleLineHollowRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}) {
 	moveCursorToCoord(coord);
 	string fgColorCode;
 	if (color.r != -1) {
@@ -111,14 +118,15 @@ void drawDoubleLineHollowRectangle(Coord coord, int width, int height, PikaRGB c
 	s += "╝";
 	cout << s;
 	moveCursorToCoord({coord.x, coord.y + height / 2 + 1});
-	moveCursorToCoord({0,0}); //Resting coord
+	moveCursorToCoord({0, 0}); //Resting coord
 }
 
-void drawThinLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1,-1,-1}, PikaRGB bgColor = {-1,-1,-1}) {
+void drawThinLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
+						   PikaRGB bgColor = {-1, -1, -1}) {
 	drawRectangle({"┌", "─", "┐", "│", "│", "└", "─", "┘"}, coord, width, height, color, bgColor);
 }
 
-void drawAtPos(Coord coord, const string& s) {
+void drawAtPos(Coord coord, const string &s) {
 	istringstream sstr(s);
 	string temp;
 	while (!sstr.eof()) {
@@ -130,7 +138,7 @@ void drawAtPos(Coord coord, const string& s) {
 	moveCursorToCoord({0, 0});
 }
 
-void drawTextAtPos(Coord coord, const string& s) {
+void drawTextAtPos(Coord coord, const string &s) {
 //	string foreground;
 //	if (fg.r != -1) {
 //		foreground = getFGAnsiCode(fg);
@@ -146,7 +154,7 @@ void drawTextAtPos(Coord coord, const string& s) {
 	cout << s;
 }
 
-void drawAtPosTransparent(Coord coord, const string& s) {
+void drawAtPosTransparent(Coord coord, const string &s) {
 	istringstream sstr(s);
 	string temp;
 	while (!sstr.eof()) {
@@ -163,14 +171,18 @@ void drawAtPosTransparent(Coord coord, const string& s) {
 	}
 }
 
-struct AnsiArt{
+struct AnsiArt {
 	vector<string> frames;
 	unsigned long long sleepTime = 10; //in ms
 	bool loop = false;
 	bool isDone = false;
+
 	int getFramesAmount() const;
+
 	int currentFrame = 0;
-	void addFrame(const string& frame);
+
+	void addFrame(const string &frame);
+
 	string nextFrame();
 };
 
@@ -178,7 +190,7 @@ int AnsiArt::getFramesAmount() const {
 	return frames.size(); // NOLINT(*-narrowing-conversions)
 }
 
-void AnsiArt::addFrame(const string& frame) {
+void AnsiArt::addFrame(const string &frame) {
 	frames.push_back(frame);
 }
 
@@ -195,7 +207,7 @@ string AnsiArt::nextFrame() {
 	return frames[currentFrame];
 }
 
-void drawAnsiArt(AnsiArt& art, Coord coord, bool transparent = false) {
+void drawAnsiArt(AnsiArt &art, Coord coord, bool transparent = false) {
 	if (art.isDone) return;
 	if (!transparent) drawAtPos(coord, art.nextFrame());
 	else drawAtPosTransparent(coord, art.nextFrame());
@@ -205,7 +217,7 @@ void drawAnsiArt(AnsiArt& art, Coord coord, bool transparent = false) {
 }
 
 //Source: friendly neighbourhood!
-void readAnsiFile(const string& filePath, AnsiArt &art) {
+void readAnsiFile(const string &filePath, AnsiArt &art) {
 	ifstream ifs(filePath.c_str());
 	if (ifs.is_open()) {
 		int width = 0, height = 0;
@@ -213,9 +225,9 @@ void readAnsiFile(const string& filePath, AnsiArt &art) {
 		ifs >> height;
 //		cout << width << " " << height << "\n";
 		ifs.ignore();
-		int nFrame = width*height/(8*4);
+		int nFrame = width * height / (8 * 4);
 		string frame;
-		while (nFrame --> 0 && !ifs.eof()) {
+		while (nFrame-- > 0 && !ifs.eof()) {
 			string line;
 			getline(ifs, line);
 			while (line != "@ANSI" && !line.empty() && !ifs.eof()) {

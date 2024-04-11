@@ -1,14 +1,18 @@
 #ifndef PIKACHUGAME_UTILS_H
 #define PIKACHUGAME_UTILS_H
-#endif
 
 #include <filesystem>
+#include <string>
+#include <fstream>
+
+using namespace std;
+#endif
 
 // Repeat a string multi times, Eg: str_repeat("a",3) -> "aaa"
 // Name suggested by PHP >:)! PHP RULE!11!
 string str_repeat(string s, int n) {
 	string s1 = s;
-	for (int i=1; i<n;i++) s += s1;
+	for (int i = 1; i < n; i++) s += s1;
 	return s;
 }
 
@@ -36,7 +40,7 @@ char getRandomCharInRange(int range_a = 65, int range_b = 90) {
 	return (char) getRandomIntInRange(range_a, range_b);
 }
 
-struct PikaRGB{
+struct PikaRGB {
 	int r;
 	int g;
 	int b;
@@ -72,6 +76,6 @@ string getFGAnsiCode(PikaRGB rgb) {
 	return getFGAnsiCode(rgb.r, rgb.g, rgb.b);
 }
 
-bool dirExist(const char* dirPath) {
+bool dirExist(const char *dirPath) {
 	return filesystem::is_directory(dirPath);
 }

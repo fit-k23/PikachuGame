@@ -35,48 +35,48 @@ AnsiArt bgAnsi;
 //https://colorhunt.co/palette/070f2b1b1a55535c919290c3
 
 PikaRGB color[12] = {
-	{53, 55, 75}, //#35374B
-	{52, 73, 85}, //#344955
-	{80, 114, 123}, //#50727B
-	{120, 160, 131}, //#78A083
-	{179, 200, 207}, //#B3C8CF
-	{190, 215, 220}, //#BED7DC
-	{241, 238, 220}, //#F1EEDC
-	{229, 221, 197}, //#E5DDC5
-	{7, 15, 43}, //#070F2B
-	{27, 26, 85}, //#1B1A55
-	{83, 92, 145}, //#535C91
-	{146, 144, 195} //#9290C3
+		{53,  55,  75}, //#35374B
+		{52,  73,  85}, //#344955
+		{80,  114, 123}, //#50727B
+		{120, 160, 131}, //#78A083
+		{179, 200, 207}, //#B3C8CF
+		{190, 215, 220}, //#BED7DC
+		{241, 238, 220}, //#F1EEDC
+		{229, 221, 197}, //#E5DDC5
+		{7,   15,  43}, //#070F2B
+		{27,  26,  85}, //#1B1A55
+		{83,  92,  145}, //#535C91
+		{146, 144, 195} //#9290C3
 };
 
 string bgAn[12] = {
-	getBGAnsiCode(color[0]),
-	getBGAnsiCode(color[1]),
-	getBGAnsiCode(color[2]),
-	getBGAnsiCode(color[3]),
-	getBGAnsiCode(color[4]),
-	getBGAnsiCode(color[5]),
-	getBGAnsiCode(color[6]),
-	getBGAnsiCode(color[7]),
-	getBGAnsiCode(color[8]),
-	getBGAnsiCode(color[9]),
-	getBGAnsiCode(color[10]),
-	getBGAnsiCode(color[11])
+		getBGAnsiCode(color[0]),
+		getBGAnsiCode(color[1]),
+		getBGAnsiCode(color[2]),
+		getBGAnsiCode(color[3]),
+		getBGAnsiCode(color[4]),
+		getBGAnsiCode(color[5]),
+		getBGAnsiCode(color[6]),
+		getBGAnsiCode(color[7]),
+		getBGAnsiCode(color[8]),
+		getBGAnsiCode(color[9]),
+		getBGAnsiCode(color[10]),
+		getBGAnsiCode(color[11])
 };
 
 string fgAn[12] = {
-	getFGAnsiCode(getSuitAbleFGColor(color[0])),
-	getFGAnsiCode(getSuitAbleFGColor(color[1])),
-	getFGAnsiCode(getSuitAbleFGColor(color[2])),
-	getFGAnsiCode(getSuitAbleFGColor(color[3])),
-	getFGAnsiCode(getSuitAbleFGColor(color[4])),
-	getFGAnsiCode(getSuitAbleFGColor(color[5])),
-	getFGAnsiCode(getSuitAbleFGColor(color[6])),
-	getFGAnsiCode(getSuitAbleFGColor(color[7])),
-	getFGAnsiCode(getSuitAbleFGColor(color[8])),
-	getFGAnsiCode(getSuitAbleFGColor(color[9])),
-	getFGAnsiCode(getSuitAbleFGColor(color[10])),
-	getFGAnsiCode(getSuitAbleFGColor(color[11]))
+		getFGAnsiCode(getSuitAbleFGColor(color[0])),
+		getFGAnsiCode(getSuitAbleFGColor(color[1])),
+		getFGAnsiCode(getSuitAbleFGColor(color[2])),
+		getFGAnsiCode(getSuitAbleFGColor(color[3])),
+		getFGAnsiCode(getSuitAbleFGColor(color[4])),
+		getFGAnsiCode(getSuitAbleFGColor(color[5])),
+		getFGAnsiCode(getSuitAbleFGColor(color[6])),
+		getFGAnsiCode(getSuitAbleFGColor(color[7])),
+		getFGAnsiCode(getSuitAbleFGColor(color[8])),
+		getFGAnsiCode(getSuitAbleFGColor(color[9])),
+		getFGAnsiCode(getSuitAbleFGColor(color[10])),
+		getFGAnsiCode(getSuitAbleFGColor(color[11]))
 };
 
 void drawCursor() {
@@ -106,7 +106,8 @@ void drawSelect(Coord coord) {
 }
 
 void drawBackgroundBox(Coord coord) {
-	drawAtPos({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 1}, bgAnsi.frames[1 + (coord.y) * MAZE_COL + coord.x]);
+	drawAtPos({BOARD_START_X + (1 + LINE) * coord.x + 1, BOARD_START_Y + (1 + PILAR) * coord.y + 1},
+			  bgAnsi.frames[1 + (coord.y) * MAZE_COL + coord.x]);
 }
 
 void drawBox(int i, int j) {
@@ -119,7 +120,8 @@ void drawBox(int i, int j) {
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 2});
 //	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1 + LINE / 2, BOARD_START_Y + (1 + PILAR) * i + 2});
 //	cout << boxes[i - PADDING][j - PADDING].alphabet;
-	cout << bg << string(LINE / 2, ' ') << fg << boxes[i - PADDING][j - PADDING].alphabet << string((LINE - 1) / 2, ' ') << ANSI_RESET_BACKGROUND;
+	cout << bg << string(LINE / 2, ' ') << fg << boxes[i - PADDING][j - PADDING].alphabet << string((LINE - 1) / 2, ' ')
+		 << ANSI_RESET_BACKGROUND;
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 3});
 	cout << bg << "       " << ANSI_RESET_BACKGROUND;
 }
@@ -127,7 +129,7 @@ void drawBox(int i, int j) {
 void draw() {
 	for (int i = 0; i < MAZE_ROW; i++) {
 		for (int j = 0; j < MAZE_COL; j++) {
-			if (selector.c1.isEqual({j,i}) || selector.c2.isEqual({j,i})) {
+			if (selector.c1.isEqual({j, i}) || selector.c2.isEqual({j, i})) {
 				drawSelect({j, i});
 			} else if (!maze[i][j]) {
 				drawBox(i, j);
@@ -214,12 +216,12 @@ Coord findMatch(Coord src) {
 			}
 			maze[src.y + PADDING][src.x + PADDING] = true;
 			maze[m + PADDING][n + PADDING] = true;
-			Path p = findPath({src.y + PADDING, src.x + PADDING}, {n + PADDING,m + PADDING});
+			Path p = findPath({src.y + PADDING, src.x + PADDING}, {n + PADDING, m + PADDING});
 			if (p.turns != -1) {
 				if (p.turns > 2) {
 					system("start cmd.exe /k echo Hey1");
 				}
-				return {n + PADDING,m + PADDING};
+				return {n + PADDING, m + PADDING};
 			} else {
 				maze[src.y + PADDING][src.x + PADDING] = false;
 				maze[m + PADDING][n + PADDING] = false;
@@ -245,9 +247,10 @@ Selector help() {
 					}
 					maze[i + PADDING][j + PADDING] = true;
 					maze[m + PADDING][n + PADDING] = true;
-					Path p = findPath({j + PADDING,i + PADDING}, {n + PADDING,m + PADDING});
+					Path p = findPath({j + PADDING, i + PADDING}, {n + PADDING, m + PADDING});
 					if (p.turns != -1) {
-						return Selector{{j + PADDING,i + PADDING}, {n + PADDING,m + PADDING}};
+						return Selector{{j + PADDING, i + PADDING},
+										{n + PADDING, m + PADDING}};
 					}
 					maze[i + PADDING][j + PADDING] = false;
 					maze[m + PADDING][n + PADDING] = false;
@@ -255,7 +258,8 @@ Selector help() {
 			}
 		}
 	}
-	return {{-1,-1},{-1,-1}};
+	return {{-1, -1},
+			{-1, -1}};
 }
 
 //Help is broken
@@ -272,7 +276,8 @@ Selector help2() {
 			}
 		}
 	}
-	return {{-1,-1},{-1,-1}};
+	return {{-1, -1},
+			{-1, -1}};
 }
 
 auto musicEngine = AudioEngine();
@@ -281,7 +286,8 @@ auto soundEngine = AudioEngine();
 int score = 0;
 
 void match() {
-	if (boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].alphabet == boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].alphabet) {
+	if (boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].alphabet ==
+		boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].alphabet) {
 		maze[selector.c1.y][selector.c1.x] = true;
 		maze[selector.c2.y][selector.c2.x] = true;
 		Path p = findPath(selector.c1, selector.c2);
@@ -306,97 +312,136 @@ void match() {
 					t++;
 				}
 				coords.push_back(start);
-				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1});
+				moveCursorToCoord(
+						{BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1});
 				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2});
+				moveCursorToCoord(
+						{BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2});
 				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3});
+				moveCursorToCoord(
+						{BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3});
 				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 				Sleep(10);
 			}
 			Sleep(20);
 			draw();
-			for (auto & cods : coords) {
+			for (auto &cods: coords) {
 				switch (rand() % 37) {
 					case 0:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << ANSI_RESET_BACKGROUND;
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :D   " << ANSI_RESET_BACKGROUND;
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << ANSI_RESET_BACKGROUND;
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       "
+							 << ANSI_RESET_BACKGROUND;
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :D   "
+							 << ANSI_RESET_BACKGROUND;
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       "
+							 << ANSI_RESET_BACKGROUND;
 						break;
 					case 1:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :>   " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						break;
 					case 2:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :O   " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						break;
 					case 3:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♥   " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						break;
 					case 4:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ★   " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						break;
 					case 5:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ☆   " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						break;
 					case 6:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♫   " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						break;
 					case 7:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ⛛   " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						break;
 					case 8:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♜   " << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
 						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
 						break;
 					default:
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
-						moveCursorToCoord({BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ') << "\033[049m";
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ')
+							 << "\033[049m";
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ')
+							 << "\033[049m";
+						moveCursorToCoord(
+								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
+						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ')
+							 << "\033[049m";
 				}
 			}
 
@@ -422,15 +467,15 @@ bool FLAG_RUNNING = true;
 
 void project_init() {
 	if (!dirExist(ASSET_RELATIVE_PATH)) {
-		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of asset files!\n" << ANSI_RESET;
+		cout << getFGAnsiCode(244, 12, 21) << "Failed to init project! Project is lack of asset files!\n" << ANSI_RESET;
 		return;
 	}
 	if (!dirExist(MUSIC_RELATIVE_PATH)) {
-		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of music files!\n" << ANSI_RESET;
+		cout << getFGAnsiCode(244, 12, 21) << "Failed to init project! Project is lack of music files!\n" << ANSI_RESET;
 		return;
 	}
 	if (!dirExist(SOUND_RELATIVE_PATH)) {
-		cout << getFGAnsiCode(244, 12,21) << "Failed to init project! Project is lack of sound files!\n" << ANSI_RESET;
+		cout << getFGAnsiCode(244, 12, 21) << "Failed to init project! Project is lack of sound files!\n" << ANSI_RESET;
 		return;
 	}
 	musicEngine.init();
@@ -438,7 +483,8 @@ void project_init() {
 
 	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Littleroot Town.mp3");
 	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Soaring The Sky (Night).mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "AZALI - theme of a shop that sells things you dont want.mp3");
+	musicEngine.addSoundFromFile(
+			string(MUSIC_RELATIVE_PATH) + "AZALI - theme of a shop that sells things you dont want.mp3");
 	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Bitzel - Silly tune.mp3");
 	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "is it good enough to be called elevator music.mp3");
 	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "The 4 Corners - Phantom Funk.mp3");
@@ -463,7 +509,7 @@ void project_init() {
 	BOARD_START_Y = PILAR + 1;
 	SCORE_BOARD_X = (SCREEN_WIDTH / 2) + 20;
 	SCORE_BOARD_Y = 20;//(BOARD_START_Y + (PILAR + 1) * MAZE_ROW * 2) - 30 / 2;
-	SCORE_BOARD_Y = (BOARD_START_Y + (PILAR + 1) * MAZE_ROW) - 30/ 2;
+	SCORE_BOARD_Y = (BOARD_START_Y + (PILAR + 1) * MAZE_ROW) - 30 / 2;
 
 //	std::thread musicThread(playLoop, &musicEngine);
 //	musicThread.detach();
@@ -474,7 +520,7 @@ void project_cleanup() {
 	system("pause");
 }
 
-void drawScoreBoard(){
+void drawScoreBoard() {
 	drawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 2}, "Score: " + to_string(score));
 };
 
@@ -496,8 +542,9 @@ int main() {
 	int input;
 	while (FLAG_RUNNING) {
 		if (remainPair == 0) {
-			drawBoxyLineRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2, {255, 255,0});
-			drawAtPos({BOARD_START_X + 1,BOARD_START_Y + 1}, bgAnsi.frames[0]);
+			drawBoxyLineRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2,
+								  {255, 255, 0});
+			drawAtPos({BOARD_START_X + 1, BOARD_START_Y + 1}, bgAnsi.frames[0]);
 			break;
 		}
 		drawScoreBoard();
@@ -506,7 +553,7 @@ int main() {
 			input = getch();
 			ma_sound_start(&soundEngine.sounds[3]);
 			draw();
-			switch(input) {
+			switch (input) {
 				case CTR_ARROW_UP:
 					for (int m = cursor.y - 1; m > 0; m--) {
 						if (boxes[m - PADDING][cursor.x - PADDING].invisible) continue;
@@ -582,7 +629,7 @@ int main() {
 					if (selector.c1.x == -1 && !cursor.isEqual(selector.c2)) {
 						selector.c1 = cursor;
 					} else if (cursor.isEqual(selector.c1)) {
-						selector.c1 = {-1,-1};
+						selector.c1 = {-1, -1};
 					} else if (selector.c2.x == -1) {
 						selector.c2 = cursor;
 					} else if (cursor.isEqual(selector.c2)) {

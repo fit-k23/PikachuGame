@@ -7,7 +7,9 @@
 #endif
 
 #ifndef PIKACHUGAME_BOARD_H
+
 #include "board.h"
+
 #endif
 
 #include <cmath>
@@ -16,6 +18,7 @@
 struct Selector {
 	Coord c1;
 	Coord c2;
+
 	void reset();
 };
 
@@ -24,7 +27,8 @@ void Selector::reset() {
 	c2 = {-1, -1};
 }
 
-Selector selector{{-1, -1}, {-1, -1}};
+Selector selector{{-1, -1},
+				  {-1, -1}};
 
 // Arrays to represent change in rows and columns
 // DOWN, LEFT, RIGHT, UP
@@ -35,7 +39,7 @@ Selector selector{{-1, -1}, {-1, -1}};
 const int dr[4] = {1, 0, 0, -1};
 const int dc[4] = {0, -1, 1, 0};
 
-struct Path{
+struct Path {
 	Coord corners[4];
 	int direction;
 	int turns = 0;

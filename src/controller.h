@@ -28,7 +28,7 @@ const int CTR_ENTER_KEY = 10;
 const int PRE_KEY_1 = 0;
 const int PRE_KEY_2 = 224;
 
-void loginKeyboardController(char* userName, char* userPass, bool* inputPass, bool* entered) {
+void loginKeyboardController(char *userName, char *userPass, bool *inputPass, bool *entered) {
 	int input = 0;
 	while (!*entered) {
 		input = getch();
@@ -63,14 +63,16 @@ void loginKeyboardController(char* userName, char* userPass, bool* inputPass, bo
 				}
 			} else {
 				if (!*inputPass) {
-					if ((input >= 'A' && input <= 'Z') || (input >= 'a' && input <= 'z') || (input >= '0' && input <= '9')) {
+					if ((input >= 'A' && input <= 'Z') || (input >= 'a' && input <= 'z') ||
+						(input >= '0' && input <= '9')) {
 						int len = strlen(userName);
 						if (len == CHAR_USER_NAME_SIZE - 1) continue;
 						userName[len] = input;
 						userName[len + 1] = '\0';
 					}
 				} else {
-					if ((input >= 'A' && input <= 'Z') || (input >= 'a' && input <= 'z') || (input >= '0' && input <= '9') || input == '!') {
+					if ((input >= 'A' && input <= 'Z') || (input >= 'a' && input <= 'z') ||
+						(input >= '0' && input <= '9') || input == '!') {
 						int len = strlen(userPass);
 						if (len == CHAR_USER_PASS_SIZE - 1) continue;
 						userPass[len] = input;

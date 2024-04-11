@@ -1,7 +1,9 @@
 #ifndef PIKACHUGAME_BOARD_H
 #define PIKACHUGAME_BOARD_H
+
 #include <algorithm>
 #include <random>
+
 #endif
 
 #ifndef PIKACHUGAME_COORD_H
@@ -26,20 +28,20 @@ struct Box {
 
 Coord cursor = {PADDING, PADDING};
 
-Box** boxes;
-bool** maze;
+Box **boxes;
+bool **maze;
 
 static int remainPair;
 
 void initBoard() {
-	boxes = new Box*[ROW];
+	boxes = new Box *[ROW];
 	for (int i = 0; i < ROW; i++) boxes[i] = new Box[COL];
 
-	maze = new bool*[MAZE_ROW];
+	maze = new bool *[MAZE_ROW];
 	for (int i = 0; i < MAZE_ROW; i++) {
 		maze[i] = new bool[MAZE_COL];
 		for (int j = 0; j < MAZE_COL; j++) {
-			if (i == 0 || i == MAZE_ROW - 1 || j == 0 || j == MAZE_COL -1) {
+			if (i == 0 || i == MAZE_ROW - 1 || j == 0 || j == MAZE_COL - 1) {
 				maze[i][j] = true;
 			} else {
 				maze[i][j] = boxes[i - PADDING][j - PADDING].invisible;
@@ -67,14 +69,15 @@ void generateShuffledBoard() {
 	int cnt[7] = {};
 	int total = ROW * COL;
 	int len = total;
-	while (total > 0) for (int i = 0; i < 7; i++) {
-		if (total <= 0) break;
-		int num = 2 * getRandomCharInRange(0, 3);
-		if (total >= num) {
-			cnt[i] += num;
-			total -= num;
+	while (total > 0)
+		for (int i = 0; i < 7; i++) {
+			if (total <= 0) break;
+			int num = 2 * getRandomCharInRange(0, 3);
+			if (total >= num) {
+				cnt[i] += num;
+				total -= num;
+			}
 		}
-	}
 
 	int count = 0;
 	while (count < len) {
@@ -87,7 +90,7 @@ void generateShuffledBoard() {
 				if (count == len) {
 					break;
 				}
-				boxes[count / COL][count % COL].alphabet = (char)(i + 'A');
+				boxes[count / COL][count % COL].alphabet = (char) (i + 'A');
 				cnt[i]--;
 				count++;
 			}

@@ -3,14 +3,19 @@
 #endif
 
 #ifndef PIKACHUGAME_CONSTANT_H
+
 #include "constant.h"
+
 #endif
 
-struct Coord{
+struct Coord {
 	int x = -1;
 	int y = -1;
+
 	bool isEqual(Coord c);
+
 	Coord add(Coord c);
+
 	Coord add(int dx, int dy);
 };
 

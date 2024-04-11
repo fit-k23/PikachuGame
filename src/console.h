@@ -1,8 +1,16 @@
+#ifndef PIKACHUGAME_CONSOLE_H
+#define PIKACHUGAME_CONSOLE_H
+
 #include <windows.h>
 #include <iostream>
 
-#ifndef PIKACHUGAME_CONSOLE_H
-#define PIKACHUGAME_CONSOLE_H
+#endif
+
+#ifndef PIKA_HAS_COORD_HEADER
+
+#include "coord.h"
+
+#define PIKA_HAS_COORD_HEADER
 #endif
 
 int SCREEN_WIDTH = 0;
@@ -49,7 +57,7 @@ void clrScr() {
 	// This generally only has to be done once, so we make it static.
 	static const auto hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	COORD topLeft = { 0, 0 };
+	COORD topLeft = {0, 0};
 
 	// std::cout uses a buffer to batch writes to the underlying console.
 	// We need to flush that to the console because we're circumventing
@@ -93,13 +101,13 @@ void consoleInit() {
 	// Ref: https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex
 	CONSOLE_FONT_INFOEX cfi;
 	cfi.cbSize = sizeof cfi;
-	GetCurrentConsoleFontEx(hOut, false,  &cfi);
+	GetCurrentConsoleFontEx(hOut, false, &cfi);
 	cfi.dwFontSize = {0, 16};
 	SetCurrentConsoleFontEx(hOut, false, &cfi);
 
 	HWND hWnd = GetConsoleWindow();
 
-	ShowWindow(hWnd,SW_MAXIMIZE);
+	ShowWindow(hWnd, SW_MAXIMIZE);
 	//system("mode con COLS=700");
 	//SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000); Full screen
 
@@ -114,16 +122,11 @@ void consoleInit() {
 	SetConsoleCursorInfo(hOut, &cursorInfo);
 
 	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
-	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 	syncScrSize();
 	ShowScrollBar(hWnd, SB_BOTH, false);
 //	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
 }
-
-#ifndef PIKA_HAS_COORD_HEADER
-#include "coord.h"
-#define PIKA_HAS_COORD_HEADER
-#endif
 
 void moveCursorToCoord(Coord coord) {
 	if (coord.x > SCREEN_WIDTH || coord.y > SCREEN_HEIGHT) return;
