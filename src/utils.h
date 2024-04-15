@@ -76,11 +76,11 @@ string getFGAnsiCode(PikaRGB rgb) {
 	return getFGAnsiCode(rgb.r, rgb.g, rgb.b);
 }
 
-bool dirExist(const string &dirPath) {
+bool dirExist(const char *dirPath) {
 	return filesystem::is_directory(dirPath);
 }
 
 // https://stackoverflow.com/a/24750132/24078702
-bool fileExist(const string &filePath) {
+bool fileExist(const char *filePath) {
 	return filesystem::exists(filePath);
 }

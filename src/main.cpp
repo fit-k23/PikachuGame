@@ -471,6 +471,10 @@ void match() {
 bool FLAG_RUNNING = true;
 
 void project_init() {
+	SetConsoleTitleW(L"Pikachu - Matching Game 💀 （╯°□°）╯︵◓");
+	consoleInit();
+
+
 	if (!dirExist(ASSET_RELATIVE_PATH)) {
 		cout << getFGAnsiCode(244, 12, 21) << "Failed to init project! Project is lack of asset files!\n" << ANSI_RESET;
 		return;
@@ -511,9 +515,8 @@ void project_init() {
 	gameSound->addSoundFromFilePath(soundEngine.engine, string(SOUND_RELATIVE_PATH) + "select.wav", true);
 	gameSound->addSoundFromFilePath(soundEngine.engine, string(SOUND_RELATIVE_PATH) + "wrong.wav", true);
 	soundEngine.album = gameSound;
+	cout << gameSound->size << "\n";
 
-	SetConsoleTitleW(L"Pikachu - Matching Game 💀 （╯°□°）╯︵◓");
-	consoleInit();
 
 	setBoardSize(8, 10);
 //	setBoardSize(4, 5);
@@ -542,6 +545,9 @@ void drawScoreBoard() {
 int main() {
 	project_init();
 	readAnsiFile(string(ASSET_RELATIVE_PATH) + "pikachu_large.txt", bgAnsi);
+	playEngine(&soundEngine);
+	system("pause");
+	return 0;
 
 	SHORT i = 1000;
 	while (i-- > 0) {

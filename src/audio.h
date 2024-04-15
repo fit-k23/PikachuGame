@@ -60,7 +60,7 @@ bool SoundAlbum::isEmpty() const {
 }
 
 void SoundAlbum::shuffleSound() {
-	if (size == 0) return;
+	if (size < 1) return;
 	shuffle(sounds, sounds + size, std::mt19937(std::random_device()())); //Random shuffle algo
 }
 
@@ -69,7 +69,7 @@ bool SoundAlbum::addSoundFromFilePath(ma_engine &engine, const string &filePath,
 		return false;
 	}
 	if (!preLoad) {
-		if (fileExist(filePath)) {
+		if (fileExist(filePath.c_str())) {
 			sounds[size++].filePath = filePath;
 			return true;
 		}
