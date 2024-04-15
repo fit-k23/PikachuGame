@@ -113,7 +113,7 @@ void consoleInit() {
 
 	//disableConsoleResize(); //auto resize
 	//DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
-	disableConsoleMinimizeButton();
+//	disableConsoleMinimizeButton();
 
 	// Hide the cursor. The blinking one, not the mouse;
 	CONSOLE_CURSOR_INFO cursorInfo;
@@ -121,8 +121,8 @@ void consoleInit() {
 	cursorInfo.bVisible = false; // set the cursor visibility
 	SetConsoleCursorInfo(hOut, &cursorInfo);
 
-	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
-	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+//	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
+//	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 	syncScrSize();
 	ShowScrollBar(hWnd, SB_BOTH, false);
 //	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);

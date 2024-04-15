@@ -17,3 +17,6 @@ static const int CHAR_USER_PASS_SIZE = 21;
 static const char *ASSET_RELATIVE_PATH = "asset/";
 static const char *SOUND_RELATIVE_PATH = "asset/sound/";
 static const char *MUSIC_RELATIVE_PATH = "asset/music/";
+
+#define ASSET_PATH "adasjd"
+#define ASSET_PATH2 (ASSET_PATH "JHASKAJHD")

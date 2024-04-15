@@ -8,7 +8,7 @@
 
 #endif
 
-struct Coord {
+struct Coord{
 	int x = -1;
 	int y = -1;
 

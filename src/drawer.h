@@ -9,7 +9,7 @@
 const int LINE = 7;
 const int PILAR = 3;
 
-struct BoxPart {
+struct BoxPart{
 	const char *top_left;
 	const char *top_mid;
 	const char *top_right;
@@ -171,7 +171,7 @@ void drawAtPosTransparent(Coord coord, const string &s) {
 	}
 }
 
-struct AnsiArt {
+struct AnsiArt{
 	vector<string> frames;
 	unsigned long long sleepTime = 10; //in ms
 	bool loop = false;

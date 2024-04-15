@@ -283,6 +283,9 @@ Selector help2() {
 auto musicEngine = AudioEngine();
 auto soundEngine = AudioEngine();
 
+auto menuMusic = SoundAlbum();
+auto gameMusic = SoundAlbum();
+
 int score = 0;
 
 void match() {
@@ -448,15 +451,17 @@ void match() {
 			Sleep(100);
 			boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].invisible = true;
 			boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].invisible = true;
-			ma_sound_start(&soundEngine.sounds[2]);
+			ma_sound_start(soundEngine.album->sounds[2].sound);
 			score += (p.turns + 1) * coords.size();
 			remainPair--;
 		} else {
 			Sleep(50);
 			maze[selector.c1.y][selector.c1.x] = false;
 			maze[selector.c2.y][selector.c2.x] = false;
-			ma_sound_start(&soundEngine.sounds[5]);
+			ma_sound_start(soundEngine.album->sounds[5].sound);
 		}
+	} else {
+		ma_sound_start(soundEngine.album->sounds[5].sound);
 	}
 	selector.reset();
 	draw();
@@ -478,26 +483,34 @@ void project_init() {
 		cout << getFGAnsiCode(244, 12, 21) << "Failed to init project! Project is lack of sound files!\n" << ANSI_RESET;
 		return;
 	}
+
 	musicEngine.init();
 	soundEngine.init();
 
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Littleroot Town.mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Soaring The Sky (Night).mp3");
-	musicEngine.addSoundFromFile(
-			string(MUSIC_RELATIVE_PATH) + "AZALI - theme of a shop that sells things you dont want.mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Bitzel - Silly tune.mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "is it good enough to be called elevator music.mp3");
-	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "The 4 Corners - Phantom Funk.mp3");
-	musicEngine.loop = true;
-	musicEngine.volume = 1.0;
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Littleroot Town.mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Soaring The Sky (Night).mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "AZALI - theme of a shop that sells things you dont want.mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Bitzel - Silly tune.mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "is it good enough to be called elevator music.mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "The 4 Corners - Phantom Funk.mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "[strawberry jams vol. 4] catapillie - Starfruit Supernova (Pillars of Creation Mix).mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "maidens grove (day).mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Sonic Colors - ＂Planet Wisp＂ Night Version.mp3");
+//	musicEngine.addSoundFromFile(string(MUSIC_RELATIVE_PATH) + "Touhou 3 - Music #17 - 永遠の満月 ~ Eternal Full Moon.mp3");
 
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "button_confirm.mp3");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "button_tap.mp3");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "correct.wav");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "cursor.wav");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "select.wav");
-	soundEngine.addSoundFromFile(string(SOUND_RELATIVE_PATH) + "wrong.wav");
-	soundEngine.volume = 1.0;
+//	musicEngine.loop = true;
+//	musicEngine.setVolume(0.4);
+//	musicEngine.shuffleSound();
+
+	auto gameSound = new SoundAlbum();
+	gameSound->addSoundFromFilePath(soundEngine.engine, string(SOUND_RELATIVE_PATH) + "button_confirm.mp3", true);
+	gameSound->addSoundFromFilePath(soundEngine.engine, string(SOUND_RELATIVE_PATH) + "button_tap.mp3", true);
+	gameSound->addSoundFromFilePath(soundEngine.engine, string(SOUND_RELATIVE_PATH) + "correct.wav", true);
+	ma_sound_set_volume(gameSound->sounds[2].sound, 0.5); // reduce the volume by half
+	gameSound->addSoundFromFilePath(soundEngine.engine, string(SOUND_RELATIVE_PATH) + "cursor.wav", true);
+	gameSound->addSoundFromFilePath(soundEngine.engine, string(SOUND_RELATIVE_PATH) + "select.wav", true);
+	gameSound->addSoundFromFilePath(soundEngine.engine, string(SOUND_RELATIVE_PATH) + "wrong.wav", true);
+	soundEngine.album = gameSound;
 
 	SetConsoleTitleW(L"Pikachu - Matching Game 💀 （╯°□°）╯︵◓");
 	consoleInit();
@@ -517,6 +530,8 @@ void project_init() {
 
 void project_cleanup() {
 	uninitBoard();
+	musicEngine.uninit();
+	soundEngine.uninit();
 	system("pause");
 }
 
@@ -551,7 +566,7 @@ int main() {
 		input = getch();
 		if (input == PRE_KEY_1 || input == PRE_KEY_2) {
 			input = getch();
-			ma_sound_start(&soundEngine.sounds[3]);
+			ma_sound_start(soundEngine.album->sounds[3].sound);
 			draw();
 			switch (input) {
 				case CTR_ARROW_UP:
@@ -619,7 +634,7 @@ int main() {
 			switch (input) {
 				case CTR_ENTER_KEY:
 				case ENTER_KEY:
-					ma_sound_start(&soundEngine.sounds[4]);
+					ma_sound_start(soundEngine.album->sounds[4].sound);
 					if (maze[cursor.y][cursor.x]) {
 						selector.reset();
 						draw();
@@ -644,20 +659,25 @@ int main() {
 					selector.reset();
 					draw();
 					break;
+				case 'n':
+					musicEngine.FLAG_PLAY_NEXT_SOUND = true;
+					break;
 				case 'h': {
 					auto suggest = help();
 					if (suggest.c1.x != -1) {
 						drawSelect(suggest.c1);
 						drawSelect(suggest.c2);
-						Sleep(1000);
+//						Sleep(1000);
 						selector = suggest;
 						draw();
 						match();
 						drawCursor();
 					}
+					score -= 10;
 					break;
 				}
 				case ESC_KEY: {
+					musicEngine.isPlaying = false;
 					FLAG_RUNNING = false;
 					break;
 				}

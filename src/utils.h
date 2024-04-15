@@ -40,7 +40,7 @@ char getRandomCharInRange(int range_a = 65, int range_b = 90) {
 	return (char) getRandomIntInRange(range_a, range_b);
 }
 
-struct PikaRGB {
+struct PikaRGB{
 	int r;
 	int g;
 	int b;
@@ -76,6 +76,11 @@ string getFGAnsiCode(PikaRGB rgb) {
 	return getFGAnsiCode(rgb.r, rgb.g, rgb.b);
 }
 
-bool dirExist(const char *dirPath) {
+bool dirExist(const string &dirPath) {
 	return filesystem::is_directory(dirPath);
+}
+
+// https://stackoverflow.com/a/24750132/24078702
+bool fileExist(const string &filePath) {
+	return filesystem::exists(filePath);
 }

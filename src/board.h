@@ -20,7 +20,7 @@ const int PADDING = 1;
 int MAZE_ROW;
 int MAZE_COL;
 
-struct Box {
+struct Box{
 	char alphabet = ' ';
 	bool invisible = false;
 	int color = 0;

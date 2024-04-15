@@ -14,8 +14,7 @@ add_executable(${PROJECT_NAME} src/main.cpp src/main.h src/utils.h src/console.h
     src/bfs.h
     src/board.h
     src/audio.h
-    src/audio.h
-        src/audio.h)
+)
 
 add_custom_command(
     TARGET ${PROJECT_NAME}

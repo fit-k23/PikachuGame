@@ -15,7 +15,7 @@
 #include <cmath>
 #include <queue>
 
-struct Selector {
+struct Selector{
 	Coord c1;
 	Coord c2;
 
@@ -39,7 +39,7 @@ Selector selector{{-1, -1},
 const int dr[4] = {1, 0, 0, -1};
 const int dc[4] = {0, -1, 1, 0};
 
-struct Path {
+struct Path{
 	Coord corners[4];
 	int direction;
 	int turns = 0;
