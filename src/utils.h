@@ -31,7 +31,8 @@ string getFileContent(const string &fileName) {
 int getRandomIntInRange(int range_a, int range_b) {
 	std::random_device rd;
 	std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(range_a, range_b + 1);
+//	std::uniform_real_distribution<double> dist(range_a, range_b + 1);
+	std::uniform_real_distribution<double> dist(range_a, range_b);
 	return (int) round(dist(mt));
 	//return range_a + rand() % (range_b - range_a + 1);
 }
@@ -81,6 +82,6 @@ bool dirExist(const char *dirPath) {
 }
 
 // https://stackoverflow.com/a/24750132/24078702
-bool fileExist(const char *filePath) {
-	return filesystem::exists(filePath);
+bool fileExist(const char *fileName) {
+	return filesystem::exists(fileName);
 }

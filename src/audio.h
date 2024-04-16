@@ -16,14 +16,24 @@
 #include <random>
 #include <string>
 #include <thread>
+#include <algorithm>
+
+#ifndef PIKACHUGAME_UTILS_H
+#include "utils.h"
+#endif
 
 #endif
 
 const int MAX_ALBUM_SIZE = 10;
 
+struct AudioEngine;
+bool initSoundFromFile(AudioEngine *engine, const string &filePath, ma_sound *&sound);
+
 struct Sound{
 	string filePath;
-	ma_sound *sound = nullptr;
+	ma_sound* sound = nullptr;
+	void init();
+	void uninit();
 };
 
 struct SoundAlbum{
@@ -35,7 +45,7 @@ struct SoundAlbum{
 	bool isEmpty() const;
 	void shuffleSound();
 	Sound* nextSound();
-	bool addSoundFromFilePath(ma_engine &engine, const string& filePath, bool preLoad);
+	bool addSoundFromFilePath(AudioEngine &engine, const string& filePath, bool preLoad);
 };
 
 Sound *SoundAlbum::nextSound() {
@@ -64,7 +74,7 @@ void SoundAlbum::shuffleSound() {
 	shuffle(sounds, sounds + size, std::mt19937(std::random_device()())); //Random shuffle algo
 }
 
-bool SoundAlbum::addSoundFromFilePath(ma_engine &engine, const string &filePath, bool preLoad = false) {
+bool SoundAlbum::addSoundFromFilePath(AudioEngine &engine, const string &filePath, bool preLoad = false) {
 	if (size == MAX_ALBUM_SIZE - 1) {
 		return false;
 	}
@@ -75,8 +85,7 @@ bool SoundAlbum::addSoundFromFilePath(ma_engine &engine, const string &filePath,
 		}
 		return false;
 	}
-
-	if (ma_sound_init_from_file(&engine, filePath.c_str(), MA_SOUND_FLAG_DECODE | MA_SOUND_FLAG_ASYNC, nullptr, nullptr, sounds[size].sound) == MA_SUCCESS) {
+	if (initSoundFromFile(&engine, filePath, sounds[size].sound)) {
 		size++;
 		return true;
 	}
@@ -99,9 +108,7 @@ struct AudioEngine{
 };
 
 bool AudioEngine::init() {
-	ma_result result;
-	result = ma_engine_init(nullptr, &engine);
-	if (result != MA_SUCCESS) {
+	if (ma_engine_init(nullptr, &engine) != MA_SUCCESS) {
 		return false;
 	}
 	ma_engine_set_volume(&engine, volume);
@@ -117,12 +124,6 @@ void AudioEngine::setVolume(float v) {
 	ma_engine_set_volume(&engine, volume);
 }
 
-ma_sound* initSoundFromFile(AudioEngine *engine, const string &filename) {
-	ma_sound *sound;
-	ma_sound_init_from_file(&engine->engine, filename.c_str(),MA_SOUND_FLAG_DECODE | MA_SOUND_FLAG_ASYNC, nullptr, nullptr, sound);
-	return sound;
-}
-
 bool playEngine(AudioEngine *engine) {
 	if (engine->album->size == 0) return false;
 	engine->isPlaying = true;
@@ -132,8 +133,7 @@ bool playEngine(AudioEngine *engine) {
 	while (current != nullptr) {
 		sound = current->sound;
 		if (sound == nullptr) {
-			sound = initSoundFromFile(engine, current->filePath);
-			if (sound == nullptr) {
+			if (!initSoundFromFile(engine, current->filePath, sound)) {
 				current = engine->album->nextSound();
 				continue;
 			}
@@ -180,6 +180,18 @@ bool playEngine(AudioEngine *engine) {
 	engine->isPlaying = false;
 	return true;
 }
+
+bool initSoundFromFile(AudioEngine *engine, const string &filePath, ma_sound *&sound) {
+	sound = new ma_sound;
+	ma_result r = ma_sound_init_from_file(&engine->engine, filePath.c_str(),MA_SOUND_FLAG_DECODE | MA_SOUND_FLAG_ASYNC, nullptr, nullptr, sound);
+	if (r != MA_SUCCESS) {
+//		cout << ma_result_description(r) << "\n";
+		delete sound;
+		return false;
+	}
+	return true;
+}
+
 //
 //ma_sound *AudioEngine::nextSound() {
 //	if (size == 0) return nullptr;

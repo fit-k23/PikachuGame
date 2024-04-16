@@ -1,6 +1,5 @@
 #ifndef PIKACHUGAME_CONSTANT_H
 #define PIKACHUGAME_CONSTANT_H
-#endif
 
 static const char *ANSI_RESET_BACKGROUND = "\033[49m";
 static const char *ANSI_RESET_FOREGROUND = "\033[39m";
@@ -18,5 +17,14 @@ static const char *ASSET_RELATIVE_PATH = "asset/";
 static const char *SOUND_RELATIVE_PATH = "asset/sound/";
 static const char *MUSIC_RELATIVE_PATH = "asset/music/";
 
-#define ASSET_PATH "adasjd"
-#define ASSET_PATH2 (ASSET_PATH "JHASKAJHD")
+const string BUTTON_MODE_NORMAL = "█▄░█ █▀█ █▀█ █▀▄▀█ ▄▀█ █░░\n█░▀█ █▄█ █▀▄ █░▀░█ █▀█ █▄▄"; // Normal
+const string BUTTON_MODE_COLLAPSE = "█▀▀ █▀█ █░░ █░░ ▄▀█ █▀█ █▀ █▀▀\n█▄▄ █▄█ █▄▄ █▄▄ █▀█ █▀▀ ▄█ ██▄"; // Collapse
+const string BUTTON_RETURN = "█▀█ █▀▀ ▀█▀ █░█ █▀█ █▄░█\n█▀▄ ██▄ ░█░ █▄█ █▀▄ █░▀█"; // Return
+
+const string BUTTON_START_GAME = "█▀ ▀█▀ ▄▀█ █▀█ ▀█▀   █▀▀ ▄▀█ █▀▄▀█ █▀▀\n▄█ ░█░ █▀█ █▀▄ ░█░   █▄█ █▀█ █░▀░█ ██▄"; // Start Game
+const string BUTTON_CONTINUE_GAME = "█▀▀ █▀█ █▄░█ ▀█▀ █ █▄░█ █░█ █▀▀   █▀▀ ▄▀█ █▀▄▀█ █▀▀\\n█▄▄ █▄█ █░▀█ ░█░ █ █░▀█ █▄█ ██▄   █▄█ █▀█ █░▀░█ ██▄"; // Continue Game
+const string BUTTON_LEADERBOARD = "█░░ █▀▀ ▄▀█ █▀▄ █▀▀ █▀█ █▄▄ █▀█ ▄▀█ █▀█ █▀▄\n█▄▄ ██▄ █▀█ █▄▀ ██▄ █▀▄ █▄█ █▄█ █▀█ █▀▄ █▄▀"; // Leaderboard
+const string BUTTON_SETTING = "█▀ █▀▀ ▀█▀ ▀█▀ █ █▄░█ █▀▀\\n▄█ ██▄ ░█░ ░█░ █ █░▀█ █▄█"; // Setting
+const string BUTTON_SAVE_AND_LOGOUT = "█▀ ▄▀█ █░█ █▀▀   ▄▀█ █▄░█ █▀▄   █░░ █▀█ █▀▀ █▀█ █░█ ▀█▀\n▄█ █▀█ ▀▄▀ ██▄   █▀█ █░▀█ █▄▀   █▄▄ █▄█ █▄█ █▄█ █▄█ ░█░"; // Save and loggout
+
+#endif

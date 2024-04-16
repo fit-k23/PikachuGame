@@ -1,6 +1,5 @@
 #ifndef PIKACHUGAME_MAIN_H
 #define PIKACHUGAME_MAIN_H
-#endif //PIKACHUGAME_MAIN_H
 
 #include <iostream>
 #include <cstdlib>
@@ -13,60 +12,46 @@
 #include <sstream>
 #include <queue>
 
-#include <cstdlib>
-
 using namespace std;
 
-#ifndef PIKACHUGAME_UTILS_H
+#ifndef PIKACHUGAME_AUDIO_H
+#include "audio.h"
+#endif
 
-#include "utils.h"
-
+#ifndef PIKACHUGAME_BFS_H
+#include "bfs.h"
 #endif
 
 #ifndef PIKACHUGAME_CONSOLE_H
-
 #include "console.h"
-
 #endif
 
 #ifndef PIKACHUGAME_CONSTANT_H
 #include "constant.h"
 #endif
 
-#ifndef PIKACHUGAME_CONTROLLER_H
-
-#include "controller.h"
-
-#endif
-
 #ifndef PIKACHUGAME_COORD_H
 #include "coord.h"
 #endif
 
+#ifndef PIKACHUGAME_DATA_H
+#include "data.h"
+#endif
+
 #ifndef PIKACHUGAME_DRAWER_H
-
 #include "drawer.h"
+#endif
+
+#ifndef PIKACHUGAME_TASK_H
+#include "task.h"
+#endif
+
+#ifndef PIKACHUGAME_UTILS_H
+#include "utils.h"
+#endif
 
 #endif
 
-#ifndef PIKACHUGAME_BFS_H
-
-#include "bfs.h"
-
-#endif
-
-#ifndef PIKACHUGAME_BFS_H
-#include "bfs.h"
-#endif
-
-#ifndef PIKACHUGAME_AUDIO_H
-
-#include "audio.h"
-
-#endif
-
-void project_init();
-
-//#define MINIAUDIO_IMPLEMENTATION
-//#include "miniaudio.h"
+bool project_init();
+void project_uninit();
 

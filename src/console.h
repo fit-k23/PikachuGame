@@ -1,16 +1,13 @@
 #ifndef PIKACHUGAME_CONSOLE_H
 #define PIKACHUGAME_CONSOLE_H
 
-#include <windows.h>
 #include <iostream>
+#include <windows.h>
 
+#ifndef PIKACHUGAME_COORD_H
+#include "coord.h"
 #endif
 
-#ifndef PIKA_HAS_COORD_HEADER
-
-#include "coord.h"
-
-#define PIKA_HAS_COORD_HEADER
 #endif
 
 int SCREEN_WIDTH = 0;
@@ -85,10 +82,16 @@ void clrScr() {
 }
 
 void consoleInit() {
+
 	//Force console to use UTF-8, so it won't break ansi code due to most ansi code is written using utf-8o
 	//Ref: The source is I made it up, jk: https://stackoverflow.com/a/41645159/24078702
 	//Docs: https://learn.microsoft.com/en-us/windows/console/setconsoleoutputcp
 	SetConsoleOutputCP(CP_UTF8); //65001
+
+	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+	DWORD mode = 0;
+	GetConsoleMode(hStdin, &mode);
+	SetConsoleMode(hStdin, ENABLE_EXTENDED_FLAGS | (mode & (~ENABLE_ECHO_INPUT) & (~ENABLE_QUICK_EDIT_MODE)));
 
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	// Enable Ansi support, giving the power to change the color world! RGB1!!!!
@@ -108,6 +111,8 @@ void consoleInit() {
 	HWND hWnd = GetConsoleWindow();
 
 	ShowWindow(hWnd, SW_MAXIMIZE);
+	// SetConsoleDisplayMode(GetStdHandle(STD_OUTPUT_HANDLE), CONSOLE_FULLSCREEN_MODE, nullptr);
+
 	//system("mode con COLS=700");
 	//SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000); Full screen
 
@@ -134,19 +139,16 @@ void moveCursorToCoord(Coord coord) {
 	SetConsoleCursorPosition(hStdout, {static_cast<SHORT>(coord.x), static_cast<SHORT>(coord.y)});
 }
 
-COLORREF getDefaultColor() {
-	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
-	HANDLE consoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	GetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
-	return sbInfoEx.ColorTable[0];
-}
-
+// Set background color using palate!
 void fillConsoleBackground(COLORREF color) {
 	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
-	sbInfoEx.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
+	sbInfoEx.cbSize = sizeof(sbInfoEx);
+
 	HANDLE consoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	GetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
-	sbInfoEx.ColorTable[0] = color;
+
+	for (unsigned long & colorInfo : sbInfoEx.ColorTable) colorInfo = color;
+	//sbInfoEx.dwSize = sbInfoEx.dwMaximumWindowSize;
 	SetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
 }
 

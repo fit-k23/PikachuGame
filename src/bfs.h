@@ -1,19 +1,18 @@
 #ifndef PIKACHUGAME_BFS_H
 #define PIKACHUGAME_BFS_H
+
+#ifndef PIKACHUGAME_BOARD_H
+#include "board.h"
 #endif
 
 #ifndef PIKACHUGAME_COORD_H
 #include "coord.h"
 #endif
 
-#ifndef PIKACHUGAME_BOARD_H
-
-#include "board.h"
-
-#endif
-
 #include <cmath>
 #include <queue>
+
+#endif
 
 struct Selector{
 	Coord c1;

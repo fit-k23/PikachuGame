@@ -4,14 +4,14 @@
 #include <algorithm>
 #include <random>
 
-#endif
-
 #ifndef PIKACHUGAME_COORD_H
 #include "coord.h"
 #endif
 
 #ifndef PIKACHUGAME_UTILS_H
 #include "utils.h"
+#endif
+
 #endif
 
 int ROW;
@@ -60,10 +60,6 @@ void uninitBoard() {
 		delete maze;
 	}
 }
-
-#ifndef PIKACHUGAME_UTILS_H
-#include "utils.h"
-#endif
 
 void generateShuffledBoard() {
 	int cnt[7] = {};

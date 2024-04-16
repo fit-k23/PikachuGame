@@ -22,8 +22,7 @@ struct BoxPart{
 	const char *bot_right;
 };
 
-void drawRectangle(const BoxPart &parts, Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
-				   PikaRGB bgColor = {-1, -1, -1}) {
+void drawRectangle(const BoxPart &parts, Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	moveCursorToCoord(coord);
 	string bgColorCode;
 	string fgColorCode;
@@ -55,8 +54,7 @@ void drawRectangle(const BoxPart &parts, Coord coord, int width, int height, Pik
 	moveCursorToCoord({0, 0}); //Resting coord
 }
 
-void drawRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
-							  PikaRGB bgColor = {-1, -1, -1}, BoxPart part = {"╭", "─", "╮", "│", "│", "╰", "─", "╯"}) {
+void drawRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}, BoxPart part = {"╭", "─", "╮", "│", "│", "╰", "─", "╯"}) {
 	part.top_left = "╭";
 	part.top_right = "╮";
 	part.bot_left = "╰";
@@ -64,31 +62,19 @@ void drawRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color 
 	drawRectangle(part, coord, width, height, color, bgColor);
 }
 
-//void drawChoppedCornerRectangle(Coord coord, int width, int height, PikaRGB bgColor = {-1,-1,-1}, BoxPart part = {"╭","─","╮","│","│","╰","─","╯"}) {
-//	part.top_left = "╱";
-//	part.top_right = "╲";
-//	part.bot_left = "╲";
-//	part.bot_right = "╱";
-//	drawRectangle(part, coord, width, height, bgColor);
-//} Look bad
-
-void drawBoxyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
-						   PikaRGB bgColor = {-1, -1, -1}) {
+void drawBoxyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	drawRectangle({"▄", "▄", "▄", "█", "█", "▀", "▀", "▀"}, coord, width, height, color, bgColor);
 }
 
-void drawHeavyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
-							PikaRGB bgColor = {-1, -1, -1}) {
+void drawHeavyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	drawRectangle({"┏", "━", "┓", "┃", "┃", "┗", "━", "┛"}, coord, width, height, color, bgColor);
 }
 
-void drawHeavyLineRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
-									   PikaRGB bgColor = {-1, -1, -1}) {
+void drawHeavyLineRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	drawRoundCornerRectangle(coord, width, height, color, bgColor, {"┏", "━", "┓", "┃", "┃", "┗", "━", "┛"});
 }
 
-void drawDoubleLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
-							 PikaRGB bgColor = {-1, -1, -1}) {
+void drawDoubleLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	drawRectangle({"╔", "═", "╗", "║", "║", "╚", "═", "╝"}, coord, width, height, color, bgColor);
 }
 
@@ -121,8 +107,7 @@ void drawDoubleLineHollowRectangle(Coord coord, int width, int height, PikaRGB c
 	moveCursorToCoord({0, 0}); //Resting coord
 }
 
-void drawThinLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1},
-						   PikaRGB bgColor = {-1, -1, -1}) {
+void drawThinLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	drawRectangle({"┌", "─", "┐", "│", "│", "└", "─", "┘"}, coord, width, height, color, bgColor);
 }
 
@@ -138,18 +123,7 @@ void drawAtPos(Coord coord, const string &s) {
 	moveCursorToCoord({0, 0});
 }
 
-void drawTextAtPos(Coord coord, const string &s) {
-//	string foreground;
-//	if (fg.r != -1) {
-//		foreground = getFGAnsiCode(fg);
-//	}
-//	if (fg.r == -2) {
-//		foreground = ANSI_RESET_FOREGROUND;
-//	}
-//	string background;
-//	if (bg.r != -1) {
-//		background = getBGAnsiCode(bg);
-//	}
+void drawRawTextAtPos(Coord coord, const string &s) {
 	moveCursorToCoord(coord);
 	cout << s;
 }
