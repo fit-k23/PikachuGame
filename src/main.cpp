@@ -382,6 +382,7 @@ bool project_init() {
 		cout << getFGAnsiCode(244, 12, 21) << "Failed to init sound engine! IDK what's happened :c!\n" << ANSI_RESET;
 		return false;
 	}
+	loadPokemon();
 
 	vector<string> soundPaths = {
 		"correct.wav",
@@ -437,6 +438,7 @@ bool project_init() {
 
 void project_cleanup() {
 	saveDataToFile(string(ASSET_RELATIVE_PATH) + "gameData.txt");
+	uninitPokemon();
 	uninitBoard();
 	soundEngine.uninit();
 	soundEngine.uninit();
@@ -587,7 +589,6 @@ void runGame() {
 					break;
 				}
 				case ESC_KEY: {
-					soundEngine.isPlaying = false;
 					FLAG_RUNNING = false;
 					break;
 				}
@@ -596,86 +597,93 @@ void runGame() {
 	}
 }
 
-void drawMainMenu() {
-	drawAtPos({SCREEN_WIDTH / 2 - 50, 1}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokelogo.txt"));
+void drawMainMenu(int selectedButtonId) {
+	drawAtPos({SCREEN_WIDTH - 160 - 2, 2}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokelogo.txt"));
 
 	PikaRGB button1Color = {255,255,255};
 	string fg;
 	string choseColor = getFGAnsiCode(185, 148, 112);
 
-	if (currentButton == MAIN_MENU_BUTTON_CONTINUE_GAME) {
-		button1Color = {0,0,0};
+	if (selectedButtonId == MAIN_MENU_BUTTON_CONTINUE_GAME) {
+		button1Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({SCREEN_WIDTH / 2 - 28, static_cast<int>(SCREEN_HEIGHT / 1.35 - 8)}, 56, 4, button1Color);
-	drawAtPos({SCREEN_WIDTH / 2 - 28 + 1 + 3, static_cast<int>(SCREEN_HEIGHT / 1.35 - 8 + 1)}, fg + BUTTON_CONTINUE_GAME);
+	int button_anchor_x = SCREEN_WIDTH / 2 + 56 - 28 + 1;
+	int button_anchor_y = static_cast<int>(SCREEN_HEIGHT / 1.5);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 8)}, 56, 8, button1Color);
+	drawAtPos({button_anchor_x + 1 + 3, static_cast<int>(button_anchor_y - 8 + 1)}, fg + BUTTON_CONTINUE_GAME);
 
 	PikaRGB button2Color = {255,255,255};
 	fg = "";
-	if (currentButton == MAIN_MENU_BUTTON_START_GAME) {
-		button2Color = {0,0,0};
+	if (selectedButtonId == MAIN_MENU_BUTTON_START_GAME) {
+		button2Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({SCREEN_WIDTH / 2 - 28, static_cast<int>(SCREEN_HEIGHT / 1.35 - 4)}, 56, 4, button2Color);
-	drawAtPos({SCREEN_WIDTH / 2 - 28 + 1 + 9, static_cast<int>(SCREEN_HEIGHT / 1.35 - 4 + 1)}, fg + BUTTON_START_GAME);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 4)}, 56, 8, button2Color);
+	drawAtPos({button_anchor_x + 1 + 9, static_cast<int>(button_anchor_y - 4 + 1)}, fg + BUTTON_START_GAME);
 
 	PikaRGB button3Color = {255,255,255};
 	fg = "";
-	if (currentButton == MAIN_MENU_BUTTON_LEADER_BOARD) {
-		button3Color = {0,0,0};
+	if (selectedButtonId == MAIN_MENU_BUTTON_LEADER_BOARD) {
+		button3Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({SCREEN_WIDTH / 2 - 28, static_cast<int>(SCREEN_HEIGHT / 1.35)}, 56, 4, button3Color);
-	drawAtPos({SCREEN_WIDTH / 2 - 28 + 1 + 6, static_cast<int>(SCREEN_HEIGHT / 1.35 + 1)}, fg + BUTTON_LEADERBOARD);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y)}, 56, 8, button3Color);
+	drawAtPos({button_anchor_x + 1 + 6, static_cast<int>(button_anchor_y + 1)}, fg + BUTTON_LEADERBOARD);
 
 	PikaRGB button4Color = {255,255,255};
 	fg = "";
-	if (currentButton == MAIN_MENU_BUTTON_SETTING) {
-		button4Color = {0,0,0};
+	if (selectedButtonId == MAIN_MENU_BUTTON_SETTING) {
+		button4Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({SCREEN_WIDTH / 2 - 28, static_cast<int>(SCREEN_HEIGHT / 1.35 + 4)}, 56, 4, button4Color);
-	drawAtPos({SCREEN_WIDTH / 2 - 28 + 1, static_cast<int>(SCREEN_HEIGHT / 1.35 + 4 + 1)}, fg + BUTTON_SETTING);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y + 4)}, 56, 8, button4Color);
+	drawAtPos({button_anchor_x + 1 + 6, static_cast<int>(button_anchor_y + 4 + 1)}, fg + BUTTON_SETTING);
 
 	PikaRGB button5Color = {255,255,255};
 	fg = "";
-	if (currentButton == MAIN_MENU_BUTTON_LOG_OUT) {
-		button5Color = {0,0,0};
+	if (selectedButtonId == MAIN_MENU_BUTTON_LOG_OUT) {
+		button5Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({SCREEN_WIDTH / 2 - 28, static_cast<int>(SCREEN_HEIGHT / 1.35 + 8)}, 56, 4, button5Color);
-	drawAtPos({SCREEN_WIDTH / 2 - 28 + 1, static_cast<int>(SCREEN_HEIGHT / 1.35 + 8 + 1)}, fg + BUTTON_SAVE_AND_LOGOUT);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y + 8)}, 56, 8, button5Color);
+	drawAtPos({button_anchor_x + 1, static_cast<int>(button_anchor_y + 8 + 1)}, fg + BUTTON_SAVE_AND_LOGOUT);
 	moveCursorToCoord({SCREEN_WIDTH - 3, SCREEN_HEIGHT - 3});
 }
 
-void drawChoseGameMenu() {
-	drawAtPos({SCREEN_WIDTH / 2 - 50, 1}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokelogo.txt"));
+void drawChoseGameMenu(int selectedButtonId) {
+	drawAtPos({SCREEN_WIDTH - 160 - 2, 2}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokelogo.txt"));
 	PikaRGB button1Color = {255,255,255};
-	if (currentButton == 0) {
-		button1Color = {0,0,0};
+	int button_anchor_x = SCREEN_WIDTH / 2 + 56 + 26 - 28 + 1;
+	int button_anchor_y = static_cast<int>(SCREEN_HEIGHT / 1.5) - 4;
+	drawRoundCornerRectangle({SCREEN_WIDTH - 160 - 2, button_anchor_y - 12}, button_anchor_x - SCREEN_WIDTH + 160 - 2, 48 + 8);
+	if (selectedButtonId == CHOOSE_GAME_BUTTON_NORMAL) {
+		button1Color = {185, 148, 112};
+		drawRawTextAtPos({SCREEN_WIDTH - 160 - 2 + 1, button_anchor_y - 12 + 1}, "NORMAL");
 	}
-	drawRoundCornerRectangle({SCREEN_WIDTH / 2 - 15, static_cast<int>(SCREEN_HEIGHT / 1.35 - 4)}, 30, 4, button1Color);
-	drawAtPos({SCREEN_WIDTH / 2 - 15 + 1 + 2, static_cast<int>(SCREEN_HEIGHT / 1.35 - 4 + 1)}, BUTTON_MODE_NORMAL);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 4)}, 30, 8, button1Color);
+	drawAtPos({button_anchor_x + 1 + 2, static_cast<int>(button_anchor_y - 4 + 1)}, BUTTON_MODE_NORMAL);
 	PikaRGB button2Color = {255,255,255};
-	if (currentButton == CHOOSE_GAME_BUTTON_COLLAPSE) {
-		button2Color = {0,0,0};
+	if (selectedButtonId == CHOOSE_GAME_BUTTON_COLLAPSE) {
+		button2Color = {185, 148, 112};
+		drawRawTextAtPos({SCREEN_WIDTH - 160 - 2 + 1, button_anchor_y - 12 + 1}, "COLLAPSE");
 	}
-	drawRoundCornerRectangle({SCREEN_WIDTH / 2 - 15, static_cast<int>(SCREEN_HEIGHT / 1.35)}, 30, 4, button2Color);
-	drawAtPos({SCREEN_WIDTH / 2 - 15 + 1, static_cast<int>(SCREEN_HEIGHT / 1.35 + 1)}, BUTTON_MODE_COLLAPSE);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y)}, 30, 8, button2Color);
+	drawAtPos({button_anchor_x + 1, static_cast<int>(button_anchor_y + 1)}, BUTTON_MODE_COLLAPSE);
 	PikaRGB button3Color = {255,255,255};
-	if (currentButton == CHOOSE_GAME_BUTTON_RETURN) {
-		button3Color = {0,0,0};
+	if (selectedButtonId == CHOOSE_GAME_BUTTON_RETURN) {
+		button3Color = {185, 148, 112};
 	}
-	drawRoundCornerRectangle({SCREEN_WIDTH / 2 - 15, static_cast<int>(SCREEN_HEIGHT / 1.35 + 4)}, 30, 4, button3Color);
-	drawAtPos({SCREEN_WIDTH / 2 - 15 + 1 + 3, static_cast<int>(SCREEN_HEIGHT / 1.35 + 4 + 1)}, BUTTON_RETURN);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y + 4)}, 30, 8, button3Color);
+	drawAtPos({button_anchor_x + 1 + 3, static_cast<int>(button_anchor_y + 4 + 1)}, BUTTON_RETURN);
 	moveCursorToCoord({SCREEN_WIDTH - 3, SCREEN_HEIGHT - 3});
 }
 
-void drawLeaderBoard() {
+void drawLeaderBoard(int selectedButtonId) {
 	drawAtPos({12, 10}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_star.txt"));
 	drawAtPos({SCREEN_WIDTH / 2, 1}, getFileContent(string(ASSET_RELATIVE_PATH) + "leaderboard.txt"));
 	int a[10];
-	getTopRank(a, currentButton);
+	getTopRank(a, selectedButtonId);
 	string bg1 = getBGAnsiCode(201,166,0);
 	string bg2 = getBGAnsiCode(245,245,245);
 	string fg1 = getFGAnsiCode(255, 255,255);
@@ -695,31 +703,33 @@ void drawLeaderBoard() {
 			}
 			string name = userList[a[i]].userName;
 			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 0 + i * 3 + 15},  bg + fg + " " + string(20, '_') + name);
-			string score = to_string(userList[a[i]].score[currentButton]);
+			string score = to_string(userList[a[i]].score[selectedButtonId]);
 //			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + fg + string(70 - score.length(), ' ') + score);
 			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + empty_line);
 			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + fg + string(50 - score.length(), ' ').append(score).append(string(20, '_')));
 		}
 	}
 	PikaRGB button1Color = {255,255,255};
-	if (currentButton == CHOOSE_GAME_BUTTON_NORMAL) {
-		button1Color = {0,0,0};
+	if (selectedButtonId == CHOOSE_GAME_BUTTON_NORMAL) {
+		button1Color = {185, 148, 112};
 	}
-	drawRoundCornerRectangle({42 - 7, static_cast<int>(SCREEN_HEIGHT / 1.35 - 4)}, 30, 4, button1Color);
-	drawAtPos({42 - 7 + 3, static_cast<int>(SCREEN_HEIGHT / 1.35 - 4 + 1)}, BUTTON_MODE_NORMAL);
+
+	int button_anchor_y = static_cast<int>(SCREEN_HEIGHT / 1.35);
+	drawRoundCornerRectangle({42 - 7, static_cast<int>(button_anchor_y - 4)}, 30, 8, button1Color);
+	drawAtPos({42 - 7 + 3, static_cast<int>(button_anchor_y - 4 + 1)}, BUTTON_MODE_NORMAL);
 	string bg_fgColor = getFGAnsiCode(0,0,0);
 	PikaRGB button2Color = {255,255,255};
-	if (currentButton == CHOOSE_GAME_BUTTON_COLLAPSE) {
-		button2Color = {0,0,0};
+	if (selectedButtonId == CHOOSE_GAME_BUTTON_COLLAPSE) {
+		button2Color = {185, 148, 112};
 	}
-	drawRoundCornerRectangle({42 - 7, static_cast<int>(SCREEN_HEIGHT / 1.35)}, 30, 4, button2Color);
-	drawAtPos({42 - 7 + 1, static_cast<int>(SCREEN_HEIGHT / 1.35 + 1)}, BUTTON_MODE_COLLAPSE);
+	drawRoundCornerRectangle({42 - 7, static_cast<int>(button_anchor_y)}, 30, 8, button2Color);
+	drawAtPos({42 - 7 + 1, static_cast<int>(button_anchor_y + 1)}, BUTTON_MODE_COLLAPSE);
 	PikaRGB button3Color = {255,255,255};
-	if (currentButton == CHOOSE_GAME_BUTTON_RETURN) {
-		button3Color = {0,0,0};
+	if (selectedButtonId == CHOOSE_GAME_BUTTON_RETURN) {
+		button3Color = {185, 148, 112};
 	}
-	drawRoundCornerRectangle({42 - 7, static_cast<int>(SCREEN_HEIGHT / 1.35 + 4)}, 30, 4, button3Color);
-	drawAtPos({42 - 7 + 4, static_cast<int>(SCREEN_HEIGHT / 1.35 + 4 + 1)}, BUTTON_RETURN);
+	drawRoundCornerRectangle({42 - 7, static_cast<int>(button_anchor_y + 4)}, 30, 8, button3Color);
+	drawAtPos({42 - 7 + 4, static_cast<int>(button_anchor_y + 4 + 1)}, BUTTON_RETURN);
 	moveCursorToCoord({SCREEN_WIDTH - 3, SCREEN_HEIGHT - 3});
 }
 
@@ -730,7 +740,7 @@ void runLoginMenu() {
 
 //	fillConsoleBackground(RGB(229, 205, 174));
 
-	const int LOGIN_BOX_HEIGHT = 18;
+	const int LOGIN_BOX_HEIGHT = 22;
 	int LOGIN_BOX_WIDTH = SCREEN_WIDTH / 3;
 
 	AnsiArt pokeballs_idle{{
@@ -754,13 +764,13 @@ void runLoginMenu() {
 	cout << getBGAnsiCode(0,0,0);
 	drawRoundCornerHollowRectangle({SCREEN_WIDTH / 3, static_cast<int>(SCREEN_HEIGHT / 1.75)}, LOGIN_BOX_WIDTH, LOGIN_BOX_HEIGHT, {255,255,255});
 
-	int loginButton = LOGIN_MENU_INPUT_USERNAME;
+	int loginButtonId = LOGIN_MENU_INPUT_USERNAME;
 	bool entered = false;
 
 	int loginState = -2;
 
-	thread t(loginKeyboardController, userName, userPass, &loginButton, &entered, &loginState);
-	t.detach();
+	thread loginControlThread(loginKeyboardController, userName, userPass, &loginButtonId, &entered, &loginState);
+	loginControlThread.detach();
 
 	string bg_fgColor = getFGAnsiCode(255,255,255);
 	drawRawTextAtPos({SCREEN_WIDTH / 3 + 5, static_cast<int>(SCREEN_HEIGHT / 1.75) + 7}, bg_fgColor + "TIPS: ");
@@ -775,7 +785,7 @@ void runLoginMenu() {
 			drawAnsiArt(pokeballs_idle, {SCREEN_WIDTH / 2 - 23, SCREEN_HEIGHT / 4 - 15});
 		} else {
 			if (pokeballs_succeed.isDone) {
-				if (loginButton == LOGIN_MENU_INPUT_SIGNIN) {
+				if (loginButtonId == LOGIN_MENU_INPUT_SIGNIN) {
 					userId = loginState;
 				} else {
 					userId = login(string(userName), string(userPass));
@@ -788,38 +798,38 @@ void runLoginMenu() {
 			}
 		}
 		moveCursorToCoord({SCREEN_WIDTH / 3 + 7, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2});
-		if (loginButton == LOGIN_MENU_INPUT_USERNAME) {
+		if (loginButtonId == LOGIN_MENU_INPUT_USERNAME) {
 			cout << bg_fgColor << " > ";
 		} else {
 			cout << bg_fgColor << "   ";
 		}
 		moveCursorToCoord({SCREEN_WIDTH / 3 + 7, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3});
-		if (loginButton == LOGIN_MENU_INPUT_USERPASS) {
+		if (loginButtonId == LOGIN_MENU_INPUT_USERPASS) {
 			cout << bg_fgColor << " > ";
 		} else {
 			cout << bg_fgColor << "   ";
 		}
 
 		if (loginState == -1) {
-			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, bg_fgColor + getFGAnsiCode(234, 12, 12) + "Not found!" + ANSI_RESET);
+			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, bg_fgColor + getFGAnsiCode(234, 12, 12) + "User not found!" + ANSI_RESET);
 		} else {
 			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, string(14, ' '));
 		}
 
-		if (loginState == 0 && loginButton != LOGIN_MENU_INPUT_SIGNIN) {
+		if (loginState == 0 && loginButtonId != LOGIN_MENU_INPUT_SIGNIN) {
 			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_PASS_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3}, bg_fgColor + getFGAnsiCode(234, 12, 12) + "Wrong Password" + ANSI_RESET);
 		} else {
 			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_PASS_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3}, string(14, ' '));
 		}
 
 		string buttonColor;
-		if (loginButton == LOGIN_MENU_INPUT_LOGIN) {
+		if (loginButtonId == LOGIN_MENU_INPUT_LOGIN) {
 			buttonColor = getFGAnsiCode(185, 148, 112);
 		}
 		drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 5}, bg_fgColor + buttonColor + "LOGIN" + ANSI_RESET);
 
 		buttonColor = "";
-		if (loginButton == LOGIN_MENU_INPUT_SIGNIN) {
+		if (loginButtonId == LOGIN_MENU_INPUT_SIGNIN) {
 			buttonColor = getFGAnsiCode(185, 148, 112);
 		}
 
@@ -838,13 +848,44 @@ void runLoginMenu() {
 	}
 }
 
+int drawChoosePokemonMenu() {
+	clrScr();
+	bool entered = false;
+	bool updated = true;
+	int pokeId = 0;
+	thread choosePokemon(choosePokemonKeyboardController, &pokeId, &updated, &entered);
+	choosePokemon.detach();
+	PikaRGB buttonColor;
+	drawAtPos({SCREEN_WIDTH / 2 - 54, 2}, "▒█▀▀█ ▒█░▒█ ▒█▀▀▀█ ▒█▀▀▀█ ▒█▀▀▀█ ▒█▀▀▀   ▒█░░▒█ ▒█▀▀▀█ ▒█░▒█ ▒█▀▀█   ▒█▀▀█ ▒█▀▀▀█ ▒█░▄▀ ▒█▀▀▀ ▒█▀▄▀█ ▒█▀▀▀█ ▒█▄░▒█\n▒█░░░ ▒█▀▀█ ▒█░░▒█ ▒█░░▒█ ░▀▀▀▄▄ ▒█▀▀▀   ▒█▄▄▄█ ▒█░░▒█ ▒█░▒█ ▒█▄▄▀   ▒█▄▄█ ▒█░░▒█ ▒█▀▄░ ▒█▀▀▀ ▒█▒█▒█ ▒█░░▒█ ▒█▒█▒█\n▒█▄▄█ ▒█░▒█ ▒█▄▄▄█ ▒█▄▄▄█ ▒█▄▄▄█ ▒█▄▄▄   ░░▒█░░ ▒█▄▄▄█ ░▀▄▄▀ ▒█░▒█   ▒█░░░ ▒█▄▄▄█ ▒█░▒█ ▒█▄▄▄ ▒█░░▒█ ▒█▄▄▄█ ▒█░░▀█");
+//	string welcomeMSG = "Welcome " + userList[userId].userName + ". Please select your partner to continue with you on your journey."; 74 + user name length
+	drawRawTextAtPos({static_cast<int>((SCREEN_WIDTH - 76 - userList[userId].userName.length())/ 2), 5}, "Welcome \"" + getFGAnsiCode(243, 243, 2) + userList[userId].userName + ANSI_RESET_FOREGROUND + "\". Please select your partner to continue with you on your journey.");
+	while (!entered) {
+		if (updated) {
+			for (int i = 0; i < 3; i++) {
+				if (pokeId == i) {
+					buttonColor = {255, 255, 0};
+				} else {
+					buttonColor = {255, 255, 255};
+				}
+				drawRawTextAtPos({SCREEN_WIDTH / 3 * i + 15, 15}, getFGAnsiCode(25,255,255) + pokemonList.pokemons[i].name);
+				drawThinLineRectangle({SCREEN_WIDTH / 3 * i + 10, 20}, 40, 40, buttonColor);
+			}
+			updated = false;
+		}
+		Sleep(50); // Sleep for 70ms;
+	}
+	return pokeId;
+}
+
 void runMainMenu() {
+	bool ended = false;
 	bool changeScreen = false;
 	bool hasUpdate = true;
-	thread t2(menuKeyboardController, &currentButton, &task, &changeScreen, &hasUpdate);
-	t2.detach();
+	int menuButtonId = MAIN_MENU_BUTTON_CONTINUE_GAME;
+	thread menuControlThread(menuKeyboardController, &menuButtonId, &task, &changeScreen, &hasUpdate, &ended);
+	menuControlThread.detach();
 
-	while (true) {
+	while (!ended) {
 		if (changeScreen) {
 			clrScr();
 			changeScreen = false;
@@ -855,31 +896,62 @@ void runMainMenu() {
 		if (hasUpdate) {
 			hasUpdate = false;
 			switch (task) {
-				case TASK_LOGIN_MENU:
-					break;
 				case TASK_MAIN_MENU:
-					drawMainMenu();
+					drawMainMenu(menuButtonId);
 					break;
 				case TASK_CHOOSE_GAME:
-					drawChoseGameMenu();
+					drawChoseGameMenu(menuButtonId);
+					break;
+				case TASK_LEADER_BOARD:
+					drawLeaderBoard(menuButtonId);
 					break;
 				case TASK_START_GAME:
-					FLAG_RUNNING = true;
-					runGame();
-					cout << "Wait for a sec...";
-					Sleep(1000);
-					clrScr();
-					fillConsoleBackground(RGB(229, 205, 174));
-					task = TASK_MAIN_MENU;
-					runMainMenu();
-				case TASK_LEADER_BOARD:
-					drawLeaderBoard();
+					ended = true;
 					break;
+				case TASK_LOGIN_MENU:
 				default:
+					task = TASK_LOGIN_MENU;
+					ended = true;
 					break;
 			}
 		}
-		Sleep(100);
+		Sleep(50);
+	}
+	clrScr();
+}
+
+void menuLoop() {
+	runMainMenu();
+	if (task == TASK_START_GAME) {
+		FLAG_RUNNING = true;
+		runGame();
+		cout << "Wait for a sec...";
+		Sleep(1000);
+		clrScr();
+		task = TASK_MAIN_MENU;
+	}
+	if (task == TASK_MAIN_MENU) {
+		menuLoop();
+	}
+}
+
+void loginLoop() {
+	runLoginMenu();
+
+	if (userList[userId].pokeId == -1) {
+		userList[userId].pokeId = drawChoosePokemonMenu();
+//		drawChoosePokemonMenu();
+		clrScr();
+	}
+	saveDataToFile(string(ASSET_RELATIVE_PATH) + "gameData.txt");
+
+	if (task == TASK_MAIN_MENU) {
+		menuLoop();
+		clrScr();
+	}
+	if (task == TASK_LOGIN_MENU) {
+		saveDataToFile(string(ASSET_RELATIVE_PATH) + "gameData.txt");
+		loginLoop();
 	}
 }
 
@@ -888,13 +960,7 @@ int main() {
 		drawAtPos({30, 0}, getFileContent(string(ASSET_RELATIVE_PATH) + "pikamatch.txt"));
 		Sleep(500);
 		clrScr();
-
-		runLoginMenu();
-		saveDataToFile(string(ASSET_RELATIVE_PATH) + "gameData.txt");
-
-		if (task == TASK_MAIN_MENU) {
-			runMainMenu();
-		}
+		loginLoop();
 	}
 
 	project_cleanup();

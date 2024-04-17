@@ -42,6 +42,10 @@ using namespace std;
 #include "drawer.h"
 #endif
 
+#ifndef PIKACHUGAME_POKEMON_H
+#include "pokemon.h"
+#endif
+
 #ifndef PIKACHUGAME_TASK_H
 #include "task.h"
 #endif

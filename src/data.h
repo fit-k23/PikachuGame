@@ -25,6 +25,7 @@ struct User {
 	int score[2]{0,0};
 	int mode = -1; // -1 no save, 0 normal, 1 collapse
 	int lvl = 1;
+	int lastScore = 0;
 };
 
 static User* userList;
@@ -150,6 +151,8 @@ bool loadDataFromFile(const string &fileName) {
 		}
 		file.ignore();
 		file >> user->lvl;
+		file.ignore();
+		file >> user->lastScore;
 		getline(file, user->stage, '\n');
 	}
 	file.close();
@@ -182,6 +185,7 @@ static bool saveDataToFile(const string &fileName) {
 			continue;
 		}
 		file << userList[i].lvl << ';';
+		file << userList[i].lastScore << ";";
 		file << userList[i].stage << '\n';
 	}
 

@@ -11,8 +11,6 @@
 
 #endif
 
-static auto currentButton = 0;
-
 const int LOGIN_MENU_INPUT_USERNAME = 0;
 const int LOGIN_MENU_INPUT_USERPASS = 1;
 const int LOGIN_MENU_INPUT_LOGIN = 2;
@@ -33,7 +31,7 @@ const int LEADERBOARD_BUTTON_COLLAPSE = 1;
 const int LEADERBOARD_BUTTON_RETURN = 2;
 
 const int TASK_LOGIN_MENU = 0;
-const int TASK_CREATE_ACCOUNT = 1;
+const int TASK_CHOOSE_POKEMON = 1;
 const int TASK_MAIN_MENU = 2;
 const int TASK_CHOOSE_GAME = 3;
 const int TASK_START_GAME = 4;
@@ -144,6 +142,30 @@ void loginKeyboardController(char* userName, char* userPass, int* loginButton, b
 	}
 }
 
+void choosePokemonKeyboardController(int *pokeId, bool *updated, bool *entered) {
+	int input;
+	while (!*entered) {
+		input = getch();
+		if (input == PRE_KEY_1 || input == PRE_KEY_2) {
+			input = getch();
+			if (input == ARROW_LEFT) {
+				if (*pokeId > 0) {
+					(*pokeId)--;
+					*updated = true;
+				}
+			} else if (input == ARROW_RIGHT) {
+				if (*pokeId < 2) {
+					(*pokeId)++;
+					*updated = true;
+				}
+			}
+		} else if (input == ENTER_KEY) {
+			*updated = true; //redundant?
+			*entered = true;
+		}
+	}
+}
+
 void reinitButtonBorder(int taskId, int &buttonBorder1, int &buttonBorder2) {
 	switch (taskId) {
 		case TASK_LOGIN_MENU:
@@ -165,14 +187,14 @@ void reinitButtonBorder(int taskId, int &buttonBorder1, int &buttonBorder2) {
 	}
 }
 
-void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScreen, bool *hasUpdate) {
+void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScreen, bool *hasUpdate, bool *ended) {
 	int input = 0;
 
 	int buttonBorder1 = 0;
 	int buttonBorder2;
 	reinitButtonBorder(*taskId, buttonBorder1, buttonBorder2);
 
-	while (input != ESC_KEY) {
+	while (!*ended) {
 		if (*taskId == TASK_START_GAME) {
 			break;
 		}
@@ -209,9 +231,11 @@ void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScre
 							*hasUpdate = true;
 							*changeScreen = true;
 							*taskId = TASK_LOGIN_MENU;
+							*ended = true;
 							reinitButtonBorder(*taskId, buttonBorder1, buttonBorder2);
 						} else if (*currentButtonPtr == MAIN_MENU_BUTTON_CONTINUE_GAME) {
 							*taskId = TASK_START_GAME;
+//							*ended = true;
 							*hasUpdate = true;
 							*changeScreen = true;
 						}
@@ -219,6 +243,7 @@ void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScre
 					case TASK_CHOOSE_GAME: //Task chose game
 						if (*currentButtonPtr == CHOOSE_GAME_BUTTON_RETURN) {
 							*taskId = TASK_MAIN_MENU;
+							*changeScreen = true;
 							reinitButtonBorder(*taskId, buttonBorder1, buttonBorder2);
 							*hasUpdate = true;
 							*currentButtonPtr = MAIN_MENU_BUTTON_START_GAME;
@@ -238,6 +263,18 @@ void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScre
 						}
 						break;
 				}
+			} else if (input == ESC_KEY) {
+				switch (*taskId) {
+					case TASK_MAIN_MENU:
+						*taskId = TASK_LOGIN_MENU;
+						*ended = true;
+						break;
+					case TASK_CHOOSE_GAME:
+					case TASK_LEADER_BOARD:
+						*taskId = TASK_MAIN_MENU;
+						break;
+				}
+				reinitButtonBorder(*taskId, buttonBorder1, buttonBorder2);
 			}
 		}
 	}

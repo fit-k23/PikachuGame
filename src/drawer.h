@@ -28,9 +28,10 @@ struct BoxPart{
 };
 
 void drawRectangle(const BoxPart &parts, Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
-	moveCursorToCoord(coord);
 	string bgColorCode;
 	string fgColorCode;
+	height -= 4; // Remove top and bot line
+	height /= 2; // Console height is almost equal to 2 time width visually
 	if (color.r != -1) {
 		fgColorCode = getFGAnsiCode(color);
 	}
@@ -43,10 +44,9 @@ void drawRectangle(const BoxPart &parts, Coord coord, int width, int height, Pik
 		s += parts.top_mid;
 	}
 	s += parts.top_right;
-	cout << s;
 	drawRawTextAtPos(coord, s);
 
-	for (int i = 0; i < height / 2; i++) {
+	for (int i = 0; i < height; i++) {
 		moveCursorToCoord({coord.x, coord.y + i + 1});
 		cout << ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_left << bgColorCode + string(width, ' ') + ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_right;
 	}
@@ -55,13 +55,15 @@ void drawRectangle(const BoxPart &parts, Coord coord, int width, int height, Pik
 		s += parts.bot_mid;
 	}
 	s += parts.bot_right;
-	drawRawTextAtPos({coord.x, coord.y + height / 2 + 1}, s);
+	drawRawTextAtPos({coord.x, coord.y + height + 1}, s);
 	moveCursorToCoord({0, 0}); //Resting coord
 }
 
 void drawHollowRectangle(const BoxPart &parts, Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}) {
 	moveCursorToCoord(coord);
 	string fgColorCode;
+	height -= 4; // Remove top and bot line
+	height /= 2; // Console height is almost equal to 2 time width visually
 	if (color.r != -1) {
 		fgColorCode = getFGAnsiCode(color);
 	}
@@ -73,7 +75,7 @@ void drawHollowRectangle(const BoxPart &parts, Coord coord, int width, int heigh
 	s += parts.top_right;
 	drawRawTextAtPos(coord, s);
 
-	for (int i = 0; i < height / 2; i++) {
+	for (int i = 0; i < height; i++) {
 		moveCursorToCoord({coord.x, coord.y + i + 1});
 		cout << fgColorCode << parts.mid_left << ANSI_RESET;
 		moveCursorToCoord({coord.x + width + 1, coord.y + i + 1});
@@ -84,7 +86,7 @@ void drawHollowRectangle(const BoxPart &parts, Coord coord, int width, int heigh
 		s += parts.bot_mid;
 	}
 	s += parts.bot_right;
-	drawRawTextAtPos({coord.x, coord.y + height / 2 + 1}, s);
+	drawRawTextAtPos({coord.x, coord.y + height + 1}, s);
 	moveCursorToCoord({0, 0}); //Resting coord
 }
 
@@ -175,7 +177,7 @@ void drawAtPosTransparent(Coord coord, const string &s) {
 }
 
 struct AnsiArt{
-	vector<string> frames;
+	vector<string> frames = {};
 	unsigned long long sleepTime = 10; //in ms
 	bool loop = false;
 	bool isDone = false;
