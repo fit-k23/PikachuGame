@@ -1,9 +1,14 @@
 #ifndef PIKACHUGAME_DRAWER_H
 #define PIKACHUGAME_DRAWER_H
-#endif
 
 #ifndef PIKACHUGAME_COORD_H
 #include "coord.h"
+#endif
+
+void drawAtPos(Coord coord, const string &s);
+void drawRawTextAtPos(Coord coord, const string &s);
+void drawAtPosTransparent(Coord coord, const string &s);
+
 #endif
 
 const int LINE = 7;
@@ -32,25 +37,54 @@ void drawRectangle(const BoxPart &parts, Coord coord, int width, int height, Pik
 	if (bgColor.r != -1) {
 		bgColorCode = getBGAnsiCode(bgColor);
 	}
-	string s = fgColorCode + parts.top_left;
+	string s = ANSI_RESET_BACKGROUND + fgColorCode + parts.top_left;
 	string space;
 	for (int i = 0; i < width; i++) {
 		s += parts.top_mid;
 	}
 	s += parts.top_right;
-	cout << ANSI_RESET_BACKGROUND << s;
+	cout << s;
+	drawRawTextAtPos(coord, s);
 
 	for (int i = 0; i < height / 2; i++) {
 		moveCursorToCoord({coord.x, coord.y + i + 1});
-		cout << ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_left
-			 << bgColorCode + string(width, ' ') + ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_right;
+		cout << ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_left << bgColorCode + string(width, ' ') + ANSI_RESET_BACKGROUND << fgColorCode << parts.mid_right;
 	}
-	s = fgColorCode + parts.bot_left;
-	for (int i = 0; i < width; i++)
+	s = ANSI_RESET_BACKGROUND + fgColorCode + parts.bot_left;
+	for (int i = 0; i < width; i++) {
 		s += parts.bot_mid;
+	}
 	s += parts.bot_right;
-	moveCursorToCoord({coord.x, coord.y + height / 2 + 1});
-	cout << ANSI_RESET_BACKGROUND << s;
+	drawRawTextAtPos({coord.x, coord.y + height / 2 + 1}, s);
+	moveCursorToCoord({0, 0}); //Resting coord
+}
+
+void drawHollowRectangle(const BoxPart &parts, Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}) {
+	moveCursorToCoord(coord);
+	string fgColorCode;
+	if (color.r != -1) {
+		fgColorCode = getFGAnsiCode(color);
+	}
+	string s = ANSI_RESET_BACKGROUND + fgColorCode + parts.top_left;
+	string space;
+	for (int i = 0; i < width; i++) {
+		s += parts.top_mid;
+	}
+	s += parts.top_right;
+	drawRawTextAtPos(coord, s);
+
+	for (int i = 0; i < height / 2; i++) {
+		moveCursorToCoord({coord.x, coord.y + i + 1});
+		cout << fgColorCode << parts.mid_left << ANSI_RESET;
+		moveCursorToCoord({coord.x + width + 1, coord.y + i + 1});
+		cout << fgColorCode << parts.mid_right << ANSI_RESET;
+	}
+	s = ANSI_RESET_BACKGROUND + fgColorCode + parts.bot_left;
+	for (int i = 0; i < width; i++) {
+		s += parts.bot_mid;
+	}
+	s += parts.bot_right;
+	drawRawTextAtPos({coord.x, coord.y + height / 2 + 1}, s);
 	moveCursorToCoord({0, 0}); //Resting coord
 }
 
@@ -62,8 +96,20 @@ void drawRoundCornerRectangle(Coord coord, int width, int height, PikaRGB color 
 	drawRectangle(part, coord, width, height, color, bgColor);
 }
 
+void drawRoundCornerHollowRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, BoxPart part = {"╭", "─", "╮", "│", "│", "╰", "─", "╯"}) {
+	part.top_left = "╭";
+	part.top_right = "╮";
+	part.bot_left = "╰";
+	part.bot_right = "╯";
+	drawHollowRectangle(part, coord, width, height, color);
+}
+
 void drawBoxyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	drawRectangle({"▄", "▄", "▄", "█", "█", "▀", "▀", "▀"}, coord, width, height, color, bgColor);
+}
+
+void drawBoxyLineHollowRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}) {
+	drawHollowRectangle({"▄", "▄", "▄", "█", "█", "▀", "▀", "▀"}, coord, width, height, color);
 }
 
 void drawHeavyLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
@@ -74,41 +120,24 @@ void drawHeavyLineRoundCornerRectangle(Coord coord, int width, int height, PikaR
 	drawRoundCornerRectangle(coord, width, height, color, bgColor, {"┏", "━", "┓", "┃", "┃", "┗", "━", "┛"});
 }
 
+void drawHeavyLineRoundCornerHollowRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}) {
+	drawRoundCornerHollowRectangle(coord, width, height, color, {"┏", "━", "┓", "┃", "┃", "┗", "━", "┛"});
+}
+
 void drawDoubleLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	drawRectangle({"╔", "═", "╗", "║", "║", "╚", "═", "╝"}, coord, width, height, color, bgColor);
 }
 
 void drawDoubleLineHollowRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}) {
-	moveCursorToCoord(coord);
-	string fgColorCode;
-	if (color.r != -1) {
-		fgColorCode = getFGAnsiCode(color);
-	}
-	string s = fgColorCode + "╔";
-	string space;
-	for (int i = 0; i < width; i++) {
-		s += "═";
-	}
-	s += "╗";
-	cout << ANSI_RESET << s;
-
-	for (int i = 0; i < height / 2; i++) {
-		moveCursorToCoord({coord.x, coord.y + i + 1});
-		cout << fgColorCode << "║" << ANSI_RESET;
-		moveCursorToCoord({coord.x + width + 1, coord.y + i + 1});
-		cout << fgColorCode << "║" << ANSI_RESET;
-	}
-	s = fgColorCode + "╚";
-	for (int i = 0; i < width; i++)
-		s += "═";
-	s += "╝";
-	cout << s;
-	moveCursorToCoord({coord.x, coord.y + height / 2 + 1});
-	moveCursorToCoord({0, 0}); //Resting coord
+	drawHollowRectangle({"╔", "═", "╗", "║", "║", "╚", "═", "╝"}, coord, width, height, color);
 }
 
 void drawThinLineRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}, PikaRGB bgColor = {-1, -1, -1}) {
 	drawRectangle({"┌", "─", "┐", "│", "│", "└", "─", "┘"}, coord, width, height, color, bgColor);
+}
+
+void drawThinLineHollowRectangle(Coord coord, int width, int height, PikaRGB color = {-1, -1, -1}) {
+	drawHollowRectangle({"┌", "─", "┐", "│", "│", "└", "─", "┘"}, coord, width, height, color);
 }
 
 void drawAtPos(Coord coord, const string &s) {

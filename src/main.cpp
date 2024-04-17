@@ -73,6 +73,8 @@ void drawCursor() {
 	cout << bg << "┛";
 }
 
+int score = 0;
+
 void drawSelect(Coord coord) {
 	int r = boxes[coord.y - PADDING][coord.x - PADDING].color;
 	string bg = bgAn[r];
@@ -96,9 +98,6 @@ void drawBox(int i, int j) {
 	int r = boxes[i - PADDING][j - PADDING].color;
 	string bg = bgAn[r];
 	string fg = fgAn[r];
-	if (r >= 12) {
-		system(("start cmd.exe /k1 echo " + to_string(r)).c_str());
-	}
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 1});
 	cout << bg << "       " << ANSI_RESET_BACKGROUND;
 	moveCursorToCoord({BOARD_START_X + (1 + LINE) * j + 1, BOARD_START_Y + (1 + PILAR) * i + 2});
@@ -139,9 +138,6 @@ Coord findMatch(Coord src) {
 			maze[m + PADDING][n + PADDING] = true;
 			Path p = findPath({src.y + PADDING, src.x + PADDING}, {n + PADDING, m + PADDING});
 			if (p.turns != -1) {
-				if (p.turns > 2) {
-					system("start cmd.exe /k echo Hey1");
-				}
 				return {n + PADDING, m + PADDING};
 			} else {
 				maze[src.y + PADDING][src.x + PADDING] = false;
@@ -181,13 +177,11 @@ Selector help() {
 	return {{-1, -1},{-1, -1}};
 }
 
-auto musicEngine = AudioEngine();
 auto soundEngine = AudioEngine();
 
+auto gameSound = SoundAlbum();
 auto menuMusic = SoundAlbum();
-auto gameMusic = SoundAlbum();
-
-int score = 0;
+auto inGameMusic = SoundAlbum();
 
 void match() {
 	if (boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].alphabet == boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].alphabet) {
@@ -215,14 +209,11 @@ void match() {
 					t++;
 				}
 				coords.push_back(start);
-				moveCursorToCoord(
-						{BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1});
+				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1});
 				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-				moveCursorToCoord(
-						{BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2});
+				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2});
 				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-				moveCursorToCoord(
-						{BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3});
+				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3});
 				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
 				Sleep(10);
 			}
@@ -351,17 +342,17 @@ void match() {
 			Sleep(100);
 			boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].invisible = true;
 			boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].invisible = true;
-			ma_sound_start(soundEngine.album->sounds[2].sound);
+			soundEngine.playSyncFromAlbum(gameSound, 0);
 			score += (p.turns + 1) * coords.size();
 			remainPair--;
 		} else {
 			Sleep(50);
 			maze[selector.c1.y][selector.c1.x] = false;
 			maze[selector.c2.y][selector.c2.x] = false;
-			ma_sound_start(soundEngine.album->sounds[5].sound);
+			soundEngine.playSyncFromAlbum(gameSound, 3);
 		}
 	} else {
-		ma_sound_start(soundEngine.album->sounds[5].sound);
+		soundEngine.playSyncFromAlbum(gameSound, 3);
 	}
 	selector.reset();
 	draw();
@@ -387,43 +378,48 @@ bool project_init() {
 		cout << getFGAnsiCode(244, 12, 21) << "Failed to init project! Project is lack of sound files!\n" << ANSI_RESET;
 		return false;
 	}
-	if (!musicEngine.init()) {
-		cout << getFGAnsiCode(244, 12, 21) << "Failed to init music engine! IDK what's happened :c!\n" << ANSI_RESET;
-		return false;
-	}
 	if (!soundEngine.init()) {
 		cout << getFGAnsiCode(244, 12, 21) << "Failed to init sound engine! IDK what's happened :c!\n" << ANSI_RESET;
 		return false;
 	}
 
-	auto gameSound = new SoundAlbum();
-	gameSound->addSoundFromFilePath(soundEngine, string(SOUND_RELATIVE_PATH) + "button_confirm.mp3", true);
-	gameSound->addSoundFromFilePath(soundEngine, string(SOUND_RELATIVE_PATH) + "button_tap.mp3", true);
-	gameSound->addSoundFromFilePath(soundEngine, string(SOUND_RELATIVE_PATH) + "correct.wav", true);
-	ma_sound_set_volume(gameSound->sounds[2].sound, 0.5); // reduce the volume by half
-	gameSound->addSoundFromFilePath(soundEngine, string(SOUND_RELATIVE_PATH) + "cursor.wav", true);
-	gameSound->addSoundFromFilePath(soundEngine, string(SOUND_RELATIVE_PATH) + "select.wav", true);
-	gameSound->addSoundFromFilePath(soundEngine, string(SOUND_RELATIVE_PATH) + "wrong.wav", true);
-	soundEngine.album = gameSound;
-//	cout << gameSound->size << "\n";
+	vector<string> soundPaths = {
+		"correct.wav",
+		"cursor.wav",
+		"select.wav",
+		"wrong.wav"
+	};
+	for (const auto & soundPath : soundPaths) {
+		if (!gameSound.addSoundFromFilePath(soundEngine, string(SOUND_RELATIVE_PATH) + soundPath)) {
+			cout << getFGAnsiCode(244, 12, 21) << "Failed to add music \"" << soundPath << "\"" << ANSI_RESET;
+			return false;
+		}
+	}
 
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Littleroot Town.mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "Pokemon OR&AS OST Soaring The Sky (Night).mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "AZALI - theme of a shop that sells things you dont want.mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "Bitzel - Silly tune.mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "is it good enough to be called elevator music.mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "The 4 Corners - Phantom Funk.mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "[strawberry jams vol. 4] catapillie - Starfruit Supernova (Pillars of Creation Mix).mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "maidens grove (day).mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "Sonic Colors - ＂Planet Wisp＂ Night Version.mp3");
-	menuMusic.addSoundFromFilePath(musicEngine, string(MUSIC_RELATIVE_PATH) + "Touhou 3 - Music #17 - 永遠の満月 ~ Eternal Full Moon.mp3");
+	vector<string> musicPaths = {
+		"Pokemon OR&AS OST Littleroot Town.mp3",
+		"Pokemon OR&AS OST Soaring The Sky (Night).mp3",
+		"AZALI - theme of a shop that sells things you dont want.mp3",
+		"Bitzel - Silly tune.mp3",
+		"is it good enough to be called elevator music.mp3",
+		"The 4 Corners - Phantom Funk.mp3",
+		"maidens grove (day).mp3",
+		"Sonic Colors - ＂Planet Wisp＂ Night Version.mp3",
+		"Touhou 3 - Music #17 - 永遠の満月 ~ Eternal Full Moon.mp3"
+	};
+	for (const auto & musicPath : musicPaths) {
+		if (!menuMusic.addSoundFromFilePath(soundEngine, string(MUSIC_RELATIVE_PATH) + musicPath)) {
+			cout << getFGAnsiCode(244, 12, 21) << "Failed to add music \"" << musicPath << "\"" << ANSI_RESET;
+			return false;
+		}
+	}
 
-//	menuMusic.shuffleSound();
+	menuMusic.shuffleSound();
 	menuMusic.loop = true;
 	menuMusic.randomize = true;
 
-	musicEngine.album = &menuMusic;
-	musicEngine.setVolume(1.0);
+	soundEngine.album = &menuMusic;
+	soundEngine.setVolume(1.0);
 
 	setBoardSize(8, 10);
 //	setBoardSize(4, 5);
@@ -434,7 +430,7 @@ bool project_init() {
 	SCORE_BOARD_Y = 20;//(BOARD_START_Y + (PILAR + 1) * MAZE_ROW * 2) - 30 / 2;
 	SCORE_BOARD_Y = (BOARD_START_Y + (PILAR + 1) * MAZE_ROW) - 30 / 2;
 
-	thread musicThread(playEngine, &musicEngine);
+	thread musicThread(playEngine, &soundEngine);
 	musicThread.detach();
 	return true;
 }
@@ -442,7 +438,7 @@ bool project_init() {
 void project_cleanup() {
 	saveDataToFile(string(ASSET_RELATIVE_PATH) + "gameData.txt");
 	uninitBoard();
-	musicEngine.uninit();
+	soundEngine.uninit();
 	soundEngine.uninit();
 	system("pause");
 }
@@ -452,6 +448,8 @@ void drawScoreBoard() {
 }
 
 void runGame() {
+	fillConsoleBackground(RGB(0, 0, 0));
+
 	readAnsiFile(string(ASSET_RELATIVE_PATH) + "pikachu_large.txt", bgAnsi);
 
 	SHORT i = 300;
@@ -478,7 +476,7 @@ void runGame() {
 		input = getch();
 		if (input == PRE_KEY_1 || input == PRE_KEY_2) {
 			input = getch();
-			ma_sound_start(soundEngine.album->sounds[3].sound);
+			soundEngine.playSyncFromAlbum(gameSound, 1);
 			draw();
 			switch (input) {
 				case CTR_ARROW_UP:
@@ -546,7 +544,7 @@ void runGame() {
 			switch (input) {
 				case CTR_ENTER_KEY:
 				case ENTER_KEY:
-					ma_sound_start(soundEngine.album->sounds[4].sound);
+					soundEngine.playSyncFromAlbum(gameSound, 2);
 					if (maze[cursor.y][cursor.x]) {
 						selector.reset();
 						draw();
@@ -572,7 +570,7 @@ void runGame() {
 					draw();
 					break;
 				case 'n':
-					musicEngine.FLAG_PLAY_NEXT_SOUND = true;
+					soundEngine.FLAG_PLAY_NEXT_SOUND = true;
 					break;
 				case 'h': {
 					auto suggest = help();
@@ -589,7 +587,7 @@ void runGame() {
 					break;
 				}
 				case ESC_KEY: {
-					musicEngine.isPlaying = false;
+					soundEngine.isPlaying = false;
 					FLAG_RUNNING = false;
 					break;
 				}
@@ -598,9 +596,8 @@ void runGame() {
 	}
 }
 
-
 void drawMainMenu() {
-	drawAtPos({SCREEN_WIDTH / 2 - 60, 1}, getFileContent("pokelogo.txt"));
+	drawAtPos({SCREEN_WIDTH / 2 - 50, 1}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokelogo.txt"));
 
 	PikaRGB button1Color = {255,255,255};
 	string fg;
@@ -652,7 +649,7 @@ void drawMainMenu() {
 }
 
 void drawChoseGameMenu() {
-	drawAtPos({SCREEN_WIDTH / 2 - 60, 1}, getFileContent("pokelogo.txt"));
+	drawAtPos({SCREEN_WIDTH / 2 - 50, 1}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokelogo.txt"));
 	PikaRGB button1Color = {255,255,255};
 	if (currentButton == 0) {
 		button1Color = {0,0,0};
@@ -675,8 +672,8 @@ void drawChoseGameMenu() {
 }
 
 void drawLeaderBoard() {
-	drawAtPos({12, 10}, getFileContent("pokeball_star.txt"));
-	drawAtPos({SCREEN_WIDTH / 2, 1}, getFileContent("leaderboard.txt"));
+	drawAtPos({12, 10}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_star.txt"));
+	drawAtPos({SCREEN_WIDTH / 2, 1}, getFileContent(string(ASSET_RELATIVE_PATH) + "leaderboard.txt"));
 	int a[10];
 	getTopRank(a, currentButton);
 	string bg1 = getBGAnsiCode(201,166,0);
@@ -701,7 +698,7 @@ void drawLeaderBoard() {
 			string score = to_string(userList[a[i]].score[currentButton]);
 //			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + fg + string(70 - score.length(), ' ') + score);
 			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + empty_line);
-			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + fg + string(50 - score.length(), ' ') + score + string(20, '_'));
+			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + fg + string(50 - score.length(), ' ').append(score).append(string(20, '_')));
 		}
 	}
 	PikaRGB button1Color = {255,255,255};
@@ -729,22 +726,24 @@ void drawLeaderBoard() {
 void runMainMenu();
 
 void runLoginMenu() {
-	fillConsoleBackground(RGB(229, 205, 174));
+	fillConsoleBackground(RGB(20, 0, 20));
+
+//	fillConsoleBackground(RGB(229, 205, 174));
 
 	const int LOGIN_BOX_HEIGHT = 18;
 	int LOGIN_BOX_WIDTH = SCREEN_WIDTH / 3;
 
 	AnsiArt pokeballs_idle{{
-		   getFileContent("pokeball_default.txt"),
-		   getFileContent("pokeball_left.txt"),
-		   getFileContent("pokeball_default.txt"),
-		   getFileContent("pokeball_right.txt")
+		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_default.txt"),
+		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_left.txt"),
+		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_default.txt"),
+		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_right.txt")
    }, 100, true};
 
 	AnsiArt pokeballs_succeed{{
-		  getFileContent("pokeball_success_0.txt"),
-		  getFileContent("pokeball_success_1.txt"),
-		  getFileContent("pokeball_success_2.txt")
+		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_success_0.txt"),
+		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_success_1.txt"),
+		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_success_2.txt")
 	}, 100, false, false};
 
 //	char userName[CHAR_USER_NAME_SIZE] = {};
@@ -753,7 +752,7 @@ void runLoginMenu() {
 	char userPass[CHAR_USER_PASS_SIZE] = "123";
 
 	cout << getBGAnsiCode(0,0,0);
-	drawRoundCornerRectangle({SCREEN_WIDTH / 3, static_cast<int>(SCREEN_HEIGHT / 1.75)}, LOGIN_BOX_WIDTH, LOGIN_BOX_HEIGHT, {255,255,255}, {229,205,174});
+	drawRoundCornerHollowRectangle({SCREEN_WIDTH / 3, static_cast<int>(SCREEN_HEIGHT / 1.75)}, LOGIN_BOX_WIDTH, LOGIN_BOX_HEIGHT, {255,255,255});
 
 	int loginButton = LOGIN_MENU_INPUT_USERNAME;
 	bool entered = false;
@@ -763,7 +762,7 @@ void runLoginMenu() {
 	thread t(loginKeyboardController, userName, userPass, &loginButton, &entered, &loginState);
 	t.detach();
 
-	string bg_fgColor = getFGAnsiCode(0,0,0);
+	string bg_fgColor = getFGAnsiCode(255,255,255);
 	drawRawTextAtPos({SCREEN_WIDTH / 3 + 5, static_cast<int>(SCREEN_HEIGHT / 1.75) + 7}, bg_fgColor + "TIPS: ");
 	drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 7}, bg_fgColor + R"(- Press "ENTER" to confirm!)");
 	drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 8}, bg_fgColor + "- Use arrow keys (▲/▼/◀/▶) for navigating!");
@@ -815,13 +814,13 @@ void runLoginMenu() {
 
 		string buttonColor;
 		if (loginButton == LOGIN_MENU_INPUT_LOGIN) {
-			buttonColor = getBGAnsiCode(255,255,255);
+			buttonColor = getFGAnsiCode(185, 148, 112);
 		}
 		drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 5}, bg_fgColor + buttonColor + "LOGIN" + ANSI_RESET);
 
 		buttonColor = "";
 		if (loginButton == LOGIN_MENU_INPUT_SIGNIN) {
-			buttonColor = getBGAnsiCode(255,255,255);
+			buttonColor = getFGAnsiCode(185, 148, 112);
 		}
 
 		drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 10 + CHAR_USER_NAME_SIZE - 6, static_cast<int>(SCREEN_HEIGHT / 1.75) + 5}, bg_fgColor + buttonColor + "SIGNIN" + ANSI_RESET);
@@ -844,6 +843,7 @@ void runMainMenu() {
 	bool hasUpdate = true;
 	thread t2(menuKeyboardController, &currentButton, &task, &changeScreen, &hasUpdate);
 	t2.detach();
+
 	while (true) {
 		if (changeScreen) {
 			clrScr();
@@ -863,6 +863,15 @@ void runMainMenu() {
 				case TASK_CHOOSE_GAME:
 					drawChoseGameMenu();
 					break;
+				case TASK_START_GAME:
+					FLAG_RUNNING = true;
+					runGame();
+					cout << "Wait for a sec...";
+					Sleep(1000);
+					clrScr();
+					fillConsoleBackground(RGB(229, 205, 174));
+					task = TASK_MAIN_MENU;
+					runMainMenu();
 				case TASK_LEADER_BOARD:
 					drawLeaderBoard();
 					break;
@@ -875,13 +884,19 @@ void runMainMenu() {
 }
 
 int main() {
-	project_init();
-	runLoginMenu();
+	if (project_init()) {
+		drawAtPos({30, 0}, getFileContent(string(ASSET_RELATIVE_PATH) + "pikamatch.txt"));
+		Sleep(500);
+		clrScr();
 
-	if (task == TASK_MAIN_MENU) {
-		runMainMenu();
+		runLoginMenu();
+		saveDataToFile(string(ASSET_RELATIVE_PATH) + "gameData.txt");
+
+		if (task == TASK_MAIN_MENU) {
+			runMainMenu();
+		}
 	}
-	runGame();
+
 	project_cleanup();
 	return 0;
 }

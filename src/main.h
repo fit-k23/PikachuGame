@@ -53,5 +53,5 @@ using namespace std;
 #endif
 
 bool project_init();
-void project_uninit();
+void project_cleanup();
 

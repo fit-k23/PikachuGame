@@ -60,14 +60,16 @@ void clrScr() {
 	// We need to flush that to the console because we're circumventing
 	// std::cout entirely; after we clear the console, we don't want
 	// stale buffered text to randomly be written out.
-	std::cout.flush();
+	cout.flush();
 
 	// Figure out the current width and height of the console window
 	if (!GetConsoleScreenBufferInfo(hOut, &csbi)) {
 		abort();
 	}
-	csbi.dwSize = {static_cast<SHORT>(SCREEN_WIDTH), static_cast<SHORT>(SCREEN_HEIGHT)};
-	DWORD length = csbi.dwSize.X * csbi.dwSize.Y;
+//	csbi.dwSize = {static_cast<SHORT>(SCREEN_WIDTH), static_cast<SHORT>(SCREEN_HEIGHT)};
+//	system(("start cmd.exe /k echo " + to_string(SCREEN_WIDTH) + " : " + to_string(SCREEN_HEIGHT) + " _ " + to_string(csbi.dwMaximumWindowSize.X) + " : " + to_string(csbi.dwMaximumWindowSize.Y)).c_str());
+//	DWORD length = csbi.dwSize.X * csbi.dwSize.Y;
+	DWORD length = SCREEN_WIDTH * SCREEN_HEIGHT;
 
 	DWORD written;
 
@@ -82,9 +84,8 @@ void clrScr() {
 }
 
 void consoleInit() {
-
 	//Force console to use UTF-8, so it won't break ansi code due to most ansi code is written using utf-8o
-	//Ref: The source is I made it up, jk: https://stackoverflow.com/a/41645159/24078702
+	//Ref: The source is that I made it up, jk: https://stackoverflow.com/a/41645159/24078702
 	//Docs: https://learn.microsoft.com/en-us/windows/console/setconsoleoutputcp
 	SetConsoleOutputCP(CP_UTF8); //65001
 
@@ -95,10 +96,10 @@ void consoleInit() {
 
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	// Enable Ansi support, giving the power to change the color world! RGB1!!!!
+	// Ref: todo
 	DWORD dwMode = 0;
 	GetConsoleMode(hOut, &dwMode);
-	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-	SetConsoleMode(hOut, dwMode);
+	SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 
 	// Resize the console font size to 16
 	// Ref: https://learn.microsoft.com/en-us/windows/console/setcurrentconsolefontex
@@ -111,10 +112,10 @@ void consoleInit() {
 	HWND hWnd = GetConsoleWindow();
 
 	ShowWindow(hWnd, SW_MAXIMIZE);
-	// SetConsoleDisplayMode(GetStdHandle(STD_OUTPUT_HANDLE), CONSOLE_FULLSCREEN_MODE, nullptr);
+//	 SetConsoleDisplayMode(GetStdHandle(STD_OUTPUT_HANDLE), CONSOLE_FULLSCREEN_MODE, nullptr);
 
 	//system("mode con COLS=700");
-	//SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000); Full screen
+	//SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000);// Full screen
 
 	//disableConsoleResize(); //auto resize
 	//DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
@@ -143,21 +144,18 @@ void moveCursorToCoord(Coord coord) {
 void fillConsoleBackground(COLORREF color) {
 	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
 	sbInfoEx.cbSize = sizeof(sbInfoEx);
+
 	HANDLE consoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	GetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
-
-	for (unsigned long & colorInfo : sbInfoEx.ColorTable) colorInfo = color;
-//	sbInfoEx.dwSize = sbInfoEx.dwMaximumWindowSize;
+	sbInfoEx.dwSize = {static_cast<SHORT>(SCREEN_WIDTH), static_cast<SHORT>(SCREEN_HEIGHT)};
+	sbInfoEx.dwMaximumWindowSize = sbInfoEx.dwSize;
+	sbInfoEx.srWindow.Right = static_cast<SHORT>(sbInfoEx.srWindow.Left + SCREEN_WIDTH); //Microsoft stupid broken windows, why is the window shrinking... You got one job and Window 11 is broken as shit
+	sbInfoEx.srWindow.Bottom = static_cast<SHORT>(sbInfoEx.srWindow.Top + SCREEN_HEIGHT);
+//	for (unsigned long & colorInfo : sbInfoEx.ColorTable) colorInfo = color;
+	sbInfoEx.wAttributes = 0;
+	sbInfoEx.ColorTable[0] = color;
+	sbInfoEx.ColorTable[4] = RGB(255,255,255);
 	SetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
-}
-
-
-void setConsoleColors(WORD attribs) {
-	HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	CONSOLE_SCREEN_BUFFER_INFOEX cbi;
-	cbi.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
-	GetConsoleScreenBufferInfoEx(hOutput, &cbi);
-	cbi.wAttributes = attribs;
-	SetConsoleScreenBufferInfoEx(hOutput, &cbi);
+//	SetConsoleTextAttribute(consoleOut, 0);
+	SetConsoleTextAttribute(consoleOut, 4);
 }

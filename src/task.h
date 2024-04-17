@@ -38,7 +38,6 @@ const int TASK_MAIN_MENU = 2;
 const int TASK_CHOOSE_GAME = 3;
 const int TASK_START_GAME = 4;
 const int TASK_LEADER_BOARD = 5;
-const int TASK_CONTINUE_GAME = 6;
 const int TASK_SETTING_MENU = 99;
 const int TASK_EXIT = 100;
 
@@ -174,6 +173,9 @@ void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScre
 	reinitButtonBorder(*taskId, buttonBorder1, buttonBorder2);
 
 	while (input != ESC_KEY) {
+		if (*taskId == TASK_START_GAME) {
+			break;
+		}
 		input = getch();
 		if (input == PRE_KEY_1 || input == PRE_KEY_2) {
 			input = getch();
@@ -208,14 +210,22 @@ void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScre
 							*changeScreen = true;
 							*taskId = TASK_LOGIN_MENU;
 							reinitButtonBorder(*taskId, buttonBorder1, buttonBorder2);
+						} else if (*currentButtonPtr == MAIN_MENU_BUTTON_CONTINUE_GAME) {
+							*taskId = TASK_START_GAME;
+							*hasUpdate = true;
+							*changeScreen = true;
 						}
 						break;
-					case TASK_CHOOSE_GAME: //Task start game
-						if (*currentButtonPtr == 2) {
+					case TASK_CHOOSE_GAME: //Task chose game
+						if (*currentButtonPtr == CHOOSE_GAME_BUTTON_RETURN) {
 							*taskId = TASK_MAIN_MENU;
 							reinitButtonBorder(*taskId, buttonBorder1, buttonBorder2);
 							*hasUpdate = true;
 							*currentButtonPtr = MAIN_MENU_BUTTON_START_GAME;
+						} else if (*currentButtonPtr == CHOOSE_GAME_BUTTON_NORMAL) {
+							*taskId = TASK_START_GAME;
+							*hasUpdate = true;
+							*changeScreen = true;
 						}
 						break;
 					case TASK_LEADER_BOARD:

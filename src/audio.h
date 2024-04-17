@@ -105,6 +105,7 @@ struct AudioEngine{
 	void uninit();
 
 	void setVolume(float v);
+	bool playSyncFromAlbum(SoundAlbum &album, int soundId);
 };
 
 bool AudioEngine::init() {
@@ -131,6 +132,7 @@ bool playEngine(AudioEngine *engine) {
 	float volume = engine->volume;
 	ma_sound* sound;
 	while (current != nullptr) {
+//		system("start cmd.exe /k echo playing ");
 		sound = current->sound;
 		if (sound == nullptr) {
 			if (!initSoundFromFile(engine, current->filePath, sound)) {
@@ -162,7 +164,7 @@ bool playEngine(AudioEngine *engine) {
 			Sleep(100);
 		}
 		if (current->sound == nullptr) {
-			// deallocate the sound if it was generated if it was loaded from storage
+			// deallocate the sound if it was not preloaded
 			ma_sound_uninit(sound);
 		} else {
 			//Reset sound index to 0 so the sound will play from the start in later!
@@ -179,6 +181,22 @@ bool playEngine(AudioEngine *engine) {
 	}
 	engine->isPlaying = false;
 	return true;
+}
+
+bool AudioEngine::playSyncFromAlbum(SoundAlbum &album, int soundId) {
+	if (soundId >= 0 && soundId <= album.size) {
+		if (album.sounds[soundId].sound == nullptr) {
+			if (fileExist(album.sounds[soundId].filePath.c_str())) {
+				ma_engine_play_sound(&engine, album.sounds[soundId].filePath.c_str(), nullptr);
+				return true;
+			}
+		} else {
+			ma_sound_seek_to_pcm_frame(album.sounds[soundId].sound, 0);
+			ma_sound_start(album.sounds[soundId].sound);
+			return true;
+		}
+	}
+	return false;
 }
 
 bool initSoundFromFile(AudioEngine *engine, const string &filePath, ma_sound *&sound) {
