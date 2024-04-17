@@ -128,8 +128,8 @@ void consoleInit() {
 
 //	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
 //	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-	syncScrSize();
 	ShowScrollBar(hWnd, SB_BOTH, false);
+	syncScrSize();
 //	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
 }
 
@@ -143,33 +143,12 @@ void moveCursorToCoord(Coord coord) {
 void fillConsoleBackground(COLORREF color) {
 	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
 	sbInfoEx.cbSize = sizeof(sbInfoEx);
-
 	HANDLE consoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	GetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
 
 	for (unsigned long & colorInfo : sbInfoEx.ColorTable) colorInfo = color;
-	//sbInfoEx.dwSize = sbInfoEx.dwMaximumWindowSize;
+//	sbInfoEx.dwSize = sbInfoEx.dwMaximumWindowSize;
 	SetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
-}
-
-void flashConsoleBackgroundColor(int cntFlashes, int flashInterval_ms, COLORREF color, COLORREF color2) {
-	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
-	sbInfoEx.cbSize = sizeof(CONSOLE_SCREEN_BUFFER_INFOEX);
-
-	HANDLE consoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	GetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
-
-	COLORREF storedBG = sbInfoEx.ColorTable[0];
-
-	for (int i = 0; i < 2 * cntFlashes; ++i) {
-		if (i % 2 == 0) {
-			sbInfoEx.ColorTable[0] = color;
-		} else {
-			sbInfoEx.ColorTable[0] = color2;
-		}
-		SetConsoleScreenBufferInfoEx(consoleOut, &sbInfoEx);
-		Sleep(flashInterval_ms);
-	}
 }
 
 

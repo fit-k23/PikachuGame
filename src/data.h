@@ -8,13 +8,13 @@
 #include <cstring>
 #include <sstream>
 
+#endif
+
 #ifndef PIKACHUGAME_CONSTANT_H
 #include "constant.h"
 #endif
 
 using namespace std;
-
-#endif
 
 //struct User be datatype of each account,
 struct User {
@@ -68,8 +68,8 @@ int searchUser(const string& userName) {
 	return -1;
 }
 
-int addUser(const string& userName, const string& userPass, int pokeId = -1, int score1 = 0, int score2 = 0, int mode = -1, int lvl = 1) {
-	if (searchUser(userName) != -1) return false;
+int tryAddUser(const string& userName, const string& userPass, int pokeId = -1, int score1 = 0, int score2 = 0, int mode = -1, int lvl = 1) {
+	if (searchUser(userName) != -1) return -1;
 	userList[config.nUser++] = {"", userName, userPass, pokeId, {score1, score2}, mode, lvl};
 	return config.nUser - 1;
 }
@@ -85,12 +85,14 @@ int tryLogIn(const string& userName, const string& userPass) {
 	return userList[uid].userPass == userPass;
 }
 
+// -1 account not found
+// other: user id
 bool login(const string& userName, const string& userPass) {
-	if (!tryLogIn(userName, userPass)) {
-		return false;
+	int uid = searchUser(userName);
+	if (uid == -1) {
+		return -1;
 	}
-	userId = searchUser(userName);
-	return true;
+	return uid;
 }
 
 //this function will read all account in the data file,and it will be used for "EasyRank","NormalRank","HardRank" to find top highest score
@@ -163,7 +165,7 @@ static bool saveDataToFile(const string &fileName) {
 	file << (config.enableSound ? '1' : '0') << ';';
 	file << (config.enableMusic ? '1' : '0') << '\n';
 
-	for (int i = 0; i < config.maxUser; i++) {
+	for (int i = 0; i < config.nUser; i++) {
 		if (userList[i].userName.empty()) {
 			continue;
 		}
