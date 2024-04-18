@@ -32,6 +32,8 @@ Box **boxes;
 bool **maze;
 
 static int remainPair;
+static int mode = 0;
+static int suggestionTry = 3;
 
 void initBoard() {
 	boxes = new Box *[ROW];

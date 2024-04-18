@@ -26,6 +26,7 @@ struct User {
 	int mode = -1; // -1 no save, 0 normal, 1 collapse
 	int lastScore = 0;
 	int remainPair = 0;
+	int suggestionTry = 3;
 };
 
 static User* userList;
@@ -154,6 +155,8 @@ bool loadDataFromFile(const string &fileName) {
 		file.ignore();
 		file >> user->remainPair;
 		file.ignore();
+		file >> user->suggestionTry;
+		file.ignore();
 		getline(file, user->stage, '\n');
 	}
 	file.close();
@@ -187,6 +190,7 @@ static bool saveDataToFile(const string &fileName) {
 		}
 		file << userList[i].lastScore << ";";
 		file << to_string(userList[i].remainPair) << ";";
+		file << to_string(userList[i].suggestionTry) << ";";
 		file << userList[i].stage << '\n';
 	}
 

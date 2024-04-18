@@ -193,13 +193,12 @@ void match() {
 			vector<Coord> coords;
 			coords.push_back(start);
 			int t = 0;
-			moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1});
-			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-			moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2});
-			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-			moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3});
-			cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
+			string pathBG = getBGAnsiCode(245,245,25).append(string(LINE, ' ')).append(ANSI_RESET_BACKGROUND);
+			drawRawTextAtPos({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1}, pathBG);
+			drawRawTextAtPos({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2}, pathBG);
+			drawRawTextAtPos({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3}, pathBG);
 			Sleep(1);
+
 			while (!start.isEqual(p.corners[t])) {
 				int dx = p.corners[t].x == start.x ? 0 : (p.corners[t].x - start.x) / abs(p.corners[t].x - start.x);
 				int dy = p.corners[t].y == start.y ? 0 : (p.corners[t].y - start.y) / abs(p.corners[t].y - start.y);
@@ -209,144 +208,20 @@ void match() {
 					t++;
 				}
 				coords.push_back(start);
-				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1});
-				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2});
-				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-				moveCursorToCoord({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3});
-				cout << "\033[48;2;245;245;25m" << string(LINE, ' ') << ANSI_RESET_BACKGROUND;
-				Sleep(10);
+				drawRawTextAtPos({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 1}, pathBG);
+				drawRawTextAtPos({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 2}, pathBG);
+				drawRawTextAtPos({BOARD_START_X + (1 + LINE) * start.x + 1, BOARD_START_Y + (1 + PILAR) * start.y + 3}, pathBG);
+				Sleep(10 / coords.size());
 			}
-			Sleep(20);
 			draw();
-//			for (auto &cods: coords) {
-//				switch (rand() % 37) {
-//					case 0:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       "
-//							 << ANSI_RESET_BACKGROUND;
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :D   "
-//							 << ANSI_RESET_BACKGROUND;
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       "
-//							 << ANSI_RESET_BACKGROUND;
-//						break;
-//					case 1:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :>   " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						break;
-//					case 2:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "  :O   " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						break;
-//					case 3:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♥   " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						break;
-//					case 4:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ★   " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						break;
-//					case 5:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ☆   " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						break;
-//					case 6:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♫   " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						break;
-//					case 7:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ⛛   " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						break;
-//					case 8:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "   ♜   " << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << "       " << "\033[049m";
-//						break;
-//					default:
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 1});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ')
-//							 << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 2});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ')
-//							 << "\033[049m";
-//						moveCursorToCoord(
-//								{BOARD_START_X + (1 + LINE) * cods.x + 1, BOARD_START_Y + (1 + PILAR) * cods.y + 3});
-//						cout << getBGAnsiCode(rand() % 256, rand() % 256, rand() % 256) << string(LINE, ' ')
-//							 << "\033[049m";
-//				}
-//			}
-
-			Sleep(100);
+			Sleep(40);
 			boxes[selector.c1.y - PADDING][selector.c1.x - PADDING].invisible = true;
 			boxes[selector.c2.y - PADDING][selector.c2.x - PADDING].invisible = true;
 			soundEngine.playSyncFromAlbum(gameSound, 0);
 			score += (p.turns + 1) * coords.size();
 			remainPair--;
 		} else {
-			Sleep(50);
+			Sleep(20);
 			maze[selector.c1.y][selector.c1.x] = false;
 			maze[selector.c2.y][selector.c2.x] = false;
 			soundEngine.playSyncFromAlbum(gameSound, 3);
@@ -432,19 +307,18 @@ void project_cleanup() {
 	uninitPokemon();
 	uninitBoard();
 	soundEngine.uninit();
-	soundEngine.uninit();
-	system("pause");
+//	system("pause");
 }
-
-int mode = 0;
 
 void drawScoreBoard() {
 	int offset = 10;
-	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 2}, "User name: " + userList[userId].userName);
+	string bg = getFGAnsiCode(255,255,255);
+	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 2}, bg + "User name: " + userList[userId].userName);
 	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 3}, "Pokemon: " + pokemonList.pokemons[userList[userId].pokeId].name);
 	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 4}, "Score: " + to_string(score));
 //	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 5}, (string("Mode: ") + (mode == 0 ? "Normal" : "Collapse")));
 	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 5}, "Record: " + to_string(userList[userId].score[mode]));
+	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 6}, "Suggestion Left: " + to_string(suggestionTry));
 	drawAtPos({SCORE_BOARD_X + 30, SCORE_BOARD_Y + 4}, pokemonList.pokemons[userList[userId].pokeId].art.frames[0]);
 }
 
@@ -593,19 +467,22 @@ void runGame() {
 					soundEngine.FLAG_PLAY_NEXT_SOUND = true;
 					break;
 				case 'h': {
-					auto suggest = help();
-					if (suggest.c1.x != -1) {
-						drawSelect(suggest.c1);
-						drawSelect(suggest.c2);
-//						Sleep(1000);
-						selector = suggest;
-						draw();
-						match();
-						drawCursor();
+					if (suggestionTry > 0) {
+						auto suggest = help();
+						if (suggest.c1.x != -1) {
+							drawSelect(suggest.c1);
+							drawSelect(suggest.c2);
+							selector = suggest;
+							draw();
+							match();
+							drawCursor();
+						}
+						score -= 10;
+						suggestionTry--;
 					}
-					score -= 10;
 					break;
 				}
+				case 'q':
 				case ESC_KEY: {
 					FLAG_RUNNING = false;
 					break;
@@ -619,6 +496,7 @@ void runGame() {
 		userList[userId].lastScore = 0;
 		userList[userId].stage = "";
 		userList[userId].remainPair = 0;
+		userList[userId].suggestionTry = 0;
 	}
 }
 
@@ -802,16 +680,17 @@ void runLoginMenu() {
 
 	int loginButtonId = LOGIN_MENU_INPUT_USERNAME;
 	bool entered = false;
+	bool updated = true;
 
 	int loginState = -2;
 
-	thread loginControlThread(loginKeyboardController, userName, userPass, &loginButtonId, &entered, &loginState);
+	thread loginControlThread(loginKeyboardController, userName, userPass, &loginButtonId, &entered, &loginState, &updated);
 	loginControlThread.detach();
 
 	string bg_fgColor = getFGAnsiCode(255,255,255);
 	drawRawTextAtPos({SCREEN_WIDTH / 3 + 5, static_cast<int>(SCREEN_HEIGHT / 1.75) + 7}, bg_fgColor + "TIPS: ");
 	drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 7}, bg_fgColor + R"(- Press "ENTER" to confirm!)");
-	drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 8}, bg_fgColor + "- Use arrow keys (▲/▼/◀/▶) for navigating!");
+	drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 8}, bg_fgColor + "- Use arrow keys (▲/▼/</>) for navigating!");
 //	drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 8}, bg_fgColor + "- Use arrow keys (▴/▾/◂/▸) for navigating!");
 	drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 9}, bg_fgColor + R"(- Press "DELETE" or "←BACKSPACE" to delete.)");
 	moveCursorToCoord({0,0}); // resting point
@@ -820,6 +699,9 @@ void runLoginMenu() {
 		if (!entered) {
 			drawAnsiArt(pokeballs_idle, {SCREEN_WIDTH / 2 - 23, SCREEN_HEIGHT / 4 - 15});
 		} else {
+			if (loginState == -2) {
+				break;
+			}
 			if (pokeballs_succeed.isDone) {
 				if (loginButtonId == LOGIN_MENU_INPUT_SIGNIN) {
 					userId = loginState;
@@ -833,49 +715,61 @@ void runLoginMenu() {
 				drawAnsiArt(pokeballs_succeed, {SCREEN_WIDTH / 2 - 23, SCREEN_HEIGHT / 4 - 15});
 			}
 		}
-		moveCursorToCoord({SCREEN_WIDTH / 3 + 7, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2});
-		if (loginButtonId == LOGIN_MENU_INPUT_USERNAME) {
-			cout << bg_fgColor << " > ";
-		} else {
-			cout << bg_fgColor << "   ";
-		}
-		moveCursorToCoord({SCREEN_WIDTH / 3 + 7, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3});
-		if (loginButtonId == LOGIN_MENU_INPUT_USERPASS) {
-			cout << bg_fgColor << " > ";
-		} else {
-			cout << bg_fgColor << "   ";
+
+		if (updated) {
+			moveCursorToCoord({SCREEN_WIDTH / 3 + 7, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2});
+			if (loginButtonId == LOGIN_MENU_INPUT_USERNAME) {
+				cout << bg_fgColor << " > ";
+			} else {
+				cout << bg_fgColor << "   ";
+			}
+			moveCursorToCoord({SCREEN_WIDTH / 3 + 7, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3});
+			if (loginButtonId == LOGIN_MENU_INPUT_USERPASS) {
+				cout << bg_fgColor << " > ";
+			} else {
+				cout << bg_fgColor << "   ";
+			}
+
+			if (loginState == -1) {
+				if (loginButtonId != LOGIN_MENU_INPUT_SIGNIN) {
+					drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 12 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, string(15, ' '));
+					drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 12 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, bg_fgColor + getFGAnsiCode(234, 12, 12) + "User not found!" + ANSI_RESET);
+				} else {
+					drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 12 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, string(15, ' '));
+					drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 12 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, bg_fgColor + getFGAnsiCode(234, 12, 12) + "User existed!" + ANSI_RESET);
+				}
+				soundEngine.playSyncFromAlbum(gameSound, 3);
+			} else {
+				drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 12 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, string(15, ' '));
+			}
+
+			if (loginState == 0 && loginButtonId != LOGIN_MENU_INPUT_SIGNIN) {
+				soundEngine.playSyncFromAlbum(gameSound, 3);
+				drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 12 + CHAR_USER_PASS_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3}, bg_fgColor + getFGAnsiCode(234, 12, 12) + "Wrong Password" + ANSI_RESET);
+			} else {
+				drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 12 + CHAR_USER_PASS_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3}, string(15, ' '));
+			}
+
+			string buttonColor;
+			if (loginButtonId == LOGIN_MENU_INPUT_LOGIN) {
+				buttonColor = getFGAnsiCode(185, 148, 112);
+			}
+			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 5}, bg_fgColor + buttonColor + "LOGIN" + ANSI_RESET);
+
+			buttonColor = "";
+			if (loginButtonId == LOGIN_MENU_INPUT_SIGNIN) {
+				buttonColor = getFGAnsiCode(185, 148, 112);
+			}
+
+			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 10 + CHAR_USER_NAME_SIZE - 6, static_cast<int>(SCREEN_HEIGHT / 1.75) + 5}, bg_fgColor + buttonColor + "SIGNUP" + ANSI_RESET);
+
+			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, bg_fgColor + "User name: " + userName + string(CHAR_USER_NAME_SIZE - strlen(userName) - 1, '_'));
+			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3}, bg_fgColor + "Password:  " + string(strlen(userPass), '*') + string(CHAR_USER_PASS_SIZE - strlen(userPass) - 1, '_'));
+			moveCursorToCoord({SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10}); //Resting point! Stop a buggy bug where the cursor break the ansi escape code!
+
+			updated = false;
 		}
 
-		if (loginState == -1) {
-			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, bg_fgColor + getFGAnsiCode(234, 12, 12) + "User not found!" + ANSI_RESET);
-		} else {
-			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_NAME_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2}, string(14, ' '));
-		}
-
-		if (loginState == 0 && loginButtonId != LOGIN_MENU_INPUT_SIGNIN) {
-			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_PASS_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3}, bg_fgColor + getFGAnsiCode(234, 12, 12) + "Wrong Password" + ANSI_RESET);
-		} else {
-			drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 20 + CHAR_USER_PASS_SIZE, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3}, string(14, ' '));
-		}
-
-		string buttonColor;
-		if (loginButtonId == LOGIN_MENU_INPUT_LOGIN) {
-			buttonColor = getFGAnsiCode(185, 148, 112);
-		}
-		drawRawTextAtPos({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 5}, bg_fgColor + buttonColor + "LOGIN" + ANSI_RESET);
-
-		buttonColor = "";
-		if (loginButtonId == LOGIN_MENU_INPUT_SIGNIN) {
-			buttonColor = getFGAnsiCode(185, 148, 112);
-		}
-
-		drawRawTextAtPos({SCREEN_WIDTH / 3 + 10 + 10 + CHAR_USER_NAME_SIZE - 6, static_cast<int>(SCREEN_HEIGHT / 1.75) + 5}, bg_fgColor + buttonColor + "SIGNIN" + ANSI_RESET);
-
-		moveCursorToCoord({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 2});
-		cout << bg_fgColor << "User name: " << userName << string(CHAR_USER_NAME_SIZE - strlen(userName) - 1, '_');
-		moveCursorToCoord({SCREEN_WIDTH / 3 + 10, static_cast<int>(SCREEN_HEIGHT / 1.75) + 3});
-		cout << bg_fgColor << "Password:  " << string(strlen(userPass), '*') + string(CHAR_USER_PASS_SIZE - strlen(userPass) - 1, '_');
-		moveCursorToCoord({SCREEN_WIDTH - 10, SCREEN_HEIGHT - 10}); //Resting point! Stop a buggy bug where the cursor break the ansi escape code!
 		if (!entered) {
 			Sleep(pokeballs_idle.sleepTime);
 		} else {
@@ -920,7 +814,7 @@ void runMainMenu() {
 	bool ended = false;
 	bool changeScreen = false;
 	bool hasUpdate = true;
-	int menuButtonId = MAIN_MENU_BUTTON_CONTINUE_GAME;
+	int menuButtonId = (userList[userId].mode == -1) ? MAIN_MENU_BUTTON_START_GAME : MAIN_MENU_BUTTON_CONTINUE_GAME;
 	thread menuControlThread(menuKeyboardController, &menuButtonId, &task, &changeScreen, &hasUpdate, &ended);
 	menuControlThread.detach();
 
@@ -933,6 +827,7 @@ void runMainMenu() {
 			break;
 		}
 		if (hasUpdate) {
+			soundEngine.playSyncFromAlbum(gameSound, 2);
 			hasUpdate = false;
 			switch (task) {
 				case TASK_MAIN_MENU:
@@ -978,6 +873,9 @@ void menuLoop() {
 
 void loginLoop() {
 	runLoginMenu();
+	if (userId == -1) {
+		return;
+	}
 	if (userList[userId].mode != -1) {
 		mode = userList[userId].mode;
 		boardFromString(userList[userId].stage, 8, 10);
@@ -990,6 +888,7 @@ void loginLoop() {
 
 		score = userList[userId].lastScore;
 		remainPair = userList[userId].remainPair;
+		suggestionTry = userList[userId].suggestionTry;
 	}
 
 	if (userList[userId].pokeId == -1) {
@@ -1009,6 +908,7 @@ void loginLoop() {
 			userList[userId].stage = boardToString();
 			userList[userId].lastScore = score;
 			userList[userId].remainPair = remainPair;
+			userList[userId].suggestionTry = suggestionTry;
 		}
 		saveDataToFile(string(ASSET_RELATIVE_PATH) + "gameData.txt");
 		loginLoop();

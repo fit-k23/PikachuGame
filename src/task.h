@@ -64,7 +64,7 @@ const int PRE_KEY_2 = 224;
 #include "data.h"
 #endif
 
-void loginKeyboardController(char* userName, char* userPass, int* loginButton, bool* entered, int* loginState) {
+void loginKeyboardController(char* userName, char* userPass, int* loginButton, bool* entered, int* loginState, bool *updated) {
 	int input;
 	while (!*entered) {
 		input = getch();
@@ -75,12 +75,16 @@ void loginKeyboardController(char* userName, char* userPass, int* loginButton, b
 				case ARROW_LEFT:
 					if (*loginButton > LOGIN_MENU_INPUT_USERNAME) {
 						(*loginButton)--;
+						*loginState = -2;
+						*updated = true;
 					}
 					break;
 				case ARROW_DOWN:
 				case ARROW_RIGHT:
 					if (*loginButton < LOGIN_MENU_INPUT_SIGNIN) {
 						(*loginButton)++;
+						*loginState = -2;
+						*updated = true;
 					}
 					break;
 				case DELETE_KEY:
@@ -89,18 +93,22 @@ void loginKeyboardController(char* userName, char* userPass, int* loginButton, b
 					} else if (*loginButton == LOGIN_MENU_INPUT_USERPASS) {
 						memset(userPass, '\0', CHAR_USER_NAME_SIZE);
 					}
+					*updated = true;
 					break;
 				default:
 					break;
 			}
 		} else {
 			if (input == BACKSPACE_KEY) {
+				*loginState = -2;
 				if (*loginButton == LOGIN_MENU_INPUT_USERNAME) {
 					if (strlen(userName) == 0) continue;
 					userName[strlen(userName) - 1] = '\0';
+					*updated = true;
 				} else if (*loginButton == LOGIN_MENU_INPUT_USERPASS){
 					if (strlen(userPass) == 0) continue;
 					userPass[strlen(userPass) - 1] = '\0';
+					*updated = true;
 				}
 			} else if (input == ENTER_KEY) {
 				switch (*loginButton) {
@@ -119,9 +127,18 @@ void loginKeyboardController(char* userName, char* userPass, int* loginButton, b
 						if (*loginState != -1) {
 							*entered = true;
 						}
+					default:
+						break;
 				}
+				*updated = true;
+			} else if (input == ESC_KEY) {
+				*loginState = -2;
+				*entered = true;
+				*updated = true; //Pointless?
+				break;
 			} else {
 				*loginState = -2;
+				*updated = true;
 				if (*loginButton == LOGIN_MENU_INPUT_USERNAME) {
 					if ((input >= 'A' && input <= 'Z') || (input >= 'a' && input <= 'z') || (input >= '0' && input <= '9')) {
 						size_t len = strlen(userName);
