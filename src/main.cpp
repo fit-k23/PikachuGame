@@ -918,7 +918,7 @@ void loginLoop() {
 int main() {
 	if (project_init()) {
 		drawAtPos({0, 0}, "23127255 - Nguyễn Thọ Tài\n23127255 - ______________");
-		drawAtPos({30, 0}, getFileContent(string(TEXT_RELATIVE_PATH) + "pikamatch_background.txt"));
+		drawAtPos({(SCREEN_WIDTH - 160)/ 2, 0}, getFileContent(string(TEXT_RELATIVE_PATH) + "pikamatch_background.txt"));
 		Sleep(600);
 		clrScr();
 		loginLoop();

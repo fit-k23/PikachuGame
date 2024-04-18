@@ -30,18 +30,6 @@ void syncScrSize() {
 	SCREEN_HEIGHT = scrSize.Y;
 }
 
-void disableConsoleResize() {
-	HWND hWnd = GetConsoleWindow();
-	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_SIZEBOX);
-}
-
-void disableConsoleMinimizeButton() {
-	HWND hWnd = GetConsoleWindow();
-	HMENU hMenu = GetSystemMenu(hWnd, false);
-
-	DeleteMenu(hMenu, SC_MINIMIZE, MF_BYCOMMAND);
-}
-
 // Clear screen without the need of using "cls" command or ansi escape code (which will surely expand the screen buffer
 // causing the console to flicker)
 // Modified from the accepted answer: https://stackoverflow.com/questions/34842526/update-console-without-flickering-c
@@ -66,9 +54,6 @@ void clrScr() {
 	if (!GetConsoleScreenBufferInfo(hOut, &csbi)) {
 		abort();
 	}
-//	csbi.dwSize = {static_cast<SHORT>(SCREEN_WIDTH), static_cast<SHORT>(SCREEN_HEIGHT)};
-//	system(("start cmd.exe /k echo " + to_string(SCREEN_WIDTH) + " : " + to_string(SCREEN_HEIGHT) + " _ " + to_string(csbi.dwMaximumWindowSize.X) + " : " + to_string(csbi.dwMaximumWindowSize.Y)).c_str());
-//	DWORD length = csbi.dwSize.X * csbi.dwSize.Y;
 	DWORD length = SCREEN_WIDTH * SCREEN_HEIGHT;
 
 	DWORD written;
@@ -112,26 +97,17 @@ void consoleInit() {
 	HWND hWnd = GetConsoleWindow();
 
 	ShowWindow(hWnd, SW_MAXIMIZE);
-//	 SetConsoleDisplayMode(GetStdHandle(STD_OUTPUT_HANDLE), CONSOLE_FULLSCREEN_MODE, nullptr);
-
-	//system("mode con COLS=700");
-	//SendMessage(GetConsoleWindow(),WM_SYSKEYDOWN,VK_RETURN,0x20000000);// Full screen
-
-	//disableConsoleResize(); //auto resize
-	//DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_CLOSE, MF_BYCOMMAND);
-//	disableConsoleMinimizeButton();
 
 	// Hide the cursor. The blinking one, not the mouse;
+	// REF: WINAPI
 	CONSOLE_CURSOR_INFO cursorInfo;
 	GetConsoleCursorInfo(hOut, &cursorInfo);
 	cursorInfo.bVisible = false; // set the cursor visibility
 	SetConsoleCursorInfo(hOut, &cursorInfo);
-
-//	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_MAXIMIZEBOX);
-//	SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	// Hide scollbar... pointless?
 	ShowScrollBar(hWnd, SB_BOTH, false);
+
 	syncScrSize();
-//	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
 }
 
 // Set the position of the console cursor with anti buffer expansion.
@@ -145,6 +121,7 @@ void moveCursorToCoord(Coord coord) {
 }
 
 // Set background color using palate!
+// REF: WINAPI
 void fillConsoleBackground(COLORREF color) {
 	CONSOLE_SCREEN_BUFFER_INFOEX sbInfoEx;
 	sbInfoEx.cbSize = sizeof(sbInfoEx);
