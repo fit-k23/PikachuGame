@@ -405,8 +405,8 @@ bool project_init() {
 		"is it good enough to be called elevator music.mp3",
 		"The 4 Corners - Phantom Funk.mp3",
 		"maidens grove (day).mp3",
-		"Sonic Colors - ＂Planet Wisp＂ Night Version.mp3",
-		"Touhou 3 - Music #17 - 永遠の満月 ~ Eternal Full Moon.mp3"
+		"Sonic Colors - Planet Wisp.mp3",
+		"Touhou 3 - Eternal Full Moon.mp3"
 	};
 	for (const auto & musicPath : musicPaths) {
 		if (!menuMusic.addSoundFromFilePath(soundEngine, string(MUSIC_RELATIVE_PATH) + musicPath)) {
@@ -421,15 +421,6 @@ bool project_init() {
 
 	soundEngine.album = &menuMusic;
 	soundEngine.setVolume(1.0);
-
-	setBoardSize(8, 10);
-//	setBoardSize(4, 5);
-
-	BOARD_START_X = (SCREEN_WIDTH / 3 * 2) / MAZE_COL;
-	BOARD_START_Y = PILAR + 1;
-	SCORE_BOARD_X = (SCREEN_WIDTH / 2) + 20;
-	SCORE_BOARD_Y = 20;//(BOARD_START_Y + (PILAR + 1) * MAZE_ROW * 2) - 30 / 2;
-	SCORE_BOARD_Y = (BOARD_START_Y + (PILAR + 1) * MAZE_ROW) - 30 / 2;
 
 	thread musicThread(playEngine, &soundEngine);
 	musicThread.detach();
@@ -446,7 +437,29 @@ void project_cleanup() {
 }
 
 void drawScoreBoard() {
-	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 2}, "Score: " + to_string(score));
+	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 2}, "User name: " + userList[userId].userName);
+	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 3}, "Pokemon: " + pokemonList.pokemons[userList[userId].pokeId].name);
+	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 4}, "Score: " + to_string(score));
+//	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 5}, (string("Mode: ") + (mode == 0 ? "Normal" : "Collapse")));
+	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 5}, "Record: " + to_string(userList[userId].score[mode]));
+	drawAtPos({SCORE_BOARD_X + 30, SCORE_BOARD_Y + 4}, pokemonList.pokemons[userList[userId].pokeId].art.frames[0]);
+}
+
+void makeNewGame(int selectedButtonId) {
+	setBoardSize(8, 10, true);
+
+	BOARD_START_X = (SCREEN_WIDTH / 3 * 2) / MAZE_COL;
+	BOARD_START_Y = PILAR + 1;
+	SCORE_BOARD_X = (SCREEN_WIDTH / 2) + 20;
+	SCORE_BOARD_Y = (BOARD_START_Y + (PILAR + 1) * MAZE_ROW) - 30 / 2;
+
+
+	if (selectedButtonId == CHOOSE_GAME_BUTTON_NORMAL) {
+		mode = 0;
+	} else if (selectedButtonId == CHOOSE_GAME_BUTTON_COLLAPSE) {
+		mode = 1;
+	}
+	userList[userId].mode = mode;
 }
 
 void runGame() {
@@ -455,15 +468,15 @@ void runGame() {
 	readAnsiFile(string(ASSET_RELATIVE_PATH) + "pikachu_large.txt", bgAnsi);
 
 	SHORT i = 300;
-	while (i-- > 0) {
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), rand() % 16);
-		drawRawTextAtPos({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT}, rand() % 2 == 0 ? "." : "*");
-		drawRawTextAtPos({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT}, rand() % 2 == 0 ? "▪" : "▴");
-		drawRawTextAtPos({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT}, rand() % 2 == 0 ? "●" : "◌");
+	while (i --> 0) {
+		drawRawTextAtPos({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT}, getFGAnsiCode(rand() % 256, rand() % 256, rand() % 256).append(rand() % 2 == 0 ? "." : "*"));
+		drawRawTextAtPos({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT}, getFGAnsiCode(rand() % 256, rand() % 256, rand() % 256).append(rand() % 2 == 0 ? "▪" : "▴"));
+		drawRawTextAtPos({rand() % SCREEN_WIDTH, rand() % SCREEN_HEIGHT}, getFGAnsiCode(rand() % 256, rand() % 256, rand() % 256).append(rand() % 2 == 0 ? "●" : "◌"));
 		cout << ANSI_RESET;
 	}
 
-	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, (PILAR + 1) * MAZE_ROW * 2);
+	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, ((PILAR + 1) * MAZE_ROW + 2) * 2);
+	drawThinLineRectangle({SCORE_BOARD_X, BOARD_START_Y}, 60, (SCORE_BOARD_Y - BOARD_START_Y) * 2);
 	drawThinLineRectangle({SCORE_BOARD_X, SCORE_BOARD_Y}, 60, 30);
 	draw();
 	drawCursor();
@@ -595,23 +608,35 @@ void runGame() {
 			}
 		}
 	}
+	if (FLAG_RUNNING) {
+		userList[userId].score[mode] = score;
+		userList[userId].mode = -1;
+		userList[userId].lastScore = 0;
+		userList[userId].stage = "";
+		userList[userId].remainPair = 0;
+	}
 }
 
 void drawMainMenu(int selectedButtonId) {
-	drawAtPos({SCREEN_WIDTH - 160 - 2, 2}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokelogo.txt"));
+	drawAtPos({SCREEN_WIDTH - 160 - 2, 2}, getFileContent(string(TEXT_RELATIVE_PATH) + "pikamatch_text.txt"));
 
 	PikaRGB button1Color = {255,255,255};
 	string fg;
 	string choseColor = getFGAnsiCode(185, 148, 112);
 
-	if (selectedButtonId == MAIN_MENU_BUTTON_CONTINUE_GAME) {
-		button1Color = {185, 148, 112};
-		fg = choseColor;
-	}
 	int button_anchor_x = SCREEN_WIDTH / 2 + 56 - 28 + 1;
 	int button_anchor_y = static_cast<int>(SCREEN_HEIGHT / 1.5);
-	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 8)}, 56, 8, button1Color);
-	drawAtPos({button_anchor_x + 1 + 3, static_cast<int>(button_anchor_y - 8 + 1)}, fg + BUTTON_CONTINUE_GAME);
+
+	drawAtPos({SCREEN_WIDTH - button_anchor_x + 10, button_anchor_y}, pokemonList.pokemons[userList[userId].pokeId].art.frames[0]);
+
+	if (userList[userId].mode != -1) {
+		if (selectedButtonId == MAIN_MENU_BUTTON_CONTINUE_GAME) {
+			button1Color = {185, 148, 112};
+			fg = choseColor;
+		}
+		drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 8)}, 56, 8, button1Color);
+		drawAtPos({button_anchor_x + 1 + 3, static_cast<int>(button_anchor_y - 8 + 1)}, fg + BUTTON_CONTINUE_GAME);
+	}
 
 	PikaRGB button2Color = {255,255,255};
 	fg = "";
@@ -652,7 +677,7 @@ void drawMainMenu(int selectedButtonId) {
 }
 
 void drawChoseGameMenu(int selectedButtonId) {
-	drawAtPos({SCREEN_WIDTH - 160 - 2, 2}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokelogo.txt"));
+	drawAtPos({SCREEN_WIDTH - 160 - 2, 2}, getFileContent(string(TEXT_RELATIVE_PATH) + "pikamatch_text.txt"));
 	PikaRGB button1Color = {255,255,255};
 	int button_anchor_x = SCREEN_WIDTH / 2 + 56 + 26 - 28 + 1;
 	int button_anchor_y = static_cast<int>(SCREEN_HEIGHT / 1.5) - 4;
@@ -680,8 +705,8 @@ void drawChoseGameMenu(int selectedButtonId) {
 }
 
 void drawLeaderBoard(int selectedButtonId) {
-	drawAtPos({12, 10}, getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_star.txt"));
-	drawAtPos({SCREEN_WIDTH / 2, 1}, getFileContent(string(ASSET_RELATIVE_PATH) + "leaderboard.txt"));
+	drawAtPos({12, 10}, getFileContent(string(TEXT_RELATIVE_PATH) + "leaderboard_logo.txt"));
+	drawAtPos({SCREEN_WIDTH / 2, 1}, getFileContent(string(TEXT_RELATIVE_PATH) + "leaderboard_text.txt"));
 	int a[10];
 	getTopRank(a, selectedButtonId);
 	string bg1 = getBGAnsiCode(201,166,0);
@@ -693,7 +718,7 @@ void drawLeaderBoard(int selectedButtonId) {
 	for (int i = 0; i < 10; i++) {
 		string bg = i % 2 == 0 ? bg1 : bg2;
 		string fg = i % 2 == 0 ? fg1 : fg2;
-		if (a[i] == -1) {
+		if (a[i] == -1 || selectedButtonId == LEADERBOARD_BUTTON_RETURN) {
 			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 0 + i * 3 + 15}, bg + empty_line);
 			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + empty_line);
 		} else {
@@ -702,11 +727,11 @@ void drawLeaderBoard(int selectedButtonId) {
 				drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75) + 60, 0 + i * 3 + 15}, bg + fg + "✮ Top " + to_string(i + 1));
 			}
 			string name = userList[a[i]].userName;
-			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 0 + i * 3 + 15},  bg + fg + " " + string(20, '_') + name);
-			string score = to_string(userList[a[i]].score[selectedButtonId]);
+			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 0 + i * 3 + 15},  bg + fg + " " + string(20, '_').append(name));
+			string scoreStr = to_string(userList[a[i]].score[selectedButtonId]);
 //			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + fg + string(70 - score.length(), ' ') + score);
 			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + empty_line);
-			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + fg + string(50 - score.length(), ' ').append(score).append(string(20, '_')));
+			drawAtPos({static_cast<int>(SCREEN_WIDTH / 1.75), 1 + i * 3 + 15}, bg + fg + string(50 - scoreStr.length(), ' ').append(scoreStr).append(string(20, '_')));
 		}
 	}
 	PikaRGB button1Color = {255,255,255};
@@ -744,21 +769,21 @@ void runLoginMenu() {
 	int LOGIN_BOX_WIDTH = SCREEN_WIDTH / 3;
 
 	AnsiArt pokeballs_idle{{
-		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_default.txt"),
-		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_left.txt"),
-		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_default.txt"),
-		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_right.txt")
+		getFileContent(string(TEXT_RELATIVE_PATH) + "pokeball_default.txt"),
+		getFileContent(string(TEXT_RELATIVE_PATH) + "pokeball_left.txt"),
+		getFileContent(string(TEXT_RELATIVE_PATH) + "pokeball_default.txt"),
+		getFileContent(string(TEXT_RELATIVE_PATH) + "pokeball_right.txt")
    }, 100, true};
 
 	AnsiArt pokeballs_succeed{{
-		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_success_0.txt"),
-		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_success_1.txt"),
-		getFileContent(string(ASSET_RELATIVE_PATH) + "pokeball_success_2.txt")
+		getFileContent(string(TEXT_RELATIVE_PATH) + "pokeball_success_0.txt"),
+		getFileContent(string(TEXT_RELATIVE_PATH) + "pokeball_success_1.txt"),
+		getFileContent(string(TEXT_RELATIVE_PATH) + "pokeball_success_2.txt")
 	}, 100, false, false};
 
 //	char userName[CHAR_USER_NAME_SIZE] = {};
-	char userName[CHAR_USER_NAME_SIZE] = "Tai1906";
 //	char userPass[CHAR_USER_PASS_SIZE] = {};
+	char userName[CHAR_USER_NAME_SIZE] = "Tai1906";
 	char userPass[CHAR_USER_PASS_SIZE] = "123";
 
 	cout << getBGAnsiCode(0,0,0);
@@ -861,14 +886,17 @@ int drawChoosePokemonMenu() {
 	drawRawTextAtPos({static_cast<int>((SCREEN_WIDTH - 76 - userList[userId].userName.length())/ 2), 5}, "Welcome \"" + getFGAnsiCode(243, 243, 2) + userList[userId].userName + ANSI_RESET_FOREGROUND + "\". Please select your partner to continue with you on your journey.");
 	while (!entered) {
 		if (updated) {
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < pokemonList.size; i++) {
 				if (pokeId == i) {
 					buttonColor = {255, 255, 0};
+					clearArea({static_cast<int>((SCREEN_WIDTH -  50) / 2), 15 + 20}, {SCREEN_WIDTH, 15 + 20 + 4});
+					drawAtPos({static_cast<int>((SCREEN_WIDTH -  50) / 2), 15 + 20}, getFGAnsiCode(25,255,255) + pokemonList.pokemons[pokeId].desc);
 				} else {
 					buttonColor = {255, 255, 255};
 				}
-				drawRawTextAtPos({SCREEN_WIDTH / 3 * i + 15, 15}, getFGAnsiCode(25,255,255) + pokemonList.pokemons[i].name);
-				drawThinLineRectangle({SCREEN_WIDTH / 3 * i + 10, 20}, 40, 40, buttonColor);
+				drawRawTextAtPos({static_cast<int>(SCREEN_WIDTH / 3 * i + 10 + 20 - pokemonList.pokemons[i].name.length() / 2), 12}, getFGAnsiCode(25,255,255) + pokemonList.pokemons[i].name);
+				drawThinLineHollowRectangle({SCREEN_WIDTH / 3 * i + 10, 13}, 40, 40, buttonColor);
+				drawAtPos({SCREEN_WIDTH / 3 * i + 10 + 1 + 10, 14 + 5}, pokemonList.pokemons[i].art.frames[0]);
 			}
 			updated = false;
 		}
@@ -906,6 +934,9 @@ void runMainMenu() {
 					drawLeaderBoard(menuButtonId);
 					break;
 				case TASK_START_GAME:
+					if (userList[userId].mode == -1) {
+						makeNewGame(menuButtonId);
+					}
 					ended = true;
 					break;
 				case TASK_LOGIN_MENU:
@@ -937,6 +968,19 @@ void menuLoop() {
 
 void loginLoop() {
 	runLoginMenu();
+	if (userList[userId].mode != -1) {
+		mode = userList[userId].mode;
+		boardFromString(userList[userId].stage, 8, 10);
+
+		BOARD_START_X = (SCREEN_WIDTH / 3 * 2) / MAZE_COL;
+		BOARD_START_Y = PILAR + 1;
+		SCORE_BOARD_X = (SCREEN_WIDTH / 2) + 20;
+		SCORE_BOARD_Y = 20;//(BOARD_START_Y + (PILAR + 1) * MAZE_ROW * 2) - 30 / 2;
+		SCORE_BOARD_Y = (BOARD_START_Y + (PILAR + 1) * MAZE_ROW) - 30 / 2;
+
+		score = userList[userId].lastScore;
+		remainPair = userList[userId].remainPair;
+	}
 
 	if (userList[userId].pokeId == -1) {
 		userList[userId].pokeId = drawChoosePokemonMenu();
@@ -950,6 +994,12 @@ void loginLoop() {
 		clrScr();
 	}
 	if (task == TASK_LOGIN_MENU) {
+		if (mode != -1) {
+			userList[userId].mode = mode;
+			userList[userId].stage = boardToString();
+			userList[userId].lastScore = score;
+			userList[userId].remainPair = remainPair;
+		}
 		saveDataToFile(string(ASSET_RELATIVE_PATH) + "gameData.txt");
 		loginLoop();
 	}
@@ -957,8 +1007,9 @@ void loginLoop() {
 
 int main() {
 	if (project_init()) {
-		drawAtPos({30, 0}, getFileContent(string(ASSET_RELATIVE_PATH) + "pikamatch.txt"));
-		Sleep(500);
+		drawAtPos({0, 0}, "23127255 - Nguyễn Thọ Tài\n23127255 - ______________");
+		drawAtPos({30, 0}, getFileContent(string(TEXT_RELATIVE_PATH) + "pikamatch_background.txt"));
+		Sleep(600);
 		clrScr();
 		loginLoop();
 	}

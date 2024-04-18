@@ -24,8 +24,8 @@ struct User {
 	int pokeId = -1;
 	int score[2]{0,0};
 	int mode = -1; // -1 no save, 0 normal, 1 collapse
-	int lvl = 1;
 	int lastScore = 0;
+	int remainPair = 0;
 };
 
 static User* userList;
@@ -69,9 +69,9 @@ int searchUser(const string& userName) {
 	return -1;
 }
 
-int tryAddUser(const string& userName, const string& userPass, int pokeId = -1, int score1 = 0, int score2 = 0, int mode = -1, int lvl = 1) {
+int tryAddUser(const string& userName, const string& userPass, int pokeId = -1, int score1 = 0, int score2 = 0, int mode = -1) {
 	if (searchUser(userName) != -1) return -1;
-	userList[config.nUser++] = {"", userName, userPass, pokeId, {score1, score2}, mode, lvl};
+	userList[config.nUser++] = {"", userName, userPass, pokeId, {score1, score2}, mode};
 	return config.nUser - 1;
 }
 
@@ -150,9 +150,10 @@ bool loadDataFromFile(const string &fileName) {
 			continue;
 		}
 		file.ignore();
-		file >> user->lvl;
-		file.ignore();
 		file >> user->lastScore;
+		file.ignore();
+		file >> user->remainPair;
+		file.ignore();
 		getline(file, user->stage, '\n');
 	}
 	file.close();
@@ -184,8 +185,8 @@ static bool saveDataToFile(const string &fileName) {
 			file << '\n';
 			continue;
 		}
-		file << userList[i].lvl << ';';
 		file << userList[i].lastScore << ";";
+		file << to_string(userList[i].remainPair) << ";";
 		file << userList[i].stage << '\n';
 	}
 

@@ -14,8 +14,9 @@ const int CHAR_USER_NAME_SIZE = 21;
 const int CHAR_USER_PASS_SIZE = 21;
 
 const char* ASSET_RELATIVE_PATH = "asset/";
-const char* SOUND_RELATIVE_PATH = "asset/sound/";
 const char* MUSIC_RELATIVE_PATH = "asset/music/";
+const char* SOUND_RELATIVE_PATH = "asset/sound/";
+const char* TEXT_RELATIVE_PATH = "asset/text/";
 
 const string BUTTON_MODE_NORMAL = "█▄░█ █▀█ █▀█ █▀▄▀█ ▄▀█ █░░\n█░▀█ █▄█ █▀▄ █░▀░█ █▀█ █▄▄"; // Normal
 const string BUTTON_MODE_COLLAPSE = "█▀▀ █▀█ █░░ █░░ ▄▀█ █▀█ █▀ █▀▀\n█▄▄ █▄█ █▄▄ █▄▄ █▀█ █▀▀ ▄█ ██▄"; // Collapse

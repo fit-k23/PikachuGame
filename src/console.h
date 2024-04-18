@@ -134,8 +134,12 @@ void consoleInit() {
 //	DeleteMenu(GetSystemMenu(GetConsoleWindow(), FALSE), SC_MINIMIZE, MF_BYCOMMAND);
 }
 
+// Set the position of the console cursor with anti buffer expansion.
+// REF: https://learn.microsoft.com/en-us/windows/console/setconsolecursorposition
 void moveCursorToCoord(Coord coord) {
 	if (coord.x > SCREEN_WIDTH || coord.y > SCREEN_HEIGHT) return;
+	if (coord.x < 0) coord.x = 0;
+	if (coord.y < 0) coord.y = 0;
 	HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleCursorPosition(hStdout, {static_cast<SHORT>(coord.x), static_cast<SHORT>(coord.y)});
 }

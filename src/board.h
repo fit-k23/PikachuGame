@@ -20,6 +20,8 @@ const int PADDING = 1;
 int MAZE_ROW;
 int MAZE_COL;
 
+int mode = 0;
+
 struct Box{
 	char alphabet = ' ';
 	bool invisible = false;
@@ -94,6 +96,14 @@ void generateShuffledBoard() {
 	}
 }
 
+void syncMaze() {
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++) {
+			maze[i + PADDING][j + PADDING] = boxes[i][j].invisible;
+		}
+	}
+}
+
 void generateColorBoard() {
 	for (int i = 0; i < ROW; i++) {
 		for (int j = 0; j < COL; j++) {
@@ -102,14 +112,39 @@ void generateColorBoard() {
 	}
 }
 
-void setBoardSize(int row, int col) {
+void setBoardSize(int row, int col, bool newShuffle = false) {
 	uninitBoard();
 	ROW = row;
 	COL = col;
 	MAZE_ROW = ROW + 2 * PADDING;
 	MAZE_COL = COL + 2 * PADDING;
 	initBoard();
-	generateShuffledBoard();
+	if (newShuffle) generateShuffledBoard();
 	generateColorBoard();
 	remainPair = ROW * COL / 2;
+}
+
+string boardToString() {
+	string r;
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++) {
+			if (boxes[i][j].invisible) {
+				r.push_back(' ');
+			} else {
+				r.push_back(boxes[i][j].alphabet);
+			}
+		}
+	}
+	return r;
+}
+
+void boardFromString(const string &bs, int row, int col) {
+	setBoardSize(row, col, false);
+	for (int i = 0; i < ROW; i++) {
+		for (int j = 0; j < COL; j++) {
+			boxes[i][j].alphabet = bs[i * COL + j];
+			boxes[i][j].invisible = (bs[i * COL + j] == ' ');
+			maze[i + PADDING][j + PADDING] = boxes[i][j].invisible;
+		}
+	}
 }

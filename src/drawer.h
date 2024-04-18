@@ -176,6 +176,16 @@ void drawAtPosTransparent(Coord coord, const string &s) {
 	}
 }
 
+void clearArea(Coord start, Coord end) {
+	if (end.y > SCREEN_HEIGHT) end.y = SCREEN_HEIGHT;
+	if (end.x > SCREEN_WIDTH) end.x = SCREEN_WIDTH;
+	string dxs = ANSI_RESET + string(end.x - start.x, ' ');
+	int dy = end.y - start.y;
+	for (int d = 0; d <= dy; d++) {
+		drawRawTextAtPos(start.add(0, d), dxs);
+	}
+}
+
 struct AnsiArt{
 	vector<string> frames = {};
 	unsigned long long sleepTime = 10; //in ms

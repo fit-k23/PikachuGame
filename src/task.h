@@ -235,7 +235,6 @@ void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScre
 							reinitButtonBorder(*taskId, buttonBorder1, buttonBorder2);
 						} else if (*currentButtonPtr == MAIN_MENU_BUTTON_CONTINUE_GAME) {
 							*taskId = TASK_START_GAME;
-//							*ended = true;
 							*hasUpdate = true;
 							*changeScreen = true;
 						}
@@ -249,6 +248,7 @@ void menuKeyboardController(int* currentButtonPtr, int* taskId, bool* changeScre
 							*currentButtonPtr = MAIN_MENU_BUTTON_START_GAME;
 						} else if (*currentButtonPtr == CHOOSE_GAME_BUTTON_NORMAL) {
 							*taskId = TASK_START_GAME;
+							userList[userId].mode = -1;
 							*hasUpdate = true;
 							*changeScreen = true;
 						}
