@@ -439,11 +439,12 @@ void project_cleanup() {
 int mode = 0;
 
 void drawScoreBoard() {
-	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 2}, "User name: " + userList[userId].userName);
-	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 3}, "Pokemon: " + pokemonList.pokemons[userList[userId].pokeId].name);
-	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 4}, "Score: " + to_string(score));
+	int offset = 10;
+	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 2}, "User name: " + userList[userId].userName);
+	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 3}, "Pokemon: " + pokemonList.pokemons[userList[userId].pokeId].name);
+	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 4}, "Score: " + to_string(score));
 //	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 5}, (string("Mode: ") + (mode == 0 ? "Normal" : "Collapse")));
-	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 5}, "Record: " + to_string(userList[userId].score[mode]));
+	drawRawTextAtPos({SCORE_BOARD_X + 2 + offset, SCORE_BOARD_Y + 5}, "Record: " + to_string(userList[userId].score[mode]));
 	drawAtPos({SCORE_BOARD_X + 30, SCORE_BOARD_Y + 4}, pokemonList.pokemons[userList[userId].pokeId].art.frames[0]);
 }
 
@@ -478,8 +479,10 @@ void runGame() {
 	}
 
 	drawRoundCornerRectangle({BOARD_START_X, BOARD_START_Y}, (LINE + 1) * MAZE_COL, ((PILAR + 1) * MAZE_ROW + 2) * 2);
-	drawThinLineRectangle({SCORE_BOARD_X, BOARD_START_Y}, 60, (SCORE_BOARD_Y - BOARD_START_Y) * 2);
-	drawThinLineRectangle({SCORE_BOARD_X, SCORE_BOARD_Y}, 60, 30);
+
+	int offset = 5;
+	drawThinLineRectangle({SCORE_BOARD_X + offset, BOARD_START_Y}, 60 - 2*offset, (SCORE_BOARD_Y - BOARD_START_Y) * 2);
+	drawThinLineRectangle({SCORE_BOARD_X + offset, SCORE_BOARD_Y}, 60 - 2*offset, 30);
 	draw();
 	drawCursor();
 	int input;
@@ -626,7 +629,8 @@ void drawMainMenu(int selectedButtonId) {
 	string fg;
 	string choseColor = getFGAnsiCode(185, 148, 112);
 
-	int button_anchor_x = SCREEN_WIDTH / 2 + 56 - 28 + 1 - 20;
+	int button_width = 56;
+	int button_anchor_x = SCREEN_WIDTH / 2 + button_width - 28 + 1 - 20;
 	int button_anchor_y = static_cast<int>(SCREEN_HEIGHT / 1.5);
 
 	Coord pokemon_art_pos = {SCREEN_WIDTH - button_anchor_x + 10 - 40, button_anchor_y};
@@ -637,7 +641,7 @@ void drawMainMenu(int selectedButtonId) {
 			button1Color = {185, 148, 112};
 			fg = choseColor;
 		}
-		drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 8)}, 56, 8, button1Color);
+		drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 8)}, button_width, 8, button1Color);
 		drawAtPos({button_anchor_x + 1 + 3, static_cast<int>(button_anchor_y - 8 + 1)}, fg + BUTTON_CONTINUE_GAME);
 	}
 
@@ -647,7 +651,7 @@ void drawMainMenu(int selectedButtonId) {
 		button2Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 4)}, 56, 8, button2Color);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 4)}, button_width, 8, button2Color);
 	drawAtPos({button_anchor_x + 1 + 9, static_cast<int>(button_anchor_y - 4 + 1)}, fg + BUTTON_START_GAME);
 
 	PikaRGB button3Color = {255,255,255};
@@ -656,7 +660,7 @@ void drawMainMenu(int selectedButtonId) {
 		button3Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y)}, 56, 8, button3Color);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y)}, button_width, 8, button3Color);
 	drawAtPos({button_anchor_x + 1 + 6, static_cast<int>(button_anchor_y + 1)}, fg + BUTTON_LEADERBOARD);
 
 	PikaRGB button4Color = {255,255,255};
@@ -665,7 +669,7 @@ void drawMainMenu(int selectedButtonId) {
 		button4Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y + 4)}, 56, 8, button4Color);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y + 4)}, button_width, 8, button4Color);
 	drawAtPos({button_anchor_x + 1 + 6, static_cast<int>(button_anchor_y + 4 + 1)}, fg + BUTTON_SETTING);
 
 	PikaRGB button5Color = {255,255,255};
@@ -674,7 +678,7 @@ void drawMainMenu(int selectedButtonId) {
 		button5Color = {185, 148, 112};
 		fg = choseColor;
 	}
-	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y + 8)}, 56, 8, button5Color);
+	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y + 8)}, button_width, 8, button5Color);
 	drawAtPos({button_anchor_x + 1, static_cast<int>(button_anchor_y + 8 + 1)}, fg + BUTTON_SAVE_AND_LOGOUT);
 	moveCursorToCoord({SCREEN_WIDTH - 3, SCREEN_HEIGHT - 3});
 }
