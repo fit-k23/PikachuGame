@@ -13,8 +13,8 @@ if "%GCC_BIN%"=="" (
 )
 set CFLAGS="-std=c++17"
 
-@REM set BUILD_FLAGS="-O2"
-set BUILD_FLAGS=""
+set BUILD_FLAGS="-O2"
+@REM set BUILD_FLAGS=""
 
 %GCC_BIN% %CFLAGS% %BUILD_FLAGS% -o pikachu.exe src/main.h src/main.cpp
 if %ERRORLEVEL%==0 (

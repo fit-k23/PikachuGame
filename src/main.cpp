@@ -967,7 +967,6 @@ void menuLoop() {
 	if (task == TASK_START_GAME) {
 		FLAG_RUNNING = true;
 		runGame();
-		cout << "Wait for a sec...";
 		Sleep(1000);
 		clrScr();
 		task = TASK_MAIN_MENU;
