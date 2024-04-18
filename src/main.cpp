@@ -436,6 +436,8 @@ void project_cleanup() {
 	system("pause");
 }
 
+int mode = 0;
+
 void drawScoreBoard() {
 	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 2}, "User name: " + userList[userId].userName);
 	drawRawTextAtPos({SCORE_BOARD_X + 2, SCORE_BOARD_Y + 3}, "Pokemon: " + pokemonList.pokemons[userList[userId].pokeId].name);
@@ -624,10 +626,11 @@ void drawMainMenu(int selectedButtonId) {
 	string fg;
 	string choseColor = getFGAnsiCode(185, 148, 112);
 
-	int button_anchor_x = SCREEN_WIDTH / 2 + 56 - 28 + 1;
+	int button_anchor_x = SCREEN_WIDTH / 2 + 56 - 28 + 1 - 20;
 	int button_anchor_y = static_cast<int>(SCREEN_HEIGHT / 1.5);
 
-	drawAtPos({SCREEN_WIDTH - button_anchor_x + 10, button_anchor_y}, pokemonList.pokemons[userList[userId].pokeId].art.frames[0]);
+	Coord pokemon_art_pos = {SCREEN_WIDTH - button_anchor_x + 10 - 40, button_anchor_y};
+	drawAtPos(pokemon_art_pos, pokemonList.pokemons[userList[userId].pokeId].art.frames[0]);
 
 	if (userList[userId].mode != -1) {
 		if (selectedButtonId == MAIN_MENU_BUTTON_CONTINUE_GAME) {
@@ -677,14 +680,16 @@ void drawMainMenu(int selectedButtonId) {
 }
 
 void drawChoseGameMenu(int selectedButtonId) {
-	drawAtPos({SCREEN_WIDTH - 160 - 2, 2}, getFileContent(string(TEXT_RELATIVE_PATH) + "pikamatch_text.txt"));
+	int game_title_width = 160;
+	drawAtPos({SCREEN_WIDTH - game_title_width - 2, 2}, getFileContent(string(TEXT_RELATIVE_PATH) + "pikamatch_text.txt"));
 	PikaRGB button1Color = {255,255,255};
-	int button_anchor_x = SCREEN_WIDTH / 2 + 56 + 26 - 28 + 1;
+	int button_anchor_x = SCREEN_WIDTH / 2 + 56 + 26 - 28 + 1 - 20;
 	int button_anchor_y = static_cast<int>(SCREEN_HEIGHT / 1.5) - 4;
-	drawRoundCornerRectangle({SCREEN_WIDTH - 160 - 2, button_anchor_y - 12}, button_anchor_x - SCREEN_WIDTH + 160 - 2, 48 + 8);
+	int box_width = button_anchor_x - SCREEN_WIDTH + game_title_width - 20;
+	drawRoundCornerRectangle({SCREEN_WIDTH - game_title_width - 2, button_anchor_y - 12}, box_width, 48 + 8);
 	if (selectedButtonId == CHOOSE_GAME_BUTTON_NORMAL) {
 		button1Color = {185, 148, 112};
-		drawRawTextAtPos({SCREEN_WIDTH - 160 - 2 + 1, button_anchor_y - 12 + 1}, "NORMAL");
+		drawRawTextAtPos({SCREEN_WIDTH - game_title_width - 2 + 1, button_anchor_y - 12 + 1}, "NORMAL");
 	}
 	drawRoundCornerRectangle({button_anchor_x, static_cast<int>(button_anchor_y - 4)}, 30, 8, button1Color);
 	drawAtPos({button_anchor_x + 1 + 2, static_cast<int>(button_anchor_y - 4 + 1)}, BUTTON_MODE_NORMAL);
@@ -706,7 +711,9 @@ void drawChoseGameMenu(int selectedButtonId) {
 
 void drawLeaderBoard(int selectedButtonId) {
 	drawAtPos({12, 10}, getFileContent(string(TEXT_RELATIVE_PATH) + "leaderboard_logo.txt"));
-	drawAtPos({SCREEN_WIDTH / 2, 1}, getFileContent(string(TEXT_RELATIVE_PATH) + "leaderboard_text.txt"));
+
+	int leaderboard_text_width = 40;
+	drawAtPos({SCREEN_WIDTH / 2 - leaderboard_text_width, 1}, getFileContent(string(TEXT_RELATIVE_PATH) + "leaderboard_text.txt"));
 	int a[10];
 	getTopRank(a, selectedButtonId);
 	string bg1 = getBGAnsiCode(201,166,0);

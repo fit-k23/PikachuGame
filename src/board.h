@@ -20,8 +20,6 @@ const int PADDING = 1;
 int MAZE_ROW;
 int MAZE_COL;
 
-int mode = 0;
-
 struct Box{
 	char alphabet = ' ';
 	bool invisible = false;
